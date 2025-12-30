@@ -26,6 +26,18 @@ const highlightSectionSchema = new mongoose.Schema({
   items: { type: [String], default: [] },
 }, { _id: false });
 
+const additionalInformationSubsectionSchema = new mongoose.Schema({
+  label: { type: String, required: true },
+  items: { type: [String], default: [] },
+}, { _id: false });
+
+const additionalInformationSectionSchema = new mongoose.Schema({
+  enabled: { type: Boolean, default: false },
+  icon: { type: String, required: false },
+  title: { type: String, required: false },
+  subsections: { type: [additionalInformationSubsectionSchema], default: [] },
+}, { _id: false });
+
 const subsectionSchema = new mongoose.Schema(
   {
     title: { type: String, required: false },
@@ -214,9 +226,9 @@ const productSchema = new mongoose.Schema(
     productDescription: { type: paragraphSectionSchema, default: {} },
     ingredients: { type: listSectionSchema, default: {} },
     keyUses: { type: listSectionSchema, default: {} },
-    howToUse: { type: paragraphSectionSchema, default: {} },
-    safetyInformation: { type: paragraphSectionSchema, default: {} },
-    additionalInformation: { type: listSectionSchema, default: {} },
+    howToUse: { type: highlightSectionSchema, default: {} },
+    safetyInformation: { type: highlightSectionSchema, default: {} },
+    additionalInformation: { type: additionalInformationSectionSchema, default: {} },
     composition: { type: paragraphSectionSchema, default: {} },
     productHighlights: { type: highlightSectionSchema, default: {} },
     manufacturerDetails: { type: highlightSectionSchema, default: {} },

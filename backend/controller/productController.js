@@ -176,6 +176,135 @@ const sanitizeFaqs = (faqs = []) => {
     .filter(Boolean);
 };
 
+// Sanitize paragraphSectionSchema structure (for productDescription, howToUse, safetyInformation, composition, disclaimer)
+const sanitizeParagraphSection = (section = {}, defaultTitle = "") => {
+  if (Array.isArray(section) || (typeof section !== "object" || section === null)) {
+    return {
+      enabled: false,
+      icon: "",
+      title: defaultTitle,
+      description: "",
+    };
+  }
+
+  return {
+    enabled: Boolean(section.enabled),
+    icon: typeof section.icon === "string" ? section.icon.trim() : "",
+    title:
+      typeof section.title === "string" && section.title.trim()
+        ? section.title.trim()
+        : defaultTitle,
+    description: typeof section.description === "string" ? section.description.trim() : "",
+  };
+};
+
+// Sanitize listSectionSchema structure (for ingredients, keyUses, additionalInformation, faqs)
+const sanitizeListSection = (section = {}, defaultTitle = "") => {
+  if (Array.isArray(section) || (typeof section !== "object" || section === null)) {
+    return {
+      enabled: false,
+      icon: "",
+      title: defaultTitle,
+      items: [],
+    };
+  }
+
+  const items = Array.isArray(section.items)
+    ? section.items
+        .filter(
+          (item) =>
+            item &&
+            (typeof item.key === "string" || typeof item.value === "string")
+        )
+        .map((item) => ({
+          key: typeof item.key === "string" ? item.key.trim() : "",
+          value: typeof item.value === "string" ? item.value.trim() : "",
+        }))
+    : [];
+
+  return {
+    enabled: Boolean(section.enabled),
+    icon: typeof section.icon === "string" ? section.icon.trim() : "",
+    title:
+      typeof section.title === "string" && section.title.trim()
+        ? section.title.trim()
+        : defaultTitle,
+    items,
+  };
+};
+
+// Sanitize highlightSectionSchema structure (for productHighlights, manufacturerDetails)
+const sanitizeHighlightSection = (section = {}, defaultTitle = "") => {
+  if (Array.isArray(section) || (typeof section !== "object" || section === null)) {
+    return {
+      enabled: false,
+      icon: "",
+      title: defaultTitle,
+      items: [],
+    };
+  }
+
+  const items = Array.isArray(section.items)
+    ? section.items
+        .filter((item) => typeof item === "string" && item.trim().length > 0)
+        .map((item) => item.trim())
+    : [];
+
+  return {
+    enabled: Boolean(section.enabled),
+    icon: typeof section.icon === "string" ? section.icon.trim() : "",
+    title:
+      typeof section.title === "string" && section.title.trim()
+        ? section.title.trim()
+        : defaultTitle,
+    items,
+  };
+};
+
+// Sanitize additionalInformationSectionSchema structure (with subsections)
+const sanitizeAdditionalInformationSection = (section = {}, defaultTitle = "") => {
+  if (Array.isArray(section) || (typeof section !== "object" || section === null)) {
+    return {
+      enabled: false,
+      icon: "",
+      title: defaultTitle,
+      subsections: [],
+    };
+  }
+
+  const subsections = Array.isArray(section.subsections)
+    ? section.subsections
+        .filter((subsection) => subsection && typeof subsection.label === "string" && subsection.label.trim().length > 0)
+        .map((subsection) => {
+          const items = Array.isArray(subsection.items)
+            ? subsection.items
+                .filter((item) => typeof item === "string" && item.trim().length > 0)
+                .map((item) => item.trim())
+            : [];
+          
+          return {
+            label: subsection.label.trim(),
+            items,
+          };
+        })
+    : [];
+
+  return {
+    enabled: Boolean(section.enabled),
+    icon: typeof section.icon === "string" ? section.icon.trim() : "",
+    title:
+      typeof section.title === "string" && section.title.trim()
+        ? section.title.trim()
+        : defaultTitle,
+    subsections,
+  };
+};
+
+// Sanitize FAQ section according to listSectionSchema structure
+const sanitizeFaqSection = (faqSection = {}) => {
+  return sanitizeListSection(faqSection, "FAQ");
+};
+
 const addProduct = async (req, res) => {
   try {
     const taxFields = normalizeTaxPayload(req.body);
@@ -185,7 +314,22 @@ const addProduct = async (req, res) => {
       ...taxFields,
       dynamicSections: sanitizeDynamicSections(req.body.dynamicSections),
       mediaSections: sanitizeMediaSections(req.body.mediaSections),
-      faqs: sanitizeFaqs(req.body.faqs),
+      faqs: sanitizeFaqSection(req.body.faqs),
+      // Sanitize paragraph sections
+      productDescription: sanitizeParagraphSection(req.body.productDescription, "Product Description"),
+      composition: sanitizeParagraphSection(req.body.composition, "Composition"),
+      disclaimer: sanitizeParagraphSection(req.body.disclaimer, "Disclaimer"),
+      // Sanitize list sections
+      ingredients: sanitizeListSection(req.body.ingredients, "Ingredients"),
+      keyUses: sanitizeListSection(req.body.keyUses, "Key Uses"),
+      // Sanitize additional information section (with subsections)
+      additionalInformation: sanitizeAdditionalInformationSection(req.body.additionalInformation, "Additional Information"),
+      // Sanitize highlight sections (simple string list)
+      howToUse: sanitizeHighlightSection(req.body.howToUse, "How to Use"),
+      safetyInformation: sanitizeHighlightSection(req.body.safetyInformation, "Safety Information"),
+      // Sanitize highlight sections
+      productHighlights: sanitizeHighlightSection(req.body.productHighlights, "Product Highlights"),
+      manufacturerDetails: sanitizeHighlightSection(req.body.manufacturerDetails, "Manufacturer Details"),
       productId: req.body.productId
         ? req.body.productId
         : mongoose.Types.ObjectId(),
@@ -396,7 +540,39 @@ const updateProduct = async (req, res) => {
         );
       }
       if (Object.prototype.hasOwnProperty.call(req.body, "faqs")) {
-        product.faqs = sanitizeFaqs(req.body.faqs);
+        product.faqs = sanitizeFaqSection(req.body.faqs);
+      }
+      
+      // Update new sections if provided
+      if (Object.prototype.hasOwnProperty.call(req.body, "productDescription")) {
+        product.productDescription = sanitizeParagraphSection(req.body.productDescription, "Product Description");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "ingredients")) {
+        product.ingredients = sanitizeListSection(req.body.ingredients, "Ingredients");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "keyUses")) {
+        product.keyUses = sanitizeListSection(req.body.keyUses, "Key Uses");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "howToUse")) {
+        product.howToUse = sanitizeHighlightSection(req.body.howToUse, "How to Use");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "safetyInformation")) {
+        product.safetyInformation = sanitizeHighlightSection(req.body.safetyInformation, "Safety Information");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "additionalInformation")) {
+        product.additionalInformation = sanitizeAdditionalInformationSection(req.body.additionalInformation, "Additional Information");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "composition")) {
+        product.composition = sanitizeParagraphSection(req.body.composition, "Composition");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "productHighlights")) {
+        product.productHighlights = sanitizeHighlightSection(req.body.productHighlights, "Product Highlights");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "manufacturerDetails")) {
+        product.manufacturerDetails = sanitizeHighlightSection(req.body.manufacturerDetails, "Manufacturer Details");
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "disclaimer")) {
+        product.disclaimer = sanitizeParagraphSection(req.body.disclaimer, "Disclaimer");
       }
 
       await product.save();

@@ -83,9 +83,9 @@ const useProductSubmit = (id) => {
   const [productDescription, setProductDescription] = useState({ enabled: true, icon: "", title: "Product Description", description: "" });
   const [ingredients, setIngredients] = useState({ enabled: true, icon: "", title: "Ingredients", items: [] });
   const [keyUses, setKeyUses] = useState({ enabled: true, icon: "", title: "Key Uses", items: [] });
-  const [howToUse, setHowToUse] = useState({ enabled: true, icon: "", title: "How to Use", description: "" });
-  const [safetyInformation, setSafetyInformation] = useState({ enabled: true, icon: "", title: "Safety Information", description: "" });
-  const [additionalInformation, setAdditionalInformation] = useState({ enabled: true, icon: "", title: "Additional Information", items: [] });
+  const [howToUse, setHowToUse] = useState({ enabled: true, icon: "", title: "How to Use", items: [] }); // items is array of strings
+  const [safetyInformation, setSafetyInformation] = useState({ enabled: true, icon: "", title: "Safety Information", items: [] }); // items is array of strings
+  const [additionalInformation, setAdditionalInformation] = useState({ enabled: true, icon: "", title: "Additional Information", subsections: [] });
   const [composition, setComposition] = useState({ enabled: true, icon: "", title: "Composition", description: "" });
   const [productHighlights, setProductHighlights] = useState({ enabled: true, icon: "", title: "Product Highlights", items: [] });
   const [manufacturerDetails, setManufacturerDetails] = useState({ enabled: true, icon: "", title: "Manufacturer Details", items: [] });
@@ -497,9 +497,9 @@ const useProductSubmit = (id) => {
       setProductDescription({ enabled: true, icon: "", title: "Product Description", description: "" });
       setIngredients({ enabled: true, icon: "", title: "Ingredients", items: [] });
       setKeyUses({ enabled: true, icon: "", title: "Key Uses", items: [] });
-      setHowToUse({ enabled: true, icon: "", title: "How to Use", description: "" });
-      setSafetyInformation({ enabled: true, icon: "", title: "Safety Information", description: "" });
-      setAdditionalInformation({ enabled: true, icon: "", title: "Additional Information", items: [] });
+      setHowToUse({ enabled: true, icon: "", title: "How to Use", items: [] });
+      setSafetyInformation({ enabled: true, icon: "", title: "Safety Information", items: [] });
+      setAdditionalInformation({ enabled: true, icon: "", title: "Additional Information", subsections: [] });
       setComposition({ enabled: true, icon: "", title: "Composition", description: "" });
       setProductHighlights({ enabled: true, icon: "", title: "Product Highlights", items: [] });
       setManufacturerDetails({ enabled: true, icon: "", title: "Manufacturer Details", items: [] });

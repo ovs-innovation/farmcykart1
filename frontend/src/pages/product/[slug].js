@@ -93,6 +93,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const [reviewsRatingFilter, setReviewsRatingFilter] = useState(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [activeTab, setActiveTab] = useState("product-description");
 
   // Simple stock derivation to avoid infinite variant loops
   useEffect(() => {
@@ -664,6 +665,44 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     setIsLoading(false);
   }, [product]);
 
+  // Scroll spy to update active tab
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        "product-description",
+        "specification",
+        "key-uses",
+        "how-to-use",
+        "safety-information",
+        "additional-information",
+        "faq"
+      ];
+      
+      let currentSection = "";
+      const isDesktop = window.innerWidth >= 1024;
+      // Desktop: Header (~100px) + Tabs (~60px) + Buffer = ~180px
+      // Mobile: Header (~64px) + Tabs (~60px) + Buffer = ~140px
+      const offset = isDesktop ? 180 : 140;
+      
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= offset) {
+            currentSection = sectionId;
+          }
+        }
+      }
+      
+      if (currentSection) {
+        setActiveTab(currentSection);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleAddToCart = (p) => {
     if (stock <= 0) return notifyError("Insufficient stock");
 
@@ -918,17 +957,42 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
   const { t } = useTranslation();
 
-  const productFaqs = useMemo(
-    () =>
-      (product?.faqs || []).filter(
+  const productFaqs = useMemo(() => {
+    // Handle new listSectionSchema structure (with items array)
+    if (product?.faqs && typeof product.faqs === 'object' && !Array.isArray(product.faqs)) {
+      // New structure: { enabled, icon, title, items: [{ key, value }] }
+      if (product.faqs.items && Array.isArray(product.faqs.items)) {
+        return product.faqs.items
+          .filter(
+            (item) =>
+              item &&
+              (item.key || item.value) &&
+              (item.key?.trim() || item.value?.trim()) &&
+              product.faqs.enabled !== false
+          )
+          .map((item) => ({
+            question: item.key || item.value || "",
+            answer: item.value || item.key || "",
+            answerType: "custom",
+            isVisible: true,
+          }));
+      }
+      return [];
+    }
+    
+    // Handle old array structure (backward compatibility)
+    if (Array.isArray(product?.faqs)) {
+      return product.faqs.filter(
         (faq) =>
           faq &&
           faq?.question &&
           faq.question.trim() !== "" &&
           faq?.isVisible !== false
-      ),
-    [product?.faqs]
-  );
+      );
+    }
+    
+    return [];
+  }, [product?.faqs]);
 
   // category name slug
   const category_name = showingTranslateValue(product?.category?.name)
@@ -1105,7 +1169,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                   <button
                     type="button"
                     onClick={handleShareCurrentVariant}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-blue-600 border border-gray-200 hover:border-blue-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-store-600 border border-gray-200 hover:border-store-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
                     aria-label="Share this product"
                   >
                     <FiShare2 className="w-4 h-4" />
@@ -1316,6 +1380,293 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           </div> */}
 
 
+                          {/* Composition Section */}
+                          {product?.composition?.enabled !== false && product?.composition?.description && (
+                            <div className="mt-8 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.composition.icon && (
+                                  <img src={product.composition.icon} alt="" className="w-8 h-8" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.composition.title || "Composition"}
+                                </h2>
+                              </div>
+                              <p className="text-sm text-gray-600 leading-relaxed">
+                                {product.composition.description}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Product Highlights Section */}
+                          {product?.productHighlights?.enabled !== false && product?.productHighlights?.items?.length > 0 && (
+                            <div className="mt-8 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.productHighlights.icon && (
+                                  <img src={product.productHighlights.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.productHighlights.title || "Product Highlights"}
+                                </h2>
+                              </div>
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                {product.productHighlights.items.map((item, idx) => (
+                                  <li key={idx} className="leading-relaxed">
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Tab Navigation */}
+                          <div className="sticky top-16 lg:top-[100px] z-10 bg-store-50 mt-10 mb-6 py-2 shadow-sm">
+                            <div className="flex flex-wrap gap-2 border-b border-gray-200 overflow-x-auto">
+                              {product?.productDescription?.enabled !== false && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("product-description");
+                                    document.getElementById("product-description")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "product-description"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Product Description
+                                </button>
+                              )}
+                              {product?.dynamicSections?.some(s => s?.name?.toLowerCase().includes("specification")) && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("specification");
+                                    document.getElementById("specification")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "specification"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Specification
+                                </button>
+                              )}
+                              {product?.keyUses?.enabled !== false && product?.keyUses?.items?.length > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("key-uses");
+                                    document.getElementById("key-uses")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "key-uses"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Key Uses
+                                </button>
+                              )}
+                              {product?.howToUse?.enabled !== false && product?.howToUse?.items?.length > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("how-to-use");
+                                    document.getElementById("how-to-use")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "how-to-use"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  How To Use
+                                </button>
+                              )}
+                              {product?.safetyInformation?.enabled !== false && product?.safetyInformation?.items?.length > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("safety-information");
+                                    document.getElementById("safety-information")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "safety-information"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Safety Information
+                                </button>
+                              )}
+                              {product?.additionalInformation?.enabled !== false && product?.additionalInformation?.subsections?.length > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("additional-information");
+                                    document.getElementById("additional-information")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "additional-information"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Additional Information
+                                </button>
+                              )}
+                              {productFaqs.length > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setActiveTab("faq");
+                                    document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === "faq"
+                                      ? "border-store-600 text-store-600"
+                                      : "border-transparent text-gray-600 hover:text-store-500"
+                                  }`}
+                                >
+                                  Frequently asked questions
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Product Description Section */}
+                          {product?.productDescription?.enabled !== false && product?.productDescription?.description && (
+                            <div id="product-description" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.productDescription.icon && (
+                                  <img src={product.productDescription.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.productDescription.title || "Product Description"} of {dynamicTitle || showingTranslateValue(product?.title)}
+                                </h2>
+                              </div>
+                              <p className="text-sm text-gray-600 leading-relaxed">
+                                {product.productDescription.description}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Specification Section */}
+                          {product?.dynamicSections?.some(s => s?.name?.toLowerCase().includes("specification")) && (
+                            <div id="specification" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              {product.dynamicSections
+                                .filter(s => s?.name?.toLowerCase().includes("specification"))
+                                .map((section, idx) => (
+                                  <div key={idx} className="mb-6">
+                                    <div className="flex items-center gap-3 mb-4">
+                                      <h2 className="text-xl font-semibold text-gray-800">
+                                        {section.name} of {dynamicTitle || showingTranslateValue(product?.title)}
+                                      </h2>
+                                    </div>
+                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                      {section.subsections
+                                        ?.filter(sub => sub?.type !== "paragraph" && (sub?.key || sub?.value))
+                                        .map((sub, subIdx) => (
+                                          <li key={subIdx}>
+                                            <strong>{sub.key || sub.title}:</strong> {sub.value || sub.content}
+                                          </li>
+                                        ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+
+                          {/* Key Uses Section */}
+                          {product?.keyUses?.enabled !== false && product?.keyUses?.items?.length > 0 && (
+                            <div id="key-uses" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.keyUses.icon && (
+                                  <img src={product.keyUses.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.keyUses.title || "Key Uses"} of {dynamicTitle || showingTranslateValue(product?.title)}
+                                </h2>
+                              </div>
+                              <ul className="list-disc list-inside space-y-4 text-sm text-gray-600">
+                                {product.keyUses.items.map((item, idx) => (
+                                  <li key={idx} className="leading-relaxed">
+                                    <strong className="text-gray-900">{item.key || item.value}:</strong>{" "}
+                                    {item.value && item.key ? item.value : ""}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* How To Use Section */}
+                          {product?.howToUse?.enabled !== false && product?.howToUse?.items?.length > 0 && (
+                            <div id="how-to-use" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.howToUse.icon && (
+                                  <img src={product.howToUse.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.howToUse.title || "How To Use"}
+                                </h2>
+                              </div>
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                {product.howToUse.items.map((item, idx) => (
+                                  <li key={idx} className="leading-relaxed">
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Safety Information Section */}
+                          {product?.safetyInformation?.enabled !== false && product?.safetyInformation?.items?.length > 0 && (
+                            <div id="safety-information" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.safetyInformation.icon && (
+                                  <img src={product.safetyInformation.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.safetyInformation.title || "Safety Information"}
+                                </h2>
+                              </div>
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                {product.safetyInformation.items.map((item, idx) => (
+                                  <li key={idx} className="leading-relaxed">
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Additional Information Section */}
+                          {product?.additionalInformation?.enabled !== false && product?.additionalInformation?.subsections?.length > 0 && (
+                            <div id="additional-information" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
+                              <div className="flex items-center gap-3 mb-4">
+                                {product.additionalInformation.icon && (
+                                  <img src={product.additionalInformation.icon} alt="" className="w-10 h-10" />
+                                )}
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                  {product.additionalInformation.title || "Additional Information"}
+                                </h2>
+                              </div>
+                              <div className="space-y-6">
+                                {product.additionalInformation.subsections.map((subsection, idx) => (
+                                  <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <h3 className="inline-block px-3 py-1 mb-3 text-sm font-semibold text-store-600 bg-store-50 rounded-full">
+                                      {subsection.label}
+                                    </h3>
+                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                      {subsection.items.map((item, itemIdx) => (
+                                        <li key={itemIdx} className="leading-relaxed">
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Product Details Section (Dynamic & Media) */}
                           <ProductDetailsSection
                             dynamicSections={variantDynamicSections || product?.dynamicSections}
                             mediaSections={variantMediaSections || product?.mediaSections}
@@ -1323,40 +1674,14 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                             isVariantSpecific={!!variantDynamicSections}
                           />
 
-                          {/* Ratings & Reviews Section - right side only */}
-                          <div id="ratings-section" className="mt-8 lg:mt-10 space-y-4">
-                            <RatingSummary summary={ratingSummary} />
-                            <WriteReviewForm
-                              productId={product?._id}
-                              existingReview={reviews.find(
-                                // backend ensures one review per user; we rely on updated list
-                                () => false
-                              )}
-                              onSubmitReview={handleSubmitReview}
-                              isSubmitting={reviewSubmitting}
-                            />
-                            <ReviewFilters
-                              sort={reviewsSort}
-                              ratingFilter={reviewsRatingFilter}
-                              onSortChange={setReviewsSort}
-                              onRatingFilterChange={setReviewsRatingFilter}
-                            />
-                            <ReviewList
-                              reviews={reviews}
-                              loading={reviewsLoading}
-                              onLoadMore={handleLoadMoreReviews}
-                              canLoadMore={reviewsHasMore}
-                              onMarkHelpful={handleMarkHelpful}
-                            />
-                          </div>
-
+                          {/* FAQ Section */}
                           {productFaqs.length > 0 && (
-                            <div className="mt-8">
+                            <div id="faq" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
                               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                {product?.faqTitle && product.faqTitle.trim().length
+                                {product?.faqs?.title || (product?.faqTitle && product.faqTitle.trim().length
                                   ? product.faqTitle
                                   : t("frequentlyAskedQuestions") ||
-                                    "Frequently Asked Questions"}
+                                    "Frequently Asked Questions (FAQs)")}
                               </h3>
                               <div className="divide-y divide-gray-200 border border-gray-100 rounded-2xl overflow-hidden">
                                 {productFaqs.map((faq, index) => {
@@ -1398,6 +1723,33 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               </div>
                             </div>
                           )}
+
+                          {/* Ratings & Reviews Section - right side only */}
+                          <div id="ratings-section" className="mt-8 lg:mt-10 space-y-4">
+                            <RatingSummary summary={ratingSummary} />
+                            <WriteReviewForm
+                              productId={product?._id}
+                              existingReview={reviews.find(
+                                // backend ensures one review per user; we rely on updated list
+                                () => false
+                              )}
+                              onSubmitReview={handleSubmitReview}
+                              isSubmitting={reviewSubmitting}
+                            />
+                            <ReviewFilters
+                              sort={reviewsSort}
+                              ratingFilter={reviewsRatingFilter}
+                              onSortChange={setReviewsSort}
+                              onRatingFilterChange={setReviewsRatingFilter}
+                            />
+                            <ReviewList
+                              reviews={reviews}
+                              loading={reviewsLoading}
+                              onLoadMore={handleLoadMoreReviews}
+                              canLoadMore={reviewsHasMore}
+                              onMarkHelpful={handleMarkHelpful}
+                            />
+                          </div>
 
                         
 

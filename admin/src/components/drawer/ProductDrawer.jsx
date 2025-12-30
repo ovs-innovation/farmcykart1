@@ -2516,13 +2516,39 @@ const ProductDrawer = ({ id }) => {
                         />
                       </div>
                       <div>
-                        <LabelArea label="Description" />
-                        <Textarea
-                          rows="4"
-                          value={howToUse.description || ""}
-                          onChange={(e) => setHowToUse({ ...howToUse, description: e.target.value })}
-                          placeholder="How to use instructions"
-                        />
+                        <LabelArea label="Items (List)" />
+                        <div className="space-y-3">
+                          {howToUse.items?.map((item, idx) => (
+                            <div key={idx} className="flex gap-2 items-center">
+                              <Input
+                                placeholder="How to use instruction"
+                                value={item || ""}
+                                onChange={(e) => {
+                                  const newItems = [...howToUse.items];
+                                  newItems[idx] = e.target.value;
+                                  setHowToUse({ ...howToUse, items: newItems });
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newItems = howToUse.items.filter((_, i) => i !== idx);
+                                  setHowToUse({ ...howToUse, items: newItems });
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            size="small"
+                            onClick={() => setHowToUse({ ...howToUse, items: [...(howToUse.items || []), ""] })}
+                          >
+                            Add Item
+                          </Button>
+                        </div>
                       </div>
                     </div>
                 </div>
@@ -2551,13 +2577,39 @@ const ProductDrawer = ({ id }) => {
                         />
                       </div>
                       <div>
-                        <LabelArea label="Description" />
-                        <Textarea
-                          rows="4"
-                          value={safetyInformation.description || ""}
-                          onChange={(e) => setSafetyInformation({ ...safetyInformation, description: e.target.value })}
-                          placeholder="Safety Information"
-                        />
+                        <LabelArea label="Items (List)" />
+                        <div className="space-y-3">
+                          {safetyInformation.items?.map((item, idx) => (
+                            <div key={idx} className="flex gap-2 items-center">
+                              <Input
+                                placeholder="Safety information item"
+                                value={item || ""}
+                                onChange={(e) => {
+                                  const newItems = [...safetyInformation.items];
+                                  newItems[idx] = e.target.value;
+                                  setSafetyInformation({ ...safetyInformation, items: newItems });
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newItems = safetyInformation.items.filter((_, i) => i !== idx);
+                                  setSafetyInformation({ ...safetyInformation, items: newItems });
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            size="small"
+                            onClick={() => setSafetyInformation({ ...safetyInformation, items: [...(safetyInformation.items || []), ""] })}
+                          >
+                            Add Item
+                          </Button>
+                        </div>
                       </div>
                     </div>
                 </div>
@@ -2586,46 +2638,85 @@ const ProductDrawer = ({ id }) => {
                         />
                       </div>
                       <div>
-                        <LabelArea label="Items (Key - Value)" />
-                        <div className="space-y-3">
-                          {additionalInformation.items?.map((item, idx) => (
-                            <div key={idx} className="flex gap-2 items-center">
-                              <Input
-                                placeholder="Key"
-                                value={item.key || ""}
-                                onChange={(e) => {
-                                  const newItems = [...additionalInformation.items];
-                                  newItems[idx].key = e.target.value;
-                                  setAdditionalInformation({ ...additionalInformation, items: newItems });
-                                }}
-                              />
-                              <Input
-                                placeholder="Value"
-                                value={item.value || ""}
-                                onChange={(e) => {
-                                  const newItems = [...additionalInformation.items];
-                                  newItems[idx].value = e.target.value;
-                                  setAdditionalInformation({ ...additionalInformation, items: newItems });
-                                }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newItems = additionalInformation.items.filter((_, i) => i !== idx);
-                                  setAdditionalInformation({ ...additionalInformation, items: newItems });
-                                }}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <FiTrash2 />
-                              </button>
+                        <LabelArea label="Sub-Sections" />
+                        <div className="space-y-6">
+                          {additionalInformation.subsections?.map((subsection, subIdx) => (
+                            <div key={subIdx} className="border border-gray-300 rounded-lg p-4 bg-white">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex-1 mr-2">
+                                  <Input
+                                    placeholder="Sub-section Label (e.g., Good to Know, Quick Tips)"
+                                    value={subsection.label || ""}
+                                    onChange={(e) => {
+                                      const newSubsections = [...additionalInformation.subsections];
+                                      newSubsections[subIdx].label = e.target.value;
+                                      setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
+                                    }}
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newSubsections = additionalInformation.subsections.filter((_, i) => i !== subIdx);
+                                    setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
+                                  }}
+                                  className="text-red-500 hover:text-red-700 ml-2"
+                                >
+                                  <FiTrash2 size={20} />
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                <LabelArea label="Items" />
+                                {subsection.items?.map((item, itemIdx) => (
+                                  <div key={itemIdx} className="flex gap-2 items-center">
+                                    <Input
+                                      placeholder="Item text"
+                                      value={item || ""}
+                                      onChange={(e) => {
+                                        const newSubsections = [...additionalInformation.subsections];
+                                        newSubsections[subIdx].items[itemIdx] = e.target.value;
+                                        setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newSubsections = [...additionalInformation.subsections];
+                                        newSubsections[subIdx].items = newSubsections[subIdx].items.filter((_, i) => i !== itemIdx);
+                                        setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
+                                      }}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <FiTrash2 />
+                                    </button>
+                                  </div>
+                                ))}
+                                <Button
+                                  type="button"
+                                  size="small"
+                                  onClick={() => {
+                                    const newSubsections = [...additionalInformation.subsections];
+                                    if (!newSubsections[subIdx].items) {
+                                      newSubsections[subIdx].items = [];
+                                    }
+                                    newSubsections[subIdx].items = [...newSubsections[subIdx].items, ""];
+                                    setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
+                                  }}
+                                >
+                                  Add Item
+                                </Button>
+                              </div>
                             </div>
                           ))}
                           <Button
                             type="button"
                             size="small"
-                            onClick={() => setAdditionalInformation({ ...additionalInformation, items: [...additionalInformation.items, { key: "", value: "" }] })}
+                            onClick={() => setAdditionalInformation({ 
+                              ...additionalInformation, 
+                              subsections: [...(additionalInformation.subsections || []), { label: "", items: [] }] 
+                            })}
                           >
-                            Add Item
+                            Add Sub-Section
                           </Button>
                         </div>
                       </div>
