@@ -1,0 +1,1516 @@
+import useTranslation from "next-translate/useTranslation";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FiChevronRight,
+  FiMinus,
+  FiPlus,
+  FiChevronDown,
+  FiChevronUp,
+  FiShare2,
+  FiHeart,
+  FiShuffle,
+} from "react-icons/fi";
+import { AiFillStar } from "react-icons/ai";
+import {
+  FacebookIcon,
+  FacebookShareButton,
+  LinkedinIcon,
+  LinkedinShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WhatsappIcon,
+  WhatsappShareButton,
+} from "react-share";
+import { FaInstagram } from "react-icons/fa";
+//internal import
+
+import Price from "@components/common/Price";
+import Stock from "@components/common/Stock";
+import Tags from "@components/common/Tags";
+import Layout from "@layout/Layout";
+import Card from "@components/slug-card/Card";
+import useAddToCart from "@hooks/useAddToCart";
+import { useCart } from "react-use-cart";
+import Loading from "@components/preloader/Loading";
+import ProductCard from "@components/product/ProductCard";
+import VariantList from "@components/variants/VariantList";
+import { SidebarContext } from "@context/SidebarContext";
+import AttributeServices from "@services/AttributeServices";
+import ProductServices from "@services/ProductServices";
+import useUtilsFunction from "@hooks/useUtilsFunction";
+import Discount from "@components/common/Discount";
+import useGetSetting from "@hooks/useGetSetting";
+import ProductImageGallery from "@components/product/ProductImageGallery";
+import ProductDetailsSection from "@components/product/ProductDetailsSection";
+import RatingSummary from "@components/reviews/RatingSummary";
+import ReviewFilters from "@components/reviews/ReviewFilters";
+import ReviewList from "@components/reviews/ReviewList";
+import WriteReviewForm from "@components/reviews/WriteReviewForm";
+import ReviewServices from "@services/ReviewServices";
+import { notifyError, notifySuccess } from "@utils/toast";
+import { useSession } from "next-auth/react";
+import { addToWishlist } from "@lib/wishlist";
+
+const ProductScreen = ({ product, attributes, relatedProducts }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const { lang, showingTranslateValue, getNumber, currency } =
+    useUtilsFunction();
+  const { isLoading, setIsLoading } = useContext(SidebarContext);
+  const { handleAddItem, item, setItem } = useAddToCart();
+  const { setItems, addItem } = useCart();
+  const { storeCustomizationSetting } = useGetSetting();
+
+  // react hook
+
+  const [value, setValue] = useState("");
+  const [price, setPrice] = useState(0);
+  const [activeImage, setActiveImage] = useState("");
+  const [originalPrice, setOriginalPrice] = useState(0);
+  const [stock, setStock] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [selectVariant, setSelectVariant] = useState({});
+  const [isReadMore, setIsReadMore] = useState(true);
+  const [selectVa, setSelectVa] = useState({});
+  const [variantTitle, setVariantTitle] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [dynamicTitle, setDynamicTitle] = useState("");
+  const [dynamicDescription, setDynamicDescription] = useState("");
+  const [variantDynamicSections, setVariantDynamicSections] = useState(null);
+  const [variantMediaSections, setVariantMediaSections] = useState(null);
+  const isUpdatingUrlRef = useRef(false);
+  const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+  const [currentImages, setCurrentImages] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [ratingSummary, setRatingSummary] = useState(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsHasMore, setReviewsHasMore] = useState(false);
+  const [reviewsSort, setReviewsSort] = useState("newest");
+  const [reviewsRatingFilter, setReviewsRatingFilter] = useState(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+
+  // Simple stock derivation to avoid infinite variant loops
+  useEffect(() => {
+    if (!product) return;
+
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      // sum of variant quantities as overall stock
+      const total = product.variants.reduce(
+        (sum, v) => sum + (Number(v.quantity) || 0),
+        0
+      );
+      setStock(total);
+    } else {
+      setStock(Number(product.stock) || 0);
+    }
+  }, [product]);
+
+  // Get product media (images + optional video) - supports up to 5 items
+  const productImages = useMemo(() => {
+    const media = [];
+
+    // Add images first
+    if (Array.isArray(product?.image)) {
+      media.push(
+        ...product.image.filter(
+          (img) => img && typeof img === "string" && img.trim() !== ""
+        )
+      );
+    } else if (product?.image) {
+      media.push(product.image);
+    }
+
+    // If legacy 'video' field exists, also push it into media array
+    if (
+      product?.video &&
+      typeof product.video === "string" &&
+      product.video.trim() !== ""
+    ) {
+      media.push(product.video);
+    }
+
+    return media.slice(0, 5);
+  }, [product?.image, product?.video]);
+
+  // Keep a sharable URL in sync with current selection (includes query params)
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (typeof window === "undefined") return;
+
+    // Always take the real browser URL so that we include query params
+    setShareUrl(window.location.href);
+  }, [router.isReady, router.asPath]);
+
+  // Auto-select first available variant on initial load
+  useEffect(() => {
+    if (!product?.variants || product.variants.length === 0) return;
+    if (!variantTitle || variantTitle.length === 0) return;
+
+    // If we already have any attribute selected, don't override
+    if (selectVa && Object.keys(selectVa).some((key) => selectVa[key])) return;
+
+    // Pick first variant with stock > 0, otherwise just first variant
+    const firstAvailableVariant =
+      product.variants.find((v) => Number(v.quantity) > 0) ||
+      product.variants[0];
+
+    if (!firstAvailableVariant) return;
+
+    const initialSelection = {};
+    variantTitle.forEach((att) => {
+      if (firstAvailableVariant[att._id]) {
+        initialSelection[att._id] = firstAvailableVariant[att._id];
+      }
+    });
+
+    if (Object.keys(initialSelection).length === 0) return;
+
+    // Initialize attribute selection; price/images/stock will be synced
+    // by the variant-matching effect below.
+    setSelectVa(initialSelection);
+    setSelectVariant((prev) =>
+      Object.keys(prev || {}).length === 0 ? initialSelection : prev
+    );
+  }, [product?.variants, variantTitle]);
+
+  useEffect(() => {
+    // Trigger when we have variants and some selection
+    if (!product?.variants || product.variants.length === 0) return;
+    
+    // Check if we have any attribute selection
+    const attributeKeys = variantTitle?.map(att => att._id) || [];
+    const hasSelection = value || (selectVa && Object.keys(selectVa).length > 0 && attributeKeys.some(key => selectVa[key]));
+    
+    if (!hasSelection) {
+      return;
+    }
+    
+    if (hasSelection) {
+      // Merge current selectVa with selectVariant to get complete selection
+      const mergedSelection = { ...selectVariant, ...selectVa };
+      
+      // Filter out non-attribute keys for comparison
+      const attributeKeys = variantTitle?.map(att => att._id) || [];
+      
+      // If we have attribute keys, filter by them; otherwise use all variants
+      let result = product?.variants || [];
+      
+      if (attributeKeys.length > 0) {
+        result = product?.variants?.filter((variant) => {
+          // Check if variant matches all selected attributes
+          return attributeKeys.every((attrKey) => {
+            const selectedValue = mergedSelection[attrKey];
+            // If no selection for this attribute, skip it (allow any value)
+            if (!selectedValue) return true;
+            return variant[attrKey] === selectedValue;
+          });
+        }) || [];
+      }
+
+      const res = result?.map(
+        ({
+          originalPrice,
+          price,
+          discount,
+          quantity,
+          barcode,
+          sku,
+          productId,
+          image,
+          images,
+          title,
+          description,
+          ...rest
+        }) => ({ ...rest })
+      );
+
+      const filterKey = Object.keys(Object.assign({}, ...res));
+      const selectVar = filterKey?.reduce(
+        (obj, key) => ({ ...obj, [key]: mergedSelection[key] || selectVariant[key] }),
+        {}
+      );
+      const newObj = Object.entries(selectVar).reduce(
+        (a, [k, v]) => (v ? ((a[k] = v), a) : a),
+        {}
+      );
+
+      // Find the variant that matches all selected attributes
+      let result2 = null;
+      
+      if (Object.keys(newObj).length > 0) {
+        result2 = result?.find((v) =>
+          Object.keys(newObj).every((k) => newObj[k] === v[k])
+        );
+      } else if (result.length > 0) {
+        // If no specific selection, use first matching variant
+        result2 = result[0];
+      }
+
+      // console.log("result2", result2);
+      if (result.length <= 0 || result2 === undefined || result2 === null) {
+        // If no exact match, try to find partial match
+        if (result.length > 0) {
+          result2 = result[0];
+        } else {
+          setStock(0);
+          return;
+        }
+      }
+
+      setVariants(result);
+      const sameVariant =
+        result2 && selectVariant && result2._id === selectVariant._id;
+      if (!sameVariant) {
+        setSelectVariant(result2);
+        setSelectVa(result2);
+      }
+      
+      // Get variant images - prioritize variant images
+      let variantImages = [];
+      if (Array.isArray(result2?.images) && result2.images.length > 0) {
+        variantImages = result2.images;
+      } else if (result2?.image) {
+        variantImages = [result2.image];
+      }
+      
+      // If variant has video, add it to images array
+      if (result2?.video && typeof result2.video === "string" && result2.video.trim() !== "") {
+        if (!variantImages.includes(result2.video)) {
+          variantImages.push(result2.video);
+        }
+      }
+      
+      // Set active image to first variant image, or fallback to product image
+      const variantImage = variantImages.length > 0 
+        ? variantImages[0]
+        : (productImages[0] || "");
+      setActiveImage(variantImage);
+      setCurrentImages(
+        variantImages.length > 0 ? variantImages : productImages
+      );
+      
+      setStock(result2?.quantity);
+      const price = getNumber(result2?.price);
+      const originalPrice = getNumber(result2?.originalPrice);
+      const discountPercentage = getNumber(
+        ((originalPrice - price) / originalPrice) * 100
+      );
+      setDiscount(getNumber(discountPercentage));
+      setPrice(price);
+      setOriginalPrice(originalPrice);
+      
+      // Set dynamic title and description - variant first, then product
+      const variantTitleText = showingTranslateValue(result2?.title);
+      const variantDescText = showingTranslateValue(result2?.description);
+      setDynamicTitle(variantTitleText || showingTranslateValue(product?.title));
+      setDynamicDescription(variantDescText || showingTranslateValue(product?.description));
+      
+      // Set variant-specific dynamic and media sections
+      // Always set if array exists, even if sections have isVisible: false
+      setVariantDynamicSections(
+        Array.isArray(result2?.dynamicSections) && result2.dynamicSections.length > 0
+          ? result2.dynamicSections
+          : null
+      );
+      setVariantMediaSections(
+        Array.isArray(result2?.mediaSections) && result2.mediaSections.length > 0
+          ? result2.mediaSections
+          : null
+      );
+    } else if (product?.variants?.length > 0) {
+      const result = product?.variants?.filter((variant) =>
+        Object.keys(selectVa).every((k) => selectVa[k] === variant[k])
+      );
+
+      setVariants(result);
+
+      // Pick first variant with non-zero price, fall back to index 0
+      const pricedVariant =
+        product.variants.find(
+          (v) => getNumber(v?.price ?? 0) > 0
+        ) || product.variants[0];
+
+      setStock(pricedVariant?.quantity);
+      setSelectVariant(pricedVariant);
+      setSelectVa(pricedVariant);
+
+      // Get variant image - handle both variant.image (string) and variant.images (array)
+      const firstVariantImageArr =
+        Array.isArray(pricedVariant?.images) && pricedVariant.images.length > 0
+          ? pricedVariant.images
+          : pricedVariant?.image
+          ? [pricedVariant.image]
+          : [];
+
+      const firstVariantImage =
+        firstVariantImageArr[0] || productImages[0] || "";
+      setActiveImage(firstVariantImage);
+      setCurrentImages(
+        firstVariantImageArr.length > 0 ? firstVariantImageArr : productImages
+      );
+
+      const rawVariantPrice =
+        pricedVariant?.price ?? product?.prices?.price ?? 0;
+      const rawVariantOriginal =
+        pricedVariant?.originalPrice ??
+        product?.prices?.originalPrice ??
+        rawVariantPrice;
+
+      const price = getNumber(rawVariantPrice);
+      const originalPrice = getNumber(rawVariantOriginal);
+
+      const discountPercentage =
+        originalPrice > 0
+          ? getNumber(((originalPrice - price) / originalPrice) * 100)
+          : 0;
+
+      setDiscount(discountPercentage);
+      setPrice(price);
+      setOriginalPrice(originalPrice);
+
+      // Set dynamic title and description - variant first, then product
+      const firstVariantTitleText = showingTranslateValue(pricedVariant?.title);
+      const firstVariantDescText = showingTranslateValue(
+        pricedVariant?.description
+      );
+      setDynamicTitle(
+        firstVariantTitleText || showingTranslateValue(product?.title)
+      );
+      setDynamicDescription(
+        firstVariantDescText || showingTranslateValue(product?.description)
+      );
+
+      // Set variant-specific dynamic and media sections
+      setVariantDynamicSections(
+        Array.isArray(pricedVariant?.dynamicSections) &&
+          pricedVariant.dynamicSections.length > 0
+          ? pricedVariant.dynamicSections
+          : null
+      );
+      setVariantMediaSections(
+        Array.isArray(pricedVariant?.mediaSections) &&
+          pricedVariant.mediaSections.length > 0
+          ? pricedVariant.mediaSections
+          : null
+      );
+    } else {
+      setStock(product?.stock);
+      setActiveImage(productImages[0] || "");
+
+      const baseRawPrice = product?.prices?.price ?? 0;
+      const baseRawOriginal =
+        product?.prices?.originalPrice ?? baseRawPrice;
+
+      const price = getNumber(baseRawPrice);
+      const originalPrice = getNumber(baseRawOriginal);
+
+      const discountPercentage =
+        originalPrice > 0
+          ? getNumber(((originalPrice - price) / originalPrice) * 100)
+          : 0;
+
+      setDiscount(discountPercentage);
+      setPrice(price);
+      setOriginalPrice(originalPrice);
+      
+      // Set dynamic title and description - use product title/description when no variant
+      setDynamicTitle(showingTranslateValue(product?.title));
+      setDynamicDescription(showingTranslateValue(product?.description));
+      
+      // Reset variant-specific sections when no variant
+      setVariantDynamicSections(null);
+      setVariantMediaSections(null);
+    }
+  }, [
+    product?.prices?.discount,
+    product?.prices?.originalPrice,
+    product?.prices?.price,
+    product?.stock,
+    product.variants,
+    selectVa,
+    selectVariant,
+    value,
+    productImages,
+    variantTitle,
+    showingTranslateValue,
+    getNumber,
+    product?.title,
+    product?.description,
+  ]);
+
+  useEffect(() => {
+    // Initialize gallery images and active image when product media changes
+    const initialImage = productImages[0] || "";
+    setActiveImage(initialImage);
+    setCurrentImages((prev) =>
+      prev && prev.length > 0 ? prev : productImages
+    );
+    // Initialize dynamic title and description on mount
+    if (!dynamicTitle) {
+      setDynamicTitle(showingTranslateValue(product?.title));
+    }
+    if (!dynamicDescription) {
+      setDynamicDescription(showingTranslateValue(product?.description));
+    }
+  }, [productImages]);
+
+  // Fetch reviews when product or filters change
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!product?._id) return;
+      try {
+        setReviewsLoading(true);
+        const res = await ReviewServices.getProductReviews({
+          productId: product._id,
+          sort: reviewsSort,
+          rating: reviewsRatingFilter,
+          page: 1,
+          limit: 6,
+        });
+        setReviews(res.reviews || []);
+        setRatingSummary(res.ratingSummary || null);
+        setReviewsPage(1);
+        setReviewsHasMore(
+          res.pagination && res.pagination.page < res.pagination.pages
+        );
+      } catch (err) {
+        notifyError(
+          err?.response?.data?.message || "Failed to load reviews."
+        );
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [product?._id, reviewsSort, reviewsRatingFilter]);
+
+  const handleLoadMoreReviews = async () => {
+    if (!product?._id || !reviewsHasMore || reviewsLoading) return;
+    try {
+      const nextPage = reviewsPage + 1;
+      setReviewsLoading(true);
+      const res = await ReviewServices.getProductReviews({
+        productId: product._id,
+        sort: reviewsSort,
+        rating: reviewsRatingFilter,
+        page: nextPage,
+        limit: 6,
+      });
+      setReviews((prev) => [...prev, ...(res.reviews || [])]);
+      setReviewsPage(nextPage);
+      setReviewsHasMore(
+        res.pagination && res.pagination.page < res.pagination.pages
+      );
+    } catch (err) {
+      notifyError(
+        err?.response?.data?.message || "Failed to load more reviews."
+      );
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async ({ productId, rating, reviewText }) => {
+    if (!productId) return;
+    try {
+      setReviewSubmitting(true);
+      const res = await ReviewServices.addOrUpdateReview({
+        productId,
+        rating,
+        reviewText,
+      });
+
+      if (res.review) {
+        setReviews((prev) => {
+          const idx = prev.findIndex((r) => r._id === res.review._id);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = res.review;
+            return updated;
+          }
+          return [res.review, ...prev];
+        });
+      }
+      if (res.ratingSummary) {
+        setRatingSummary(res.ratingSummary);
+      }
+    } catch (err) {
+      notifyError(
+        err?.response?.data?.message || "Failed to submit review."
+      );
+      throw err;
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const handleMarkHelpful = async (review) => {
+    if (!review?._id) return;
+    try {
+      const res = await ReviewServices.markHelpful(review._id);
+      if (res.review) {
+        setReviews((prev) =>
+          prev.map((r) => (r._id === res.review._id ? res.review : r))
+        );
+      }
+    } catch (err) {
+      notifyError(
+        err?.response?.data?.message || "Failed to mark as helpful."
+      );
+    }
+  };
+
+  // Additional useEffect to handle variant changes when selectVa changes (for immediate updates on button click)
+  useEffect(() => {
+    // Only trigger if we have variants
+    if (!product?.variants || product.variants.length === 0) return;
+    
+    // Get attribute keys
+    const attributeKeys = variantTitle?.map(att => att._id) || [];
+    if (attributeKeys.length === 0) return;
+    
+    // Check if selectVa has any attribute selections
+    const hasAttributeSelection = selectVa && Object.keys(selectVa).some(key => attributeKeys.includes(key));
+    
+    if (!hasAttributeSelection) return;
+    
+    // Find matching variant based on selected attributes
+    const matchingVariant = product.variants.find((variant) => {
+      return attributeKeys.every((attrKey) => {
+        const selectedValue = selectVa[attrKey];
+        // If attribute is selected, it must match; if not selected, allow any value
+        if (!selectedValue) return true;
+        return variant[attrKey] === selectedValue;
+      });
+    });
+
+    // Compare by SKU or by checking if attributes match
+    const isDifferent = !selectVariant || 
+      matchingVariant?.sku !== selectVariant?.sku ||
+      attributeKeys.some(key => matchingVariant[key] !== selectVariant[key]);
+    
+    if (matchingVariant && isDifferent) {
+      setSelectVariant(matchingVariant);
+      
+      // Update images immediately - prioritize variant images
+      let variantImages = [];
+      if (Array.isArray(matchingVariant?.images) && matchingVariant.images.length > 0) {
+        variantImages = matchingVariant.images;
+      } else if (matchingVariant?.image) {
+        variantImages = [matchingVariant.image];
+      }
+      
+      // If variant has video, add it to images array
+      if (matchingVariant?.video && typeof matchingVariant.video === "string" && matchingVariant.video.trim() !== "") {
+        if (!variantImages.includes(matchingVariant.video)) {
+          variantImages.push(matchingVariant.video);
+        }
+      }
+      
+      const variantImage = variantImages.length > 0 
+        ? variantImages[0]
+        : (productImages[0] || "");
+      setActiveImage(variantImage);
+      setCurrentImages(
+        variantImages.length > 0 ? variantImages : productImages
+      );
+      
+      // Update price, stock, etc. immediately
+      setStock(matchingVariant?.quantity || 0);
+      const price = getNumber(matchingVariant?.price);
+      const originalPrice = getNumber(matchingVariant?.originalPrice);
+      const discountPercentage = getNumber(
+        ((originalPrice - price) / originalPrice) * 100
+      );
+      setDiscount(getNumber(discountPercentage));
+      setPrice(price);
+      setOriginalPrice(originalPrice);
+      
+      // Update dynamic title and description immediately
+      const variantTitleText = showingTranslateValue(matchingVariant?.title);
+      const variantDescText = showingTranslateValue(matchingVariant?.description);
+      setDynamicTitle(variantTitleText || showingTranslateValue(product?.title));
+      setDynamicDescription(variantDescText || showingTranslateValue(product?.description));
+      
+      // Update variant-specific dynamic and media sections immediately
+      // Always set if array exists, even if sections have isVisible: false
+      setVariantDynamicSections(
+        Array.isArray(matchingVariant?.dynamicSections) && matchingVariant.dynamicSections.length > 0
+          ? matchingVariant.dynamicSections
+          : null
+      );
+      setVariantMediaSections(
+        Array.isArray(matchingVariant?.mediaSections) && matchingVariant.mediaSections.length > 0
+          ? matchingVariant.mediaSections
+          : null
+      );
+    }
+  }, [selectVa, variantTitle, product?.variants, productImages, showingTranslateValue, getNumber, product?.title, product?.description, selectVariant]);
+
+  useEffect(() => {
+    const res = Object.keys(Object.assign({}, ...product?.variants));
+    const varTitle = attributes?.filter((att) => res.includes(att?._id));
+
+    setVariantTitle(varTitle?.sort());
+  }, [variants, attributes]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [product]);
+
+  const handleAddToCart = (p) => {
+    if (stock <= 0) return notifyError("Insufficient stock");
+
+    const hasVariants = product?.variants && product.variants.length > 0;
+    if (
+      hasVariants &&
+      (!selectVariant || Object.keys(selectVariant).length === 0)
+    ) {
+      return notifyError("Please select all variants first!");
+    }
+
+    const { variants, categories, description, ...updatedProduct } = product;
+
+    // Ensure we have a valid price
+    const currentPrice =
+      price > 0
+        ? price
+        : getNumber(
+            selectVariant?.price ?? product?.prices?.price ?? 0
+          );
+    const currentOriginalPrice =
+      originalPrice > 0
+        ? originalPrice
+        : getNumber(
+            selectVariant?.originalPrice ??
+              product?.prices?.originalPrice ??
+              currentPrice
+          );
+
+    const newItem = {
+      ...updatedProduct,
+      id: `${
+        !hasVariants || p.variants.length <= 1
+          ? p._id
+          : p._id +
+            variantTitle?.map((att) => selectVariant[att._id]).join("-")
+      }`,
+
+      title: `${
+        !hasVariants || p.variants.length <= 1
+          ? dynamicTitle || showingTranslateValue(product?.title)
+          : (dynamicTitle || showingTranslateValue(product?.title)) +
+            "-" +
+            variantTitle
+              ?.map((att) =>
+                att.variants?.find((v) => v._id === selectVariant[att._id])
+              )
+              .map((el) => showingTranslateValue(el?.name))
+      }`,
+      image: activeImage || product.image?.[0] || product.images?.[0],
+      variant: selectVariant,
+      price: currentPrice,
+      originalPrice: currentOriginalPrice,
+    };
+    handleAddItem(newItem);
+  };
+
+  const handleAddToWishlist = (p) => {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const result = addToWishlist(p);
+
+      if (!result.ok && result.reason === "exists") {
+        notifyError("Product already in wishlist");
+        return;
+      }
+
+      if (!result.ok) {
+        notifyError("Failed to add to wishlist");
+        return;
+      }
+
+      notifySuccess("Product added to wishlist");
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      notifyError("Failed to add to wishlist");
+    }
+  };
+
+  const handleAddToCompare = (p) => {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const storedCompare = localStorage.getItem("compare");
+      let compare = storedCompare ? JSON.parse(storedCompare) : [];
+      
+      // Check if product already exists in compare
+      const exists = compare.some((item) => item._id === p._id);
+      
+      if (exists) {
+        notifyError("Product already in compare list");
+        return;
+      }
+      
+      // Limit compare list to 4 products
+      if (compare.length >= 4) {
+        notifyError("You can compare maximum 4 products");
+        return;
+      }
+      
+      // Add product to compare
+      compare.push(p);
+      localStorage.setItem("compare", JSON.stringify(compare));
+      notifySuccess("Product added to compare list");
+    } catch (error) {
+      console.error("Error adding to compare:", error);
+      notifyError("Failed to add to compare list");
+    }
+  };
+
+  const handleBuyNow = (p) => {
+    try {
+      // Check stock first - handle products with and without variants
+      if (stock <= 0) {
+        return notifyError("Insufficient stock");
+      }
+
+      // Check if user is logged in
+      const userInfo = session?.user || null;
+
+      if (!userInfo) {
+        // Optional: redirect to login or allow guest checkout
+        // For now, we'll allow it as the checkout page handles guest logic
+      }
+
+      // Check if variants need to be selected
+      const hasVariants = product?.variants && product.variants.length > 0;
+      if (
+        hasVariants &&
+        (!selectVariant || Object.keys(selectVariant).length === 0)
+      ) {
+        return notifyError("Please select all variants first!");
+      }
+
+      // Prepare product item for direct checkout
+      const { variants, categories, description, ...updatedProduct } = product;
+
+      // Ensure we have a valid price
+      const currentPrice =
+        price > 0
+          ? price
+          : getNumber(
+              selectVariant?.price ?? product?.prices?.price ?? 0
+            );
+      const currentOriginalPrice =
+        originalPrice > 0
+          ? originalPrice
+          : getNumber(
+              selectVariant?.originalPrice ??
+                product?.prices?.originalPrice ??
+                currentPrice
+            );
+
+      const newItem = {
+        ...updatedProduct,
+        id: `${
+          !hasVariants || (p.variants && p.variants.length <= 1)
+            ? p._id
+            : p._id +
+              variantTitle?.map((att) => selectVariant[att._id]).join("-")
+        }`,
+        title: `${
+          !hasVariants || (p.variants && p.variants.length <= 1)
+            ? dynamicTitle || showingTranslateValue(product?.title)
+            : (dynamicTitle || showingTranslateValue(product?.title)) +
+              "-" +
+              variantTitle
+                ?.map((att) =>
+                  att.variants?.find((v) => v._id === selectVariant[att._id])
+                )
+                .map((el) => showingTranslateValue(el?.name))
+        }`,
+        image: activeImage || product.image?.[0],
+        variant: selectVariant || {},
+        price: currentPrice,
+        originalPrice: currentOriginalPrice,
+        quantity: item,
+      };
+
+      // Replace entire cart with only this product (Flipkart style - Buy Now replaces cart)
+      // Using setItems to avoid multiple re-renders
+      setItems([newItem]);
+
+      // Redirect directly to checkout after state update
+      setTimeout(() => {
+        router.push("/checkout");
+      }, 150);
+    } catch (error) {
+      console.error("Buy Now error:", error);
+      notifyError("Something went wrong. Please try again.");
+    }
+  };
+
+  // Share current product + variant selection URL
+  const handleShareCurrentVariant = async () => {
+    const urlToShare =
+      (typeof window !== "undefined" && window.location.href) ||
+      shareUrl ||
+      `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`;
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({
+          title: dynamicTitle || showingTranslateValue(product?.title),
+          text: dynamicDescription || showingTranslateValue(product?.description),
+          url: urlToShare,
+        });
+        return;
+      }
+
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+      ) {
+        await navigator.clipboard.writeText(urlToShare);
+        notifySuccess("Link copied to clipboard!");
+        return;
+      }
+
+      notifySuccess("Share this link: " + urlToShare);
+    } catch (err) {
+      if (err?.name === "AbortError") return;
+      notifyError("Unable to share link. Please try again.");
+    }
+  };
+
+  const handleChangeImage = (img) => {
+    if (img) {
+      setActiveImage(img);
+    }
+  };
+
+  // Update images when variant changes - create variant-specific image list
+  const variantImages = useMemo(() => {
+    if (!selectVariant || Object.keys(selectVariant).length === 0) {
+      return productImages;
+    }
+
+    // Get images for selected variant
+    const variantImgs = [];
+    if (Array.isArray(selectVariant?.images) && selectVariant.images.length > 0) {
+      variantImgs.push(...selectVariant.images);
+    } else if (selectVariant?.image) {
+      variantImgs.push(selectVariant.image);
+    }
+
+    // If variant has images, use them; otherwise use all product images
+    return variantImgs.length > 0 ? variantImgs : productImages;
+  }, [selectVariant, productImages]);
+
+  const { t } = useTranslation();
+
+  const productFaqs = useMemo(
+    () =>
+      (product?.faqs || []).filter(
+        (faq) =>
+          faq &&
+          faq?.question &&
+          faq.question.trim() !== "" &&
+          faq?.isVisible !== false
+      ),
+    [product?.faqs]
+  );
+
+  // category name slug
+  const category_name = showingTranslateValue(product?.category?.name)
+    .toLowerCase()
+    .replace(/[^A-Z0-9]+/gi, "-");
+
+  // Helper to create URL-friendly slugs for attribute/variant names
+  const slugify = (str = "") =>
+    str
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  // NOTE: Variant URL syncing disabled to avoid navigation loops during Buy Now flow.
+  // If you want to re-enable deep-linking by variant, restore the previous
+  // useEffects that read/write variant params from/to the URL.
+
+  // console.log("discount", discount);
+
+  return (
+    <>
+      {isLoading ? (
+        <Loading loading={isLoading} />
+      ) : (
+        <Layout
+          title={dynamicTitle || showingTranslateValue(product?.title)}
+          description={dynamicDescription || showingTranslateValue(product.description)}
+        >
+          <div className="lg:px-8 py-2">
+            <div className="mx-auto px-3 lg:px-8 max-w-screen-2xl">
+              <div className="flex items-start pb-3 justify-between gap-4">
+                <ol className="flex items-center w-full overflow-hidden font-serif">
+                  <li
+                    className="text-sm pr-1 transition duration-200 ease-in cursor-pointer hover:text-store-500 font-semibold"
+                  >
+                    <Link href="/">Home</Link>
+                  </li>
+                  <li className="text-sm mt-[1px]">
+                    {" "}
+                    <FiChevronRight />{" "}
+                  </li>
+                  <li
+                    className="text-sm pl-1 transition duration-200 ease-in cursor-pointer hover:text-store-500 font-semibold "
+                  >
+                    <Link
+                      href={`/search?category=${category_name}&_id=${product?.category?._id}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setIsLoading(!isLoading)}
+                      >
+                        {category_name}
+                      </button>
+                    </Link>
+                  </li>
+                  <li className="text-sm mt-[1px]">
+                    {" "}
+                    <FiChevronRight />{" "}
+                  </li>
+                  <li className="text-sm px-1 transition duration-200 ease-in ">
+                    {dynamicTitle || showingTranslateValue(product?.title)}
+                  </li>
+                </ol>
+
+               
+              </div>
+              <div className="w-full rounded-lg  bg-white">
+                <div className="flex flex-col xl:flex-row gap-10">
+                  <div className="flex-shrink-0 w-full mx-auto md:w-5/12 lg:w-5/12 xl:w-5/12">
+                    <div className="mt-1 xl:mt-2 xl:sticky xl:top-28 xl:space-y-4">
+                      <Discount slug product={product} discount={discount} />
+
+                      {/* Flipkart-style Product Image Gallery */}
+                      <ProductImageGallery
+                        images={currentImages.length > 0 ? currentImages : productImages}
+                        productTitle={
+                          dynamicTitle || showingTranslateValue(product?.title)
+                        }
+                      />
+
+                      {/* Add to Cart & Buy Now under gallery (Flipkart style) */}
+                      <div className="mt-4">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleAddToCart(product)}
+                            type="button"
+                            className="w-full h-12 rounded-md text-sm font-semibold flex items-center justify-center border border-store-500 bg-store-50 text-store-700 hover:bg-store-800 hover:text-store-100 transition-colors"
+                          >
+                            {t("AddToCart")}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleBuyNow(product);
+                            }}
+                            type="button"
+                            className="w-full h-12 rounded-md text-sm font-semibold flex items-center justify-center bg-store-500 text-white hover:bg-store-700 transition-colors cursor-pointer"
+                          >
+                            Buy Now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-full relative">
+                    <div className="flex flex-col md:flex-row lg:flex-row xl:flex-row">
+                      <div className="xl:pr-6 md:pr-6 w-full">
+                        <div className="mb-6">
+                          <h1 className="leading-7 text-lg md:text-xl lg:text-2xl mb-1 font-semibold font-serif text-gray-800">
+                            {dynamicTitle || showingTranslateValue(product?.title)}
+                          </h1>
+
+                          {/* Top summary rating row (like Flipkart) */}
+                          {ratingSummary && (
+                            <div className="flex items-center flex-wrap gap-2 mb-2">
+                              <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-green-600 text-white text-xs font-semibold">
+                                <span className="mr-1">
+                                  {ratingSummary.averageRating?.toFixed
+                                    ? ratingSummary.averageRating.toFixed(1)
+                                    : "0.0"}
+                                </span>
+                                <AiFillStar className="w-3.5 h-3.5" />
+                              </div>
+                              <span className="text-xs sm:text-sm text-gray-600">
+                                {ratingSummary.totalRatings || 0} Ratings &amp;{" "}
+                                {ratingSummary.totalReviews || 0} Reviews
+                              </span>
+                            </div>
+                          )}
+
+                          <p className="uppercase font-serif font-medium text-gray-500 text-sm">
+                            SKU :{" "}
+                            <span className="font-bold text-gray-600">
+                              {product.sku}
+                            </span>
+                          </p>
+                          {product?.hsnCode && (
+                            <p className="uppercase font-serif font-medium text-gray-500 text-sm mt-1">
+                              HSN :{" "}
+                              <span className="font-bold text-gray-600">
+                                {product.hsnCode}
+                              </span>
+                            </p>
+                          )}
+
+                          <div className="relative">
+                            <Stock stock={stock} />
+                          </div>
+                        </div>
+                         {/* Flipkart-style share icon and action buttons in top-right */}
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleAddToWishlist(product)}
+                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                    aria-label="Add to wishlist"
+                  >
+                    <FiHeart className="w-4 h-4" />
+                    <span className="hidden sm:inline">Wishlist</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCompare(product)}
+                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-purple-600 border border-gray-200 hover:border-purple-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                    aria-label="Add to compare"
+                  >
+                    <FiShuffle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Compare</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleShareCurrentVariant}
+                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-blue-600 border border-gray-200 hover:border-blue-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                    aria-label="Share this product"
+                  >
+                    <FiShare2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Share</span>
+                  </button>
+                </div>
+                        <Price
+                          // Ensure we never show ₹0 by mistake when variants exist:
+                          // fall back to first variant or base product price if local state is 0.
+                          price={
+                            price > 0
+                              ? price
+                              : getNumber(
+                                  (product?.variants?.[0]?.price ??
+                                    product?.prices?.price) || 0
+                                )
+                          }
+                          product={product}
+                          currency={currency}
+                          originalPrice={
+                            originalPrice > 0
+                              ? originalPrice
+                              : getNumber(
+                                  (product?.variants?.[0]?.originalPrice ??
+                                    product?.prices?.originalPrice ??
+                                    product?.variants?.[0]?.price ??
+                                    product?.prices?.price) || 0
+                                )
+                          }
+                          showTaxLabel
+                        />
+
+                        {/* Flipkart-style Variant Selection */}
+                        <div className="mb-6 space-y-4">
+                          {variantTitle?.map((a, i) => (
+                            <div key={i + 1} className="pb-3">
+                              <div className="flex items-center mb-2">
+                                <h4 className="text-sm font-semibold text-gray-800 mr-2">
+                                  {showingTranslateValue(a?.name)}:
+                                </h4>
+                                {selectVariant[a._id] && (
+                                  <span className="text-xs text-gray-500">
+                                    {
+                                      showingTranslateValue(
+                                        a?.variants?.find(v => v._id === selectVariant[a._id])?.name
+                                      )
+                                    }
+                                  </span>
+                                )}
+                              </div>
+                              <div className="max-w-full">
+                                <VariantList
+                                  att={a._id}
+                                  lang={lang}
+                                  option={a.option}
+                                  setValue={setValue}
+                                  varTitle={variantTitle}
+                                  setSelectVa={setSelectVa}
+                                  variants={product.variants}
+                                  selectVariant={selectVariant}
+                                  setSelectVariant={setSelectVariant}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                      
+
+                        <div>
+                          <div className="text-sm leading-6 text-gray-500 md:leading-7">
+                            {(() => {
+                              const descriptionText = dynamicDescription || showingTranslateValue(product?.description);
+                              const displayText = isReadMore 
+                                ? (descriptionText?.slice(0, 230) || "")
+                                : (descriptionText || "");
+                              const textLength = descriptionText?.length || 0;
+                              
+                              return (
+                                <>
+                                  {displayText}
+                                  {textLength > 230 && (
+                                    <>
+                                      <br />
+                                      <span
+                                        onClick={() => setIsReadMore(!isReadMore)}
+                                        className="read-or-hide cursor-pointer text-store-600 hover:text-store-700"
+                                      >
+                                        {isReadMore
+                                          ? t("moreInfo")
+                                          : t("showLess")}
+                                      </span>
+                                    </>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                          <div className="flex flex-col mt-4">
+                            <span className="font-serif font-semibold py-1 text-sm d-block">
+                              <span className="text-gray-800">
+                                {t("category")}:
+                              </span>{" "}
+                              <Link
+                                href={`/search?category=${category_name}&_id=${product?.category?._id}`}
+                              >
+                                <button
+                                  type="button"
+                                  className="text-gray-600 font-serif font-medium underline ml-2 hover:text-teal-600"
+                                  onClick={() => setIsLoading(!isLoading)}
+                                >
+                                  {category_name}
+                                </button>
+                              </Link>
+                            </span>
+                            <Tags product={product} />
+                          </div>
+
+                        
+
+                          <div className="mt-8">
+                            <p className="text-xs sm:text-sm text-gray-700 font-medium">
+                              Call Us To Order By Mobile Number :{" "}
+                              <span className="text-store-500 font-semibold">
+                                +0044235234
+                              </span>{" "}
+                            </p>
+                          </div>
+
+                          {/* social share
+                          <div className="mt-2">
+                              <h3 className="text-base font-semibold mb-1 font-serif">
+                              {t("shareYourSocial")}
+                            </h3>
+                              <p className="font-sans text-sm text-gray-500">
+                              {t("shareYourSocialText")}
+                            </p>
+                            <ul className="flex mt-4">
+                              <li className="flex items-center text-center border border-gray-100 rounded-full hover:bg-store-500  mr-2 transition ease-in-out duration-500">
+                                <FacebookShareButton
+                                  url={
+                                    shareUrl ||
+                                    (typeof window !== "undefined"
+                                      ? window.location.href
+                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                  }
+                                  quote=""
+                                >
+                                  <FacebookIcon size={32} round />
+                                </FacebookShareButton>
+                              </li>
+                              <li className="flex items-center text-center border border-gray-100 rounded-full hover:bg-store-500  mr-2 transition ease-in-out duration-500">
+                                <TwitterShareButton
+                                  url={
+                                    shareUrl ||
+                                    (typeof window !== "undefined"
+                                      ? window.location.href
+                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                  }
+                                  quote=""
+                                >
+                                  <TwitterIcon size={32} round />
+                                </TwitterShareButton>
+                              </li>
+                              <li className="flex items-center text-center border border-gray-100 rounded-full hover:bg-store-500  mr-2 transition ease-in-out duration-500">
+                                <a
+                                  href={`https://www.instagram.com/?url=${
+                                    shareUrl ||
+                                    (typeof window !== "undefined"
+                                      ? window.location.href
+                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                  }`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center w-full h-full"
+                                  aria-label="Share on Instagram"
+                                >
+                                  <FaInstagram size={32} style={{ color: '#E4405F' }} />
+                                </a>
+                              </li>
+                              <li className="flex items-center text-center border border-gray-100 rounded-full hover:bg-store-500  mr-2 transition ease-in-out duration-500">
+                                <WhatsappShareButton
+                                  url={
+                                    shareUrl ||
+                                    (typeof window !== "undefined"
+                                      ? window.location.href
+                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                  }
+                                  quote=""
+                                >
+                                  <WhatsappIcon size={32} round />
+                                </WhatsappShareButton>
+                              </li>
+                              <li className="flex items-center text-center border border-gray-100 rounded-full hover:bg-store-500  mr-2 transition ease-in-out duration-500">
+                                <LinkedinShareButton
+                                  url={
+                                    shareUrl ||
+                                    (typeof window !== "undefined"
+                                      ? window.location.href
+                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                  }
+                                  quote=""
+                                >
+                                  <LinkedinIcon size={32} round />
+                                </LinkedinShareButton>
+                              </li>
+                            </ul>
+                          </div> */}
+
+
+                          <ProductDetailsSection
+                            dynamicSections={variantDynamicSections || product?.dynamicSections}
+                            mediaSections={variantMediaSections || product?.mediaSections}
+                            selectedAttributes={selectVa || selectVariant || {}}
+                            isVariantSpecific={!!variantDynamicSections}
+                          />
+
+                          {/* Ratings & Reviews Section - right side only */}
+                          <div id="ratings-section" className="mt-8 lg:mt-10 space-y-4">
+                            <RatingSummary summary={ratingSummary} />
+                            <WriteReviewForm
+                              productId={product?._id}
+                              existingReview={reviews.find(
+                                // backend ensures one review per user; we rely on updated list
+                                () => false
+                              )}
+                              onSubmitReview={handleSubmitReview}
+                              isSubmitting={reviewSubmitting}
+                            />
+                            <ReviewFilters
+                              sort={reviewsSort}
+                              ratingFilter={reviewsRatingFilter}
+                              onSortChange={setReviewsSort}
+                              onRatingFilterChange={setReviewsRatingFilter}
+                            />
+                            <ReviewList
+                              reviews={reviews}
+                              loading={reviewsLoading}
+                              onLoadMore={handleLoadMoreReviews}
+                              canLoadMore={reviewsHasMore}
+                              onMarkHelpful={handleMarkHelpful}
+                            />
+                          </div>
+
+                          {productFaqs.length > 0 && (
+                            <div className="mt-8">
+                              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                {product?.faqTitle && product.faqTitle.trim().length
+                                  ? product.faqTitle
+                                  : t("frequentlyAskedQuestions") ||
+                                    "Frequently Asked Questions"}
+                              </h3>
+                              <div className="divide-y divide-gray-200 border border-gray-100 rounded-2xl overflow-hidden">
+                                {productFaqs.map((faq, index) => {
+                                  const isOpen = activeFaqIndex === index;
+                                  const questionLabel = `Q${index + 1}`;
+                                  return (
+                                    <div key={`${faq.question}-${index}`} className="bg-white">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setActiveFaqIndex(isOpen ? null : index)
+                                        }
+                                        className="w-full flex items-center justify-between text-left px-5 py-4 focus:outline-none"
+                                      >
+                                        <span className="text-base font-semibold text-gray-900 flex items-start gap-2">
+                                          <span className="text-store-600 font-bold">
+                                            {questionLabel}.
+                                          </span>
+                                          <span>{faq.question}</span>
+                                        </span>
+                                        <span className="text-gray-500">
+                                          {isOpen ? (
+                                            <FiChevronUp className="w-6 h-6" />
+                                          ) : (
+                                            <FiChevronDown className="w-6 h-6" />
+                                          )}
+                                        </span>
+                                      </button>
+                                      {isOpen && (
+                                        <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed">
+                                          {faq.answerType === "yes" || faq.answerType === "no"
+                                            ? "- Ans: " + faq.answer
+                                            : "- Ans: " + faq.answer || faq.customAnswer || ""}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                        
+
+                         
+                        </div>
+
+                          
+                      </div>
+
+                      {/* shipping description card */}
+                      {/* <div className="w-full xl:w-5/12 lg:w-6/12 md:w-5/12">
+                        <div
+                          className={`mt-6 md:mt-0 lg:mt-0 bg-gray-50 border border-gray-100 p-4 lg:p-8 rounded-lg`}
+                        >
+                          <Card />
+                        </div>
+                      </div> */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Variant Specification Section */}
+              {/* {product?.variants && product.variants.length > 0 && (
+                <div className="mt-8 pt-8">
+                  <VariantSpecification
+                    variants={product.variants}
+                    variantTitle={variantTitle}
+                    attributes={attributes}
+                    onVariantSelect={(variant) => {
+                      setSelectVariant(variant);
+                      setSelectVa(variant);
+                      const variantImages = Array.isArray(variant?.images) 
+                        ? variant.images 
+                        : (variant?.image ? [variant.image] : []);
+                      setActiveImage(variantImages[0] || productImages[0] || "");
+                      setStock(variant?.quantity || 0);
+                      const price = getNumber(variant?.price);
+                      const originalPrice = getNumber(variant?.originalPrice);
+                      const discountPercentage = getNumber(
+                        ((originalPrice - price) / originalPrice) * 100
+                      );
+                      setDiscount(getNumber(discountPercentage));
+                      setPrice(price);
+                      setOriginalPrice(originalPrice);
+                      
+                      // Update dynamic title and description - variant first, then product
+                      const variantTitleText = showingTranslateValue(variant?.title);
+                      const variantDescText = showingTranslateValue(variant?.description);
+                      setDynamicTitle(variantTitleText || showingTranslateValue(product?.title));
+                      setDynamicDescription(variantDescText || showingTranslateValue(product?.description));
+                    }}
+                    selectedVariant={selectVariant}
+                  />
+                </div>
+              )} */}
+
+              {/* related products */}
+              {relatedProducts?.length >= 2 && (
+                <div className="pt-10 lg:pt-20 lg:pb-10">
+                  <h3 className="leading-7 text-lg lg:text-xl mb-3 font-semibold font-serif hover:text-gray-600">
+                    {t("relatedProducts")}
+                  </h3>
+                  <div className="flex">
+                    <div className="w-full">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3">
+                        {relatedProducts?.slice(1, 13).map((product, i) => (
+                          <ProductCard
+                            key={product._id}
+                            product={product}
+                            attributes={attributes}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Layout>
+      )}
+    </>
+  );
+};
+
+// you can use getServerSideProps alternative for getStaticProps and getStaticPaths
+
+export const getServerSideProps = async (context) => {
+  const { slug } = context.params;
+
+  const [data, attributes] = await Promise.all([
+    ProductServices.getShowingStoreProducts({
+      category: "",
+      slug: slug,
+    }),
+
+    AttributeServices.getShowingAttributes({}),
+  ]);
+  let product = {};
+
+  if (slug) {
+    product = data?.products?.find((p) => p.slug === slug);
+  }
+
+  return {
+    props: {
+      product,
+      attributes,
+      relatedProducts: data?.relatedProducts,
+    },
+  };
+};
+
+export default ProductScreen;
+

@@ -1,0 +1,61 @@
+const { default: Image } = require("next/image");
+const { useEffect, useState } = require("react");
+
+const fallbackImage =
+  "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
+
+const ImageWithFallback = ({
+  fallback = fallbackImage,
+  alt,
+  src,
+  style = {},
+  className = "",
+  ...props
+}) => {
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setError(null);
+  }, [src]);
+
+  // prefer explicit objectFit from caller (style.objectFit), otherwise default to cover
+  const objectFit = style.objectFit || "cover";
+
+  // If caller provided explicit width & height, render an intrinsic image (no fill)
+  const hasSize = props.width && props.height;
+
+  if (hasSize) {
+    const { width, height, ...rest } = props;
+    return (
+      <Image
+        alt={alt}
+        onError={setError}
+        src={error ? fallbackImage : src}
+        width={width}
+        height={height}
+        {...rest}
+        style={{ objectFit, ...style }}
+        sizes="100%"
+        className={`${className} transition-transform duration-500 ease-out transform group-hover:scale-105`}
+      />
+    );
+  }
+
+  return (
+    <Image
+      alt={alt}
+      onError={setError}
+      src={error ? fallbackImage : src}
+      {...props}
+      fill
+      style={{
+        objectFit,
+        ...style,
+      }}
+      sizes="100%"
+      className={`${className} transition-transform duration-500 ease-out transform group-hover:scale-105`}
+    />
+  );
+};
+
+export default ImageWithFallback;
