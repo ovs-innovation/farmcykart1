@@ -26,7 +26,7 @@ const ProductCard = ({ product, attributes }) => {
   const { handleIncreaseQuantity } = useAddToCart();
   const { globalSetting } = useGetSetting();
   const { storeCustomizationSetting } = useGetSetting();
-  const { showingTranslateValue } = useUtilsFunction();
+  const { showingTranslateValue, getNumberTwo } = useUtilsFunction();
   const router = useRouter();
 
   const storeColor = storeCustomizationSetting?.theme?.color || "pink";
@@ -120,11 +120,19 @@ const ProductCard = ({ product, attributes }) => {
         />
       )}
 
-  <div className="group box-border overflow-hidden flex rounded-md shadow-sm pe-0 flex-col items-center bg-white relative transition-shadow duration-300 hover:shadow-lg transform hover:-translate-y-1">
-        <div className="w-full flex justify-between">
-          <Stock product={product} stock={product.stock} card />
+  <div className="group box-border max-w-[270px] overflow-hidden flex rounded-lg border border-gray-200 flex-col items-center bg-white relative shadow-lg transition-shadow duration-300 hover:shadow-lg">
+        {/* Discount Badge - Top Left */}
+        <div className="absolute top-2 left-0 z-10">
           <Discount product={product} />
         </div>
+        
+        {/* Stock Badge - Top Right (only show if out of stock) */}
+        {product.stock < 1 && (
+          <div className="absolute top-2 right-2 z-10">
+            <Stock product={product} stock={product.stock} card />
+          </div>
+        )}
+
         {/* Wishlist and Compare buttons - visible on hover on desktop, always on mobile */}
         <div className="absolute top-2 right-2 z-20 flex gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
           <button
@@ -142,6 +150,8 @@ const ProductCard = ({ product, attributes }) => {
             <FiShuffle className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Product Image - Full display, no cover */}
         <div
           onClick={() => {
             router.push(`/product/${product.slug}`);
@@ -150,64 +160,74 @@ const ProductCard = ({ product, attributes }) => {
               `navigated to ${showingTranslateValue(product?.title)} product page`
             );
           }}
-          className="relative flex justify-center cursor-pointer w-full"
+          className="relative flex justify-center items-center cursor-pointer w-full pt-4 px-4 min-h-[280px]"
         >
-          <div className="relative w-full p-0 overflow-hidden rounded-md">
-            <div className="w-full transition-transform duration-500 ease-out transform group-hover:scale-105">
-              {product.image[0] ? (
-                // render intrinsic image so it displays full (not cropped) and takes full width
-                <ImageWithFallback
-                  src={product.image[0]}
-                  alt="product"
-                  width={600}
-                  height={600}
-                  className="w-full h-auto object-contain"
-                />
-              ) : (
-                <Image
-                  src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
-                  width={600}
-                  height={600}
-                  style={{
-                    objectFit: "contain",
-                  }}
-                  sizes="100%"
-                  alt="product"
-                  className="w-full h-auto"
-                />
-              )}
-            </div>
+          <div className="relative w-full h-full flex items-center justify-center">
+            {product.image[0] ? (
+              <ImageWithFallback
+                src={product.image[0]}
+                alt="product"
+                width={300}
+                height={300}
+                className="w-full h-auto max-h-[150px] object-contain"
+                style={{ objectFit: 'contain' }}
+              />
+            ) : (
+              <Image
+                src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+                width={600}
+                height={600}
+                style={{
+                  objectFit: "contain",
+                  maxHeight: "200px"
+                }}
+                sizes="100%"
+                alt="product"
+                className="w-full h-auto"
+              />
+            )}
           </div>
         </div>
-        <div className="w-full px-3 lg:px-4 pb-4 overflow-hidden">
-          <div className="relative mb-1">
-            <span className="text-gray-400 font-medium text-xs d-block mb-1">
-              {product.unit}
-            </span>
-            <h2 className="text-heading truncate mb-0 block text-sm font-medium text-gray-600">
+
+        {/* Product Details */}
+        <div className="w-full px-4 pb-4 overflow-hidden">
+          {/* Product Name */}
+          <div className="relative mb-3">
+            <h2 className="text-heading truncate mb-0 block text-sm font-normal text-gray-600 leading-tight">
               <span className="line-clamp-2">
                 {showingTranslateValue(product?.title)}
               </span>
             </h2>
           </div>
-
-          <div className="flex justify-between items-center text-heading text-sm sm:text-base space-s-2 md:text-base lg:text-xl">
-            <Price
-              card
-              product={product}
-              currency={currency}
-              price={
-                product?.isCombination
+          <hr />
+          {/* Price and Add Button */}
+          <div className="flex justify-between items-end mt-4">
+            {/* Price Section */}
+            <div className="flex flex-col">
+              {(() => {
+                const currentPrice = product?.isCombination
                   ? product?.variants[0]?.price
-                  : product?.prices?.price
-              }
-              originalPrice={
-                product?.isCombination
+                  : product?.prices?.price;
+                const originalPriceValue = product?.isCombination
                   ? product?.variants[0]?.originalPrice
-                  : product?.prices?.originalPrice
-              }
-            />
+                  : product?.prices?.originalPrice;
+                
+                return (
+                  <>
+                    {originalPriceValue > currentPrice && (
+                      <p className="text-xs text-gray-500 mb-1 font-normal">
+                        MRP <span className="line-through">{currency}{getNumberTwo(originalPriceValue)}</span>
+                      </p>
+                    )}
+                    <p className="text-lg font-bold text-gray-900">
+                      {currency}{getNumberTwo(currentPrice)}
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
 
+            {/* Add Button */}
             {inCart(product._id) ? (
               <div>
                 {items.map(
@@ -215,18 +235,18 @@ const ProductCard = ({ product, attributes }) => {
                     item.id === product._id && (
                       <div
                         key={item.id}
-                        className={`lg:h-9 w-auto flex md:flex-row flex-col  items-center justify-evenly py-1 px-2 bg-store-500 text-white rounded`}
+                        className={`h-9 w-auto flex items-center justify-evenly py-1 px-3 bg-store-500 text-white rounded-md`}
                       >
                         <button
                           onClick={() =>
                             updateItemQuantity(item.id, item.quantity - 1)
                           }
                         >
-                          <span className="text-dark text-base">
+                          <span className="text-white text-base">
                             <IoRemove />
                           </span>
                         </button>
-                        <p className="text-sm text-dark px-1 font-serif font-semibold">
+                        <p className="text-sm text-white px-2 font-serif font-semibold">
                           {item.quantity}
                         </p>
                         <button
@@ -236,23 +256,26 @@ const ProductCard = ({ product, attributes }) => {
                               : handleIncreaseQuantity(item)
                           }
                         >
-                          <span className="text-dark text-base">
+                          <span className="text-white text-base">
                             <IoAdd />
                           </span>
                         </button>
                       </div>
                     )
-                )}{" "}
+                )}
               </div>
-              ) : (
+            ) : (
               <button
                 onClick={() => handleAddItem(product)}
-                aria-label="cart"
-                className={`h-9 w-9 flex items-center justify-center border border-gray-200 rounded text-store-500 hover:border-store-500 hover:bg-store-500 hover:text-white transition transform hover:scale-110 duration-200`}
+                aria-label="Add to cart"
+                className={`h-9 px-10 min-w-[80px] flex items-center justify-center bg-blue-100 text-blue-700 border border-blue-300 rounded-md font-medium text-sm hover:bg-blue-200 transition-colors`}
+                style={{
+                  backgroundColor: `var(--store-color-50)`,
+                  color: `var(--store-color-700)`,
+                  borderColor: `var(--store-color-300)`
+                }}
               >
-                <span className="text-xl">
-                  <IoBagAddSharp />
-                </span>
+                Add
               </button>
             )}
           </div>

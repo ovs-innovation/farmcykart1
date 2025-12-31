@@ -20,27 +20,26 @@ const Discount = ({ discount, product, slug, modal }) => {
         <span
           className={
             modal
-              ? "absolute text-dark text-sm bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 left-4 top-4"
+              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
               : slug
-              ? "text-dark text-sm bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 left-0 top-4"
-              : "absolute text-dark text-xs bg-orange-500 text-white py-1 px-2 rounded font-medium z-10"
+              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              : "absolute text-xs bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
           }
         >
-          {discount}% Off
+          {discount}% OFF
         </span>
       )}
       {discount === undefined && discountPercentage > 1 && (
         <span
           className={
             modal
-              ? "absolute text-dark text-sm bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 left-4 top-4"
+              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
               : slug
-              ? "text-dark text-sm bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 left-0 top-4"
-              : "absolute text-dark text-xs bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 right-0 top-0"
+              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              : "absolute text-xs bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
           }
         >
-          {/* {Number(product.prices.discount).toFixed(0)}% Off */}
-          {discountPercentage} % Off
+          {discountPercentage}% OFF
         </span>
       )}
     </>

@@ -62,7 +62,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const { isLoading, setIsLoading } = useContext(SidebarContext);
   const { handleAddItem, item, setItem } = useAddToCart();
   const { setItems, addItem } = useCart();
-  const { storeCustomizationSetting } = useGetSetting();
+  const { storeCustomizationSetting, globalSetting } = useGetSetting();
 
   // react hook
 
@@ -94,6 +94,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [activeTab, setActiveTab] = useState("product-description");
+  const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
 
   // Simple stock derivation to avoid infinite variant loops
   useEffect(() => {
@@ -665,7 +666,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     setIsLoading(false);
   }, [product]);
 
-  // Scroll spy to update active tab
+  // Scroll spy to update active tab and show/hide sticky bottom bar
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
@@ -683,6 +684,17 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       // Desktop: Header (~100px) + Tabs (~60px) + Buffer = ~180px
       // Mobile: Header (~64px) + Tabs (~60px) + Buffer = ~140px
       const offset = isDesktop ? 180 : 140;
+      
+      // Check if product-description section is reached to show sticky bottom bar (mobile only)
+      const productDescriptionElement = document.getElementById("product-description");
+      if (productDescriptionElement && !isDesktop) {
+        const rect = productDescriptionElement.getBoundingClientRect();
+        // Show sticky bottom bar when product description section reaches top
+        const shouldShowSticky = rect.top <= offset;
+        setShowStickyBottomBar(shouldShowSticky);
+      } else {
+        setShowStickyBottomBar(false);
+      }
       
       for (const sectionId of sections) {
         const element = document.getElementById(sectionId);
@@ -702,6 +714,21 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Scroll active tab into view when it changes
+  useEffect(() => {
+    const tabContainer = document.querySelector('.tab-navigation-container');
+    if (!tabContainer || !activeTab) return;
+
+    const activeButton = tabContainer.querySelector(`[data-tab="${activeTab}"]`);
+    if (activeButton) {
+      activeButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [activeTab]);
 
   const handleAddToCart = (p) => {
     if (stock <= 0) return notifyError("Insufficient stock");
@@ -1127,7 +1154,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                             </div>
                           )}
 
-                          <p className="uppercase font-serif font-medium text-gray-500 text-sm">
+                          {/* <p className="uppercase font-serif font-medium text-gray-500 text-sm">
                             SKU :{" "}
                             <span className="font-bold text-gray-600">
                               {product.sku}
@@ -1140,7 +1167,35 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                 {product.hsnCode}
                               </span>
                             </p>
-                          )}
+                          )} */}
+                          <div className="text-sm leading-6 text-gray-500 md:leading-7">
+                            {(() => {
+                              const descriptionText = dynamicDescription || showingTranslateValue(product?.description);
+                              const displayText = isReadMore 
+                                ? (descriptionText?.slice(0, 230) || "")
+                                : (descriptionText || "");
+                              const textLength = descriptionText?.length || 0;
+                              
+                              return (
+                                <>
+                                  {displayText}
+                                  {textLength > 230 && (
+                                    <>
+                                      <br />
+                                      <span
+                                        onClick={() => setIsReadMore(!isReadMore)}
+                                        className="read-or-hide cursor-pointer text-store-600 hover:text-store-700"
+                                      >
+                                        {isReadMore
+                                          ? t("moreInfo")
+                                          : t("showLess")}
+                                      </span>
+                                    </>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
 
                           <div className="relative">
                             <Stock stock={stock} />
@@ -1240,34 +1295,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                       
 
                         <div>
-                          <div className="text-sm leading-6 text-gray-500 md:leading-7">
-                            {(() => {
-                              const descriptionText = dynamicDescription || showingTranslateValue(product?.description);
-                              const displayText = isReadMore 
-                                ? (descriptionText?.slice(0, 230) || "")
-                                : (descriptionText || "");
-                              const textLength = descriptionText?.length || 0;
-                              
-                              return (
-                                <>
-                                  {displayText}
-                                  {textLength > 230 && (
-                                    <>
-                                      <br />
-                                      <span
-                                        onClick={() => setIsReadMore(!isReadMore)}
-                                        className="read-or-hide cursor-pointer text-store-600 hover:text-store-700"
-                                      >
-                                        {isReadMore
-                                          ? t("moreInfo")
-                                          : t("showLess")}
-                                      </span>
-                                    </>
-                                  )}
-                                </>
-                              );
-                            })()}
-                          </div>
+                          
                           <div className="flex flex-col mt-4">
                             <span className="font-serif font-semibold py-1 text-sm d-block">
                               <span className="text-gray-800">
@@ -1420,14 +1448,37 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
                           {/* Tab Navigation */}
                           <div className="sticky top-16 lg:top-[100px] z-10 bg-store-50 mt-10 mb-6 py-2 shadow-sm">
-                            <div className="flex flex-wrap gap-2 border-b border-gray-200 overflow-x-auto">
+                            <style jsx global>{`
+                              .tab-navigation-container {
+                                scrollbar-width: thin !important;
+                                scrollbar-color: #cbd5e1 #f1f5f9 !important;
+                                overflow-x: auto !important;
+                              }
+                              .tab-navigation-container::-webkit-scrollbar {
+                                height: 6px !important;
+                                display: block !important;
+                              }
+                              .tab-navigation-container::-webkit-scrollbar-track {
+                                background: #f1f5f9 !important;
+                                border-radius: 3px !important;
+                              }
+                              .tab-navigation-container::-webkit-scrollbar-thumb {
+                                background: #cbd5e1 !important;
+                                border-radius: 3px !important;
+                              }
+                              .tab-navigation-container::-webkit-scrollbar-thumb:hover {
+                                background: #94a3b8 !important;
+                              }
+                            `}</style>
+                            <div className="flex gap-2 border-b border-gray-200 overflow-x-auto tab-navigation-container pb-1" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #f1f5f9' }}>
                               {product?.productDescription?.enabled !== false && (
                                 <button
+                                  data-tab="product-description"
                                   onClick={() => {
                                     setActiveTab("product-description");
                                     document.getElementById("product-description")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "product-description"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1438,11 +1489,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {product?.dynamicSections?.some(s => s?.name?.toLowerCase().includes("specification")) && (
                                 <button
+                                  data-tab="specification"
                                   onClick={() => {
                                     setActiveTab("specification");
                                     document.getElementById("specification")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "specification"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1453,11 +1505,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {product?.keyUses?.enabled !== false && product?.keyUses?.items?.length > 0 && (
                                 <button
+                                  data-tab="key-uses"
                                   onClick={() => {
                                     setActiveTab("key-uses");
                                     document.getElementById("key-uses")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "key-uses"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1468,11 +1521,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {product?.howToUse?.enabled !== false && product?.howToUse?.items?.length > 0 && (
                                 <button
+                                  data-tab="how-to-use"
                                   onClick={() => {
                                     setActiveTab("how-to-use");
                                     document.getElementById("how-to-use")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "how-to-use"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1483,11 +1537,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {product?.safetyInformation?.enabled !== false && product?.safetyInformation?.items?.length > 0 && (
                                 <button
+                                  data-tab="safety-information"
                                   onClick={() => {
                                     setActiveTab("safety-information");
                                     document.getElementById("safety-information")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "safety-information"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1498,11 +1553,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {product?.additionalInformation?.enabled !== false && product?.additionalInformation?.subsections?.length > 0 && (
                                 <button
+                                  data-tab="additional-information"
                                   onClick={() => {
                                     setActiveTab("additional-information");
                                     document.getElementById("additional-information")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "additional-information"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1513,11 +1569,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               )}
                               {productFaqs.length > 0 && (
                                 <button
+                                  data-tab="faq"
                                   onClick={() => {
                                     setActiveTab("faq");
                                     document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
                                   }}
-                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                                     activeTab === "faq"
                                       ? "border-store-600 text-store-600"
                                       : "border-transparent text-gray-600 hover:text-store-500"
@@ -1674,6 +1731,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                             isVariantSpecific={!!variantDynamicSections}
                           />
 
+
                           {/* FAQ Section */}
                           {productFaqs.length > 0 && (
                             <div id="faq" className="mt-8 scroll-mt-20 border border-gray-200 rounded-lg p-6 bg-white">
@@ -1683,10 +1741,11 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   : t("frequentlyAskedQuestions") ||
                                     "Frequently Asked Questions (FAQs)")}
                               </h3>
-                              <div className="divide-y divide-gray-200 border border-gray-100 rounded-2xl overflow-hidden">
+                              <div className="overflow-hidden">
                                 {productFaqs.map((faq, index) => {
                                   const isOpen = activeFaqIndex === index;
                                   const questionLabel = `Q${index + 1}`;
+                                  const isLast = index === productFaqs.length - 1;
                                   return (
                                     <div key={`${faq.question}-${index}`} className="bg-white">
                                       <button
@@ -1694,7 +1753,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                         onClick={() =>
                                           setActiveFaqIndex(isOpen ? null : index)
                                         }
-                                        className="w-full flex items-center justify-between text-left px-5 py-4 focus:outline-none"
+                                        className={`w-full flex items-center justify-between text-left px-5 py-4 focus:outline-none ${!isLast ? 'border-b border-gray-200' : ''}`}
                                       >
                                         <span className="text-base font-semibold text-gray-900 flex items-start gap-2">
                                           <span className="text-store-600 font-bold">
@@ -1720,6 +1779,147 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     </div>
                                   );
                                 })}
+                              </div>
+                            </div>
+                          )}
+
+                          
+                          {/* Manufacturer Details Section */}
+                          {product?.manufacturerDetails?.enabled !== false && product?.manufacturerDetails?.items?.length > 0 && (
+                            <div className="mt-8 p-6 bg-white">
+                              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                {product?.manufacturerDetails?.title || "Manufacturer details"}
+                              </h3>
+                              <div className="space-y-2 text-sm text-gray-600">
+                                {product.manufacturerDetails.items.map((item, idx) => (
+                                  <p key={idx} className="leading-relaxed">
+                                    {item}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Disclaimer Section */}
+                          {product?.disclaimer?.enabled !== false && product?.disclaimer?.description && (
+                            <div className="mt-2 p-6 bg-white">
+                              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                {product?.disclaimer?.title || "Disclaimer"}
+                              </h3>
+                              <div className="text-sm text-gray-600 leading-relaxed text-justify">
+                                <p className="leading-relaxed">
+                                  {typeof product.disclaimer.description === 'object' && product.disclaimer.description !== null
+                                    ? showingTranslateValue(product.disclaimer.description)
+                                    : product.disclaimer.description}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Contact Section */}
+                          {/* <div className="mt-4 p-6 bg-white">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">
+                              In case of any issues, contact us:
+                            </h3>
+                            <div className="space-y-2 text-sm text-gray-600">
+                              {(() => {
+                                // Try storeCustomizationSetting first, then fallback to globalSetting
+                                // Get email - handle both translated object and plain string
+                                const emailRaw = storeCustomizationSetting?.contact_us?.email_box_email || globalSetting?.email;
+                                const email = emailRaw 
+                                  ? (typeof emailRaw === 'object' && emailRaw !== null && !Array.isArray(emailRaw) ? showingTranslateValue(emailRaw) : (typeof emailRaw === 'string' ? emailRaw : ""))
+                                  : "";
+                                
+                                // Get phone - handle both translated object and plain string
+                                const phoneRaw = storeCustomizationSetting?.contact_us?.call_box_phone || globalSetting?.contact;
+                                const phone = phoneRaw 
+                                  ? (typeof phoneRaw === 'object' && phoneRaw !== null && !Array.isArray(phoneRaw) ? showingTranslateValue(phoneRaw) : (typeof phoneRaw === 'string' ? phoneRaw : ""))
+                                  : "";
+                                
+                                // Get address - handle both translated object and plain string
+                                const addressRaw = storeCustomizationSetting?.contact_us?.address_box_address_one || globalSetting?.address;
+                                const address = addressRaw 
+                                  ? (typeof addressRaw === 'object' && addressRaw !== null && !Array.isArray(addressRaw) ? showingTranslateValue(addressRaw) : (typeof addressRaw === 'string' ? addressRaw : ""))
+                                  : "";
+                                
+                                return (
+                                  <>
+                                    {(email || phone) ? (
+                                      <p className="leading-relaxed">
+                                        {email && (
+                                          <a href={`mailto:${email}`} className="text-blue-600 hover:text-blue-800">
+                                            {email}
+                                          </a>
+                                        )}
+                                        {email && phone && " | "}
+                                        {phone && (
+                                          <a href={`tel:${phone}`} className="text-blue-600 hover:text-blue-800">
+                                            {phone}
+                                          </a>
+                                        )}
+                                      </p>
+                                    ) : null}
+                                    {address ? (
+                                      <p className="leading-relaxed">
+                                        Address: {address}
+                                      </p>
+                                    ) : null}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </div> */}
+
+                          {/* Sticky Bottom Bar - Shows when scrolling down (Mobile only) */}
+                          {showStickyBottomBar && (
+                            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg lg:hidden">
+                              <div className="max-w-screen-2xl mx-auto px-4 py-3">
+                                <div className="flex items-center justify-between gap-4">
+                                  {/* Product Name and Price */}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
+                                      {dynamicTitle || showingTranslateValue(product?.title)}
+                                    </h3>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <Price
+                                        price={
+                                          price > 0
+                                            ? price
+                                            : getNumber(
+                                                (product?.variants?.[0]?.price ??
+                                                  product?.prices?.price) || 0
+                                              )
+                                        }
+                                        product={product}
+                                        currency={currency}
+                                        originalPrice={
+                                          originalPrice > 0
+                                            ? originalPrice
+                                            : getNumber(
+                                                (product?.variants?.[0]?.originalPrice ??
+                                                  product?.prices?.originalPrice ??
+                                                  product?.variants?.[0]?.price ??
+                                                  product?.prices?.price) || 0
+                                              )
+                                        }
+                                        card
+                                      />
+                                      {discount > 0 && (
+                                        <span className="text-xs font-semibold text-green-600">
+                                          {discount}% OFF
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {/* Add To Cart Button */}
+                                  <button
+                                    onClick={() => handleAddToCart(product)}
+                                    type="button"
+                                    className="flex-shrink-0 h-10 px-6 rounded-md text-sm font-semibold flex items-center justify-center bg-store-500 text-white hover:bg-store-600 transition-colors"
+                                  >
+                                    {t("AddToCart")}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           )}

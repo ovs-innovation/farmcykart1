@@ -2644,10 +2644,10 @@ const ProductDrawer = ({ id }) => {
                             <div key={subIdx} className="border border-gray-300 rounded-lg p-4 bg-white">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex-1 mr-2">
-                                  <Input
+                              <Input
                                     placeholder="Sub-section Label (e.g., Good to Know, Quick Tips)"
                                     value={subsection.label || ""}
-                                    onChange={(e) => {
+                                onChange={(e) => {
                                       const newSubsections = [...additionalInformation.subsections];
                                       newSubsections[subIdx].label = e.target.value;
                                       setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
@@ -2659,7 +2659,7 @@ const ProductDrawer = ({ id }) => {
                                   onClick={() => {
                                     const newSubsections = additionalInformation.subsections.filter((_, i) => i !== subIdx);
                                     setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
-                                  }}
+                                }}
                                   className="text-red-500 hover:text-red-700 ml-2"
                                 >
                                   <FiTrash2 size={20} />
@@ -2669,31 +2669,31 @@ const ProductDrawer = ({ id }) => {
                                 <LabelArea label="Items" />
                                 {subsection.items?.map((item, itemIdx) => (
                                   <div key={itemIdx} className="flex gap-2 items-center">
-                                    <Input
+                              <Input
                                       placeholder="Item text"
                                       value={item || ""}
-                                      onChange={(e) => {
+                                onChange={(e) => {
                                         const newSubsections = [...additionalInformation.subsections];
                                         newSubsections[subIdx].items[itemIdx] = e.target.value;
                                         setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
-                                      }}
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => {
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
                                         const newSubsections = [...additionalInformation.subsections];
                                         newSubsections[subIdx].items = newSubsections[subIdx].items.filter((_, i) => i !== itemIdx);
                                         setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
-                                      }}
-                                      className="text-red-500 hover:text-red-700"
-                                    >
-                                      <FiTrash2 />
-                                    </button>
-                                  </div>
-                                ))}
-                                <Button
-                                  type="button"
-                                  size="small"
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            size="small"
                                   onClick={() => {
                                     const newSubsections = [...additionalInformation.subsections];
                                     if (!newSubsections[subIdx].items) {
@@ -2702,8 +2702,8 @@ const ProductDrawer = ({ id }) => {
                                     newSubsections[subIdx].items = [...newSubsections[subIdx].items, ""];
                                     setAdditionalInformation({ ...additionalInformation, subsections: newSubsections });
                                   }}
-                                >
-                                  Add Item
+                          >
+                            Add Item
                                 </Button>
                               </div>
                             </div>
