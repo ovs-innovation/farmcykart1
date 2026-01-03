@@ -11,6 +11,9 @@ const CustomerServices = {
   verifyPhoneNumber: async (body) => {
     return requests.post("/customer/verify-phone", body);
   },
+  loginWithPhone: async (body) => {
+    return requests.post("/customer/login-phone", body);
+  },
 
   registerCustomer: async (token, body) => {
     return requests.post(`/customer/register/${token}`, body);
