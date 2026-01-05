@@ -307,6 +307,13 @@ const sanitizeFaqSection = (faqSection = {}) => {
 
 const addProduct = async (req, res) => {
   try {
+    if (req.body.prices) {
+      const originalPrice = Number(req.body.prices.originalPrice) || 0;
+      const discount = Number(req.body.prices.discount) || 0;
+      const discountAmount = (originalPrice * discount) / 100;
+      req.body.prices.price = originalPrice - discountAmount;
+    }
+
     const taxFields = normalizeTaxPayload(req.body);
 
     const payload = {
@@ -491,6 +498,13 @@ const updateProduct = async (req, res) => {
   // console.log('update product')
   // console.log('variant',req.body.variants)
   try {
+    if (req.body.prices) {
+      const originalPrice = Number(req.body.prices.originalPrice) || 0;
+      const discount = Number(req.body.prices.discount) || 0;
+      const discountAmount = (originalPrice * discount) / 100;
+      req.body.prices.price = originalPrice - discountAmount;
+    }
+
     const product = await Product.findById(req.params.id);
     // console.log("product", product);
 

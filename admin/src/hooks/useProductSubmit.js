@@ -131,10 +131,10 @@ const useProductSubmit = (id) => {
       setIsSubmitting(true);
       if (!imageUrl) return notifyError("Image is required!");
 
-      if (data.originalPrice < data.price) {
+      if (Number(data.discount) > Number(data.originalPrice)) {
         setIsSubmitting(false);
         return notifyError(
-          "Sale Price must be less then or equal of product price!"
+          "Discount must be less then or equal of product price!"
         );
       }
       if (!defaultCategory[0]) {
@@ -148,7 +148,7 @@ const useProductSubmit = (id) => {
       const updatedVariants = variantsWithSku.map((v, i) => {
         const newObj = {
           ...v,
-          price: getNumberTwo(v?.price),
+          price: getNumberTwo(v?.originalPrice) - getNumberTwo(v?.discount),
           originalPrice: getNumberTwo(v?.originalPrice),
           discount: getNumberTwo(v?.discount),
           quantity: Number(v?.quantity || 0),
@@ -157,7 +157,7 @@ const useProductSubmit = (id) => {
       });
 
       setIsBasicComplete(true);
-      setPrice(data.price);
+      setPrice(getNumberTwo(data.originalPrice) - getNumber(data.discount));
       setQuantity(data.stock);
       setBarcode(data.barcode);
       setSku(data.sku);
@@ -308,9 +308,9 @@ const useProductSubmit = (id) => {
         tag: JSON.stringify(tag),
 
         prices: {
-          price: getNumber(data.price),
+          price: getNumberTwo(data.originalPrice) - getNumber(data.discount),
           originalPrice: getNumberTwo(data.originalPrice),
-          discount: Number(data.originalPrice) - Number(data.price),
+          discount: getNumber(data.discount),
         },
         isCombination: updatedVariants?.length > 0 ? isCombination : false,
         variants: isCombination ? updatedVariants : [],
@@ -451,7 +451,7 @@ const useProductSubmit = (id) => {
       setValue("quantity");
       setValue("stock");
       setValue("originalPrice");
-      setValue("price");
+      setValue("discount");
       setValue("barcode");
       setValue("productId");
       setValue("hsnCode", "");
@@ -483,7 +483,7 @@ const useProductSubmit = (id) => {
       clearErrors("quantity");
       setValue("stock", 0);
       setValue("costPrice", 0);
-      setValue("price", 0);
+      setValue("discount", 0);
       setValue("originalPrice", 0);
       clearErrors("show");
       clearErrors("barcode");
@@ -535,7 +535,7 @@ const useProductSubmit = (id) => {
             setValue("barcode", res.barcode);
             setValue("stock", res.stock);
             setValue("productId", res.productId);
-            setValue("price", res?.prices?.price);
+            setValue("discount", res?.prices?.discount);
             setValue("originalPrice", res?.prices?.originalPrice);
             setValue("stock", res.stock);
             setValue("hsnCode", res?.hsnCode || "");
@@ -1394,22 +1394,14 @@ const useProductSubmit = (id) => {
     //   "variant",
     //   variant
     // );
-    if (name === "originalPrice" && Number(value) < Number(variant.price)) {
-      // variants[id][name] = Number(variant.originalPrice);
-      notifyError("Price must be more then or equal of originalPrice!");
-      setValue("originalPrice", variant.originalPrice);
+    if (name === "discount" && Number(value) > 100) {
+      notifyError("Discount percentage cannot be more than 100!");
+      setValue("discount", 0);
       setIsBulkUpdate(true);
       const timeOutId = setTimeout(() => setIsBulkUpdate(false), 100);
       return () => clearTimeout(timeOutId);
     }
-    if (name === "price" && Number(variant.originalPrice) < Number(value)) {
-      // variants[id][name] = Number(variant.originalPrice);
-      notifyError("Sale Price must be less then or equal of product price!");
-      setValue("price", variant.originalPrice);
-      setIsBulkUpdate(true);
-      const timeOutId = setTimeout(() => setIsBulkUpdate(false), 100);
-      return () => clearTimeout(timeOutId);
-    }
+
     setVariants((pre) =>
       pre.map((com, i) => {
         if (i === id) {
@@ -1418,13 +1410,13 @@ const useProductSubmit = (id) => {
             [name]: Math.round(value),
           };
 
-          if (name === "price") {
-            updatedCom.price = getNumberTwo(value);
-            updatedCom.discount = Number(variant.originalPrice) - Number(value);
+          if (name === "discount") {
+            updatedCom.discount = getNumberTwo(value);
+            updatedCom.price = Number(variant.originalPrice) - (Number(variant.originalPrice) * Number(value) / 100);
           }
           if (name === "originalPrice") {
             updatedCom.originalPrice = getNumberTwo(value);
-            updatedCom.discount = Number(value) - Number(variant.price);
+            updatedCom.price = Number(value) - (Number(value) * Number(variant.discount) / 100);
           }
 
           return updatedCom;

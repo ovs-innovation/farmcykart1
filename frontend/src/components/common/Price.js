@@ -6,6 +6,7 @@ const Price = ({
   card,
   currency,
   originalPrice,
+  discount,
   showTaxLabel,
 }) => {
   // console.log("price", price, "originalPrice", originalPrice, "card", card);
@@ -45,6 +46,15 @@ const Price = ({
                 {currency}
                 {getNumberTwo(originalPrice)}
               </del>
+              <span
+                className={
+                  card
+                    ? "block text-green-600 text-xs font-bold"
+                    : "inline-block text-green-600 text-sm font-bold ml-2"
+                }
+              >
+                {currency}{getNumberTwo(discount)} Off
+              </span>
             </>
           ) : null}
         </>
@@ -72,6 +82,15 @@ const Price = ({
                 {currency}
                 {getNumberTwo(originalPrice)}
               </del>
+              <span
+                className={
+                  card
+                    ? "block text-green-600 text-xs font-bold"
+                    : "inline-block text-green-600 text-sm font-bold ml-2"
+                }
+              >
+                {currency}{getNumberTwo(discount)} Off
+              </span>
             </>
           ) : null}
         </>

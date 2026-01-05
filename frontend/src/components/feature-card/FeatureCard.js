@@ -48,16 +48,16 @@ const FeatureCard = () => {
       {featurePromo.map((promo) => (
         <div
           key={promo.id}
-          className=" border-r border-gray-200 py-1 flex items-center justify-center bg-white"
+          className=" border-r border-store-400 py-1 flex items-center justify-center bg-transparent"
         >
           <div className="mr-3">
             <promo.icon
-              className={`flex-shrink-0 h-4 w-4 text-store-600`}
+              className={`flex-shrink-0 h-4 w-4 text-white`}
               aria-hidden="true"
             />
           </div>
           <div className="">
-            <span className="block font-serif text-sm font-medium leading-5">
+            <span className="block font-serif text-sm font-medium leading-5 text-white">
               {promo?.title}
             </span>
           </div>

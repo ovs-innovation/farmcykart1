@@ -65,9 +65,9 @@ const Home = ({ popularProducts, discountProducts, attributes, brands }) => {
 
             {/* feature category's */}
             {storeCustomizationSetting?.home?.featured_status && (
-              <div className="bg-gray-100 lg:py-16 py-10">
+              <div className="bg-white lg:py-16 py-10">
                 <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-                  {/* <div className="mb-10 flex justify-center">
+                  <div className="mb-10 flex justify-center">
                     <div className="text-center w-full lg:w-2/5">
                       <h2 className="text-xl lg:text-2xl mb-2 font-serif font-semibold">
                         <CMSkeleton
@@ -89,14 +89,14 @@ const Home = ({ popularProducts, discountProducts, attributes, brands }) => {
                         />
                       </p>
                     </div>
-                  </div> */}
+                  </div>
 
-                  <FeatureCategory />
+                  <FeatureCategory attributes={attributes} />
                 </div>
               </div>
             )}
 
-            {brands?.length > 0 && <BrandSection brands={brands} />}
+
 
             {/* popular products */}
             {storeCustomizationSetting?.home?.popular_products_status && (
@@ -134,7 +134,7 @@ const Home = ({ popularProducts, discountProducts, attributes, brands }) => {
                         loading={loading}
                       />
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-2 md:gap-3 lg:gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-3">
                         {popularProducts
                           ?.slice(
                             0,
@@ -254,7 +254,7 @@ const Home = ({ popularProducts, discountProducts, attributes, brands }) => {
                           loading={loading}
                         />
                       ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-2 md:gap-3 lg:gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-3">
                           {discountProducts
                             ?.slice(
                               0,

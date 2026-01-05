@@ -6,13 +6,22 @@ const Discount = ({ discount, product, slug, modal }) => {
   const price = product?.isCombination
     ? getNumber(product?.variants[0]?.price)
     : getNumber(product?.prices?.price);
-  const originalPrice = product?.isCombination
+  
+  const discountVal = product?.isCombination
+    ? getNumber(product?.variants[0]?.discount)
+    : getNumber(product?.prices?.discount);
+
+  let originalPrice = product?.isCombination
     ? getNumber(product?.variants[0]?.originalPrice)
     : getNumber(product?.prices?.originalPrice);
 
-  const discountPercentage = getNumber(
+  if (!originalPrice && discountVal) {
+    originalPrice = price + discountVal;
+  }
+
+  const discountPercentage = originalPrice > 0 ? getNumber(
     ((originalPrice - price) / originalPrice) * 100
-  );
+  ) : 0;
 
   return (
     <>

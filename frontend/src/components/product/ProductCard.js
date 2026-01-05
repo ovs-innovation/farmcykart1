@@ -19,7 +19,7 @@ import ImageWithFallback from "@components/common/ImageWithFallBack";
 import { handleLogEvent } from "src/lib/analytics";
 import { addToWishlist } from "@lib/wishlist";
 
-const ProductCard = ({ product, attributes }) => {
+const ProductCard = ({ product, attributes, hidePriceAndAdd = false }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const { items, addItem, updateItemQuantity, inCart, getItem } = useCart();
@@ -120,35 +120,16 @@ const ProductCard = ({ product, attributes }) => {
         />
       )}
 
-  <div className="group box-border max-w-[270px] overflow-hidden flex rounded-lg border border-gray-200 flex-col items-center bg-white relative shadow-lg transition-shadow duration-300 hover:shadow-lg">
-        {/* Discount Badge - Top Left */}
-        <div className="absolute top-2 left-0 z-10">
-          <Discount product={product} />
-        </div>
+  <div className="group box-border max-w-[270px] overflow-hidden flex rounded-lg border border-gray-200 flex-col items-center bg-white relative transition-shadow duration-300">
         
-        {/* Stock Badge - Top Right (only show if out of stock) */}
-        {product.stock < 1 && (
-          <div className="absolute top-2 right-2 z-10">
-            <Stock product={product} stock={product.stock} card />
-          </div>
-        )}
-
-        {/* Wishlist and Compare buttons - visible on hover on desktop, always on mobile */}
-        <div className="absolute top-2 right-2 z-20 flex gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={handleAddToWishlist}
-            className={`p-2 bg-white rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors`}
-            aria-label="Add to wishlist"
+        {/* Product Name - Moved to top */}
+        <div className="w-full px-4 pt-4 pb-1">
+          <h2 
+            className="text-heading mb-0 block text-sm font-normal text-gray-600 leading-tight line-clamp-2" 
+            title={showingTranslateValue(product?.title)}
           >
-            <FiHeart className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleAddToCompare}
-            className={`p-2 bg-white rounded-full shadow-md hover:bg-purple-500 hover:text-white transition-colors`}
-            aria-label="Add to compare"
-          >
-            <FiShuffle className="w-4 h-4" />
-          </button>
+            {showingTranslateValue(product?.title)}
+          </h2>
         </div>
 
         {/* Product Image - Full display, no cover */}
@@ -160,8 +141,38 @@ const ProductCard = ({ product, attributes }) => {
               `navigated to ${showingTranslateValue(product?.title)} product page`
             );
           }}
-          className="relative flex justify-center items-center cursor-pointer w-full pt-4 px-4 min-h-[280px]"
+          className="relative flex justify-center items-center cursor-pointer w-full p-2 min-h-[200px]"
         >
+          {/* Discount Badge - Bottom Left */}
+          <div className="absolute bottom-10 left-0 z-10">
+            <Discount product={product} />
+          </div>
+          
+          {/* Stock Badge - Top Right (only show if out of stock) */}
+          {product.stock < 1 && (
+            <div className="absolute top-2 right-2 z-10">
+              <Stock product={product} stock={product.stock} card />
+            </div>
+          )}
+
+          {/* Wishlist and Compare buttons - visible on hover on desktop, always on mobile */}
+          <div className="absolute bottom-0 right-2 z-20 flex gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={handleAddToWishlist}
+              className={`p-2 bg-white rounded-full shadow-md hover:bg-red-500 hover:text-white transition-colors`}
+              aria-label="Add to wishlist"
+            >
+              <FiHeart className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleAddToCompare}
+              className={`p-2 bg-white rounded-full shadow-md hover:bg-purple-500 hover:text-white transition-colors`}
+              aria-label="Add to compare"
+            >
+              <FiShuffle className="w-4 h-4" />
+            </button>
+          </div>
+
           <div className="relative w-full h-full flex items-center justify-center">
             {product.image[0] ? (
               <ImageWithFallback
@@ -169,17 +180,17 @@ const ProductCard = ({ product, attributes }) => {
                 alt="product"
                 width={300}
                 height={300}
-                className="w-full h-auto max-h-[150px] object-contain"
+                className="w-full h-auto max-h-[180px] object-contain"
                 style={{ objectFit: 'contain' }}
               />
             ) : (
               <Image
                 src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
-                width={600}
-                height={600}
+                width={300}
+                height={300}
                 style={{
                   objectFit: "contain",
-                  maxHeight: "200px"
+                  maxHeight: "180px"
                 }}
                 sizes="100%"
                 alt="product"
@@ -191,16 +202,9 @@ const ProductCard = ({ product, attributes }) => {
 
         {/* Product Details */}
         <div className="w-full px-4 pb-4 overflow-hidden">
-          {/* Product Name */}
-          <div className="relative mb-3">
-            <h2 className="text-heading truncate mb-0 block text-sm font-normal text-gray-600 leading-tight">
-              <span className="line-clamp-2">
-                {showingTranslateValue(product?.title)}
-              </span>
-            </h2>
-          </div>
           <hr />
           {/* Price and Add Button */}
+          {!hidePriceAndAdd && (
           <div className="flex justify-between items-end mt-4">
             {/* Price Section */}
             <div className="flex flex-col">
@@ -208,9 +212,18 @@ const ProductCard = ({ product, attributes }) => {
                 const currentPrice = product?.isCombination
                   ? product?.variants[0]?.price
                   : product?.prices?.price;
-                const originalPriceValue = product?.isCombination
+                
+                const discount = product?.isCombination
+                  ? product?.variants[0]?.discount
+                  : product?.prices?.discount;
+
+                let originalPriceValue = product?.isCombination
                   ? product?.variants[0]?.originalPrice
                   : product?.prices?.originalPrice;
+
+                if (!originalPriceValue && discount) {
+                  originalPriceValue = (currentPrice || 0) + (discount || 0);
+                }
                 
                 return (
                   <>
@@ -281,6 +294,7 @@ const ProductCard = ({ product, attributes }) => {
               </button>
             )}
           </div>
+          )}
         </div>
       </div>
     </>

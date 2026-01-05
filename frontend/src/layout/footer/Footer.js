@@ -16,6 +16,7 @@ import { getUserSession } from "@lib/auth";
 import useGetSetting from "@hooks/useGetSetting";
 import CMSkeleton from "@components/preloader/CMSkeleton";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import FeatureCard from "@components/feature-card/FeatureCard";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -42,12 +43,15 @@ const Footer = () => {
   };
 
   return (
-    <div className="pb-16 lg:pb-0 xl:pb-0 bg-white">
+    <div className="pb-16 lg:pb-0 xl:pb-0 bg-store-500 text-white rounded-t-[30px] lg:rounded-t-[120px]">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-10">
+        <div className="  py-6 border-b border-store-400">
+           <FeatureCard />
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-7 xl:grid-cols-12 gap-5 sm:gap-9 lg:gap-11 xl:gap-7 py-10 lg:py-16 justify-between">
           {storeCustomizationSetting?.footer?.block1_status && (
             <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
+              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5 text-white">
                 <CMSkeleton
                   count={1}
                   height={20}
@@ -59,7 +63,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <SafeLink
                     href={storeCustomizationSetting?.footer?.block1_sub_link1}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -74,7 +78,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <SafeLink
                     href={storeCustomizationSetting?.footer?.block1_sub_link2}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -89,7 +93,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <SafeLink
                     href={storeCustomizationSetting?.footer?.block1_sub_link3}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     {showingTranslateValue(
                       storeCustomizationSetting?.footer_block_one_link_three_title
@@ -107,7 +111,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <SafeLink
                     href={storeCustomizationSetting?.footer?.block1_sub_link4}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -124,7 +128,7 @@ const Footer = () => {
           )}
           {storeCustomizationSetting?.footer?.block2_status && (
             <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
+              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5 text-white">
                 <CMSkeleton
                   count={1}
                   height={20}
@@ -136,7 +140,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link1}`}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -152,7 +156,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link2}`}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -167,7 +171,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link3}`}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -182,7 +186,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link4}`}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -199,7 +203,7 @@ const Footer = () => {
           )}
           {storeCustomizationSetting?.footer?.block3_status && (
             <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
+              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5 text-white">
                 <CMSkeleton
                   count={1}
                   height={20}
@@ -211,7 +215,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={storeCustomizationSetting?.footer?.block3_sub_link1}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -226,7 +230,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={storeCustomizationSetting?.footer?.block3_sub_link2}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -241,7 +245,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={storeCustomizationSetting?.footer?.block3_sub_link3}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -256,7 +260,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={storeCustomizationSetting?.footer?.block3_sub_link4}
-                    className={`text-gray-600 inline-block w-full hover:text-store-500`}
+                    className={`text-gray-100 inline-block w-full hover:text-white`}
                   >
                     <CMSkeleton
                       count={1}
@@ -292,7 +296,7 @@ const Footer = () => {
               </Link>
 
               {/* Address Section */}
-              <p className="leading-7 font-sans text-sm text-gray-600">
+              <p className="leading-7 font-sans text-sm text-gray-100">
                 <CMSkeleton
                   count={1}
                   height={10}
@@ -409,7 +413,7 @@ const Footer = () => {
                     href={`tel:${storeCustomizationSetting?.footer?.bottom_contact}`}
                   >
                     <h5
-                      className={`text-2xl font-bold text-store-500 leading-7`}
+                      className={`text-2xl font-bold text-yellow-300 leading-7`}
                     >
                       {/* +012345-67900 */}
                       {storeCustomizationSetting?.footer?.bottom_contact}
@@ -441,13 +445,13 @@ const Footer = () => {
       </div>
 
       <div className="mx-auto max-w-screen-2xl px-3 sm:px-10 flex justify-center py-4">
-        <p className="text-sm text-gray-500 leading-6">
+        <p className="text-sm text-gray-200 leading-6">
           Copyright 2025 @{" "}
           <Link
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className={`text-store-500`}
+            className={`text-white font-bold`}
           >
             E-HealthandHerbs
           </Link>

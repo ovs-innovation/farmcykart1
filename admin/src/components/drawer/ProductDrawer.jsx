@@ -184,6 +184,7 @@ const ProductDrawer = ({ id }) => {
     productId: "",
     originalPrice: 0,
     price: 0,
+    discount: 0,
     quantity: 0,
   });
   const [variantGallery, setVariantGallery] = useState([]);
@@ -831,6 +832,7 @@ const ProductDrawer = ({ id }) => {
       productId: currentVariant.productId || "",
       originalPrice: currentVariant.originalPrice ?? 0,
       price: currentVariant.price ?? 0,
+      discount: currentVariant.discount ?? 0,
       quantity: currentVariant.quantity ?? 0,
     });
     // Auto-generate combination name & description
@@ -957,7 +959,8 @@ const ProductDrawer = ({ id }) => {
       barcode: variantEditForm.barcode || "",
       productId: variantEditForm.productId || "",
       originalPrice: Number(variantEditForm.originalPrice || 0),
-      price: Number(variantEditForm.price || 0),
+      price: Number(variantEditForm.originalPrice || 0) - (Number(variantEditForm.originalPrice || 0) * Number(variantEditForm.discount || 0) / 100),
+      discount: Number(variantEditForm.discount || 0),
       quantity: Number(variantEditForm.quantity || 0),
       title: updatedTitle,
       description: updatedDescription,
@@ -1109,7 +1112,7 @@ const ProductDrawer = ({ id }) => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">
                   Original Price
@@ -1125,16 +1128,25 @@ const ProductDrawer = ({ id }) => {
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">
-                  Sale Price
+                  Discount
                 </label>
                 <Input
                   type="number"
-                  value={variantEditForm.price}
+                  value={variantEditForm.discount}
                   onChange={(e) =>
-                    handleVariantFormChange("price", e.target.value)
+                    handleVariantFormChange("discount", e.target.value)
                   }
                   placeholder="0"
                 />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">
+                  Sale Price
+                </label>
+                <div className="block w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 h-10 flex items-center">
+                  {currency}
+                  {Math.max(0, (Number(variantEditForm.originalPrice || 0) - (Number(variantEditForm.originalPrice || 0) * Number(variantEditForm.discount || 0) / 100))).toFixed(2)}
+                </div>
               </div>
               <div>
               <label className="text-sm font-medium mb-1 block">Quantity</label>
@@ -2063,7 +2075,7 @@ const ProductDrawer = ({ id }) => {
               </div>
 
               <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
-                <LabelArea label={t("SalePrice")} />
+                <LabelArea label="Discount" />
                 <div className="col-span-8 sm:col-span-4">
                   <InputValue
                     disabled={isCombination}
@@ -2072,13 +2084,23 @@ const ProductDrawer = ({ id }) => {
                     minValue={0}
                     defaultValue={0.0}
                     required={true}
-                    label="Sale price"
-                    name="price"
+                    label="Discount"
+                    name="discount"
                     type="number"
-                    placeholder="Sale price"
+                    placeholder="Discount"
                     currency={currency}
                   />
-                  <Error errorName={errors.price} />
+                  <Error errorName={errors.discount} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+                <LabelArea label="Sale Price" />
+                <div className="col-span-8 sm:col-span-4">
+                   <div className="block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-600 font-semibold">
+                      {currency}
+                      {Math.max(0, (Number(watch("originalPrice") || 0) - (Number(watch("originalPrice") || 0) * Number(watch("discount") || 0) / 100))).toFixed(2)}
+                   </div>
                 </div>
               </div>
 

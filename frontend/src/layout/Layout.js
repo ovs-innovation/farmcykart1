@@ -68,11 +68,7 @@ const Layout = ({ title, description, children, hideMobileHeader }) => {
         <div className={`bg-gray-50 ${hideMobileHeader ? "pt-0" : "pt-16"} lg:pt-0 pb-16 lg:pb-0`}>{children}</div>
         <div className="  w-full">
           <FooterTop  />
-          <div className="hidden  relative lg:block mx-auto max-w-screen-2xl py-6 px-3 sm:px-10">
-            <FeatureCard />
-          </div>
-          <hr className="hr-line"></hr>
-          <div className="border-t border-gray-100 w-full">
+          <div className="w-full">
             <Footer />
           </div>
         </div>

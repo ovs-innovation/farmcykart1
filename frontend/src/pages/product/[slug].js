@@ -299,10 +299,16 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       setStock(result2?.quantity);
       const price = getNumber(result2?.price);
       const originalPrice = getNumber(result2?.originalPrice);
+      let discount = getNumber(result2?.discount);
+      
+      if (discount <= 0 && originalPrice > price) {
+        discount = originalPrice - price;
+      }
+
       const discountPercentage = getNumber(
         ((originalPrice - price) / originalPrice) * 100
       );
-      setDiscount(getNumber(discountPercentage));
+      setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
       
@@ -365,13 +371,18 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
       const price = getNumber(rawVariantPrice);
       const originalPrice = getNumber(rawVariantOriginal);
+      let discount = getNumber(pricedVariant?.discount ?? product?.prices?.discount ?? 0);
+
+      if (discount <= 0 && originalPrice > price) {
+        discount = originalPrice - price;
+      }
 
       const discountPercentage =
         originalPrice > 0
           ? getNumber(((originalPrice - price) / originalPrice) * 100)
           : 0;
 
-      setDiscount(discountPercentage);
+      setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
 
@@ -410,13 +421,18 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
       const price = getNumber(baseRawPrice);
       const originalPrice = getNumber(baseRawOriginal);
+      let discount = getNumber(product?.prices?.discount ?? 0);
+
+      if (discount <= 0 && originalPrice > price) {
+        discount = originalPrice - price;
+      }
 
       const discountPercentage =
         originalPrice > 0
           ? getNumber(((originalPrice - price) / originalPrice) * 100)
           : 0;
 
-      setDiscount(discountPercentage);
+      setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
       
@@ -1129,7 +1145,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                     </div>
                   </div>
 
-                  <div className="w-full relative">
+                  <div className="w-full xl:w-7/12 relative min-w-0">
                     <div className="flex flex-col md:flex-row lg:flex-row xl:flex-row">
                       <div className="xl:pr-6 md:pr-6 w-full">
                         <div className="mb-6">
@@ -1245,6 +1261,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           }
                           product={product}
                           currency={currency}
+                          discount={discount}
                           originalPrice={
                             originalPrice > 0
                               ? originalPrice
@@ -1420,7 +1437,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.composition.title || "Composition"}
                                 </h2>
                               </div>
-                              <p className="text-sm text-gray-600 leading-relaxed">
+                              <p className="text-sm text-gray-600 leading-relaxed text-justify">
                                 {product.composition.description}
                               </p>
                             </div>
@@ -1437,7 +1454,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.productHighlights.title || "Product Highlights"}
                                 </h2>
                               </div>
-                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 text-justify">
                                 {product.productHighlights.items.map((item, idx) => (
                                   <li key={idx} className="leading-relaxed">
                                     {item}
@@ -1448,31 +1465,19 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           )}
 
                           {/* Tab Navigation */}
-                          <div className="sticky top-16 lg:top-[100px] z-10 bg-store-50 mt-10 mb-6 py-2 shadow-sm">
+                          <div className="sticky top-16 lg:top-[80px] z-10 bg-store-50 mt-10 mb-6 py-2 shadow-sm w-full">
                             <style jsx global>{`
                               .tab-navigation-container {
-                                scrollbar-width: thin !important;
-                                scrollbar-color: #cbd5e1 #f1f5f9 !important;
-                                overflow-x: auto !important;
+                                scrollbar-width: none !important; /* Firefox */
+                                -ms-overflow-style: none !important; /* IE 10+ */
                               }
                               .tab-navigation-container::-webkit-scrollbar {
-                                height: 6px !important;
-                                display: block !important;
-                              }
-                              .tab-navigation-container::-webkit-scrollbar-track {
-                                background: #f1f5f9 !important;
-                                border-radius: 3px !important;
-                              }
-                              .tab-navigation-container::-webkit-scrollbar-thumb {
-                                background: #cbd5e1 !important;
-                                border-radius: 3px !important;
-                              }
-                              .tab-navigation-container::-webkit-scrollbar-thumb:hover {
-                                background: #94a3b8 !important;
+                                display: none !important; /* Chrome/Safari */
                               }
                             `}</style>
-                            <div className="flex gap-2 border-b border-gray-200 overflow-x-auto tab-navigation-container pb-1" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #f1f5f9' }}>
-                              {product?.productDescription?.enabled !== false && (
+                            <div className="max-w-screen-2xl mx-auto px-3 sm:px-10">
+                              <div className="flex gap-2 border-b border-gray-200 overflow-x-auto tab-navigation-container pb-1">
+                                {product?.productDescription?.enabled !== false && (
                                 <button
                                   data-tab="product-description"
                                   onClick={() => {
@@ -1585,6 +1590,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                 </button>
                               )}
                             </div>
+                            </div>
                           </div>
 
                           {/* Product Description Section */}
@@ -1598,7 +1604,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.productDescription.title || "Product Description"} of {dynamicTitle || showingTranslateValue(product?.title)}
                                 </h2>
                               </div>
-                              <p className="text-sm text-gray-600 leading-relaxed">
+                              <p className="text-sm text-gray-600 leading-relaxed text-justify">
                                 {product.productDescription.description}
                               </p>
                             </div>
@@ -1616,7 +1622,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                         {section.name} of {dynamicTitle || showingTranslateValue(product?.title)}
                                       </h2>
                                     </div>
-                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 text-justify">
                                       {section.subsections
                                         ?.filter(sub => sub?.type !== "paragraph" && (sub?.key || sub?.value))
                                         .map((sub, subIdx) => (
@@ -1641,7 +1647,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.keyUses.title || "Key Uses"} of {dynamicTitle || showingTranslateValue(product?.title)}
                                 </h2>
                               </div>
-                              <ul className="list-disc list-inside space-y-4 text-sm text-gray-600">
+                              <ul className="list-disc list-inside space-y-4 text-sm text-gray-600 text-justify">
                                 {product.keyUses.items.map((item, idx) => (
                                   <li key={idx} className="leading-relaxed">
                                     <strong className="text-gray-900">{item.key || item.value}:</strong>{" "}
@@ -1663,7 +1669,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.howToUse.title || "How To Use"}
                                 </h2>
                               </div>
-                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 text-justify">
                                 {product.howToUse.items.map((item, idx) => (
                                   <li key={idx} className="leading-relaxed">
                                     {item}
@@ -1684,7 +1690,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   {product.safetyInformation.title || "Safety Information"}
                                 </h2>
                               </div>
-                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 text-justify">
                                 {product.safetyInformation.items.map((item, idx) => (
                                   <li key={idx} className="leading-relaxed">
                                     {item}
@@ -1711,7 +1717,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     <h3 className="inline-block px-3 py-1 mb-3 text-sm font-semibold text-store-600 bg-store-50 rounded-full">
                                       {subsection.label}
                                     </h3>
-                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 text-justify">
                                       {subsection.items.map((item, itemIdx) => (
                                         <li key={itemIdx} className="leading-relaxed">
                                           {item}
@@ -1771,7 +1777,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                         </span>
                                       </button>
                                       {isOpen && (
-                                        <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed">
+                                        <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed text-justify">
                                           {faq.answerType === "yes" || faq.answerType === "no"
                                             ? "- Ans: " + faq.answer
                                             : "- Ans: " + faq.answer || faq.customAnswer || ""}
@@ -1791,7 +1797,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               <h3 className="text-lg font-bold text-gray-900 mb-4">
                                 {product?.manufacturerDetails?.title || "Manufacturer details"}
                               </h3>
-                              <div className="space-y-2 text-sm text-gray-600">
+                              <div className="space-y-2 text-sm text-gray-600 text-justify">
                                 {product.manufacturerDetails.items.map((item, idx) => (
                                   <p key={idx} className="leading-relaxed">
                                     {item}

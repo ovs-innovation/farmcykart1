@@ -1,25 +1,27 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useContext, useMemo, useRef } from "react";
+import { useContext, useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { IoChevronForwardSharp } from "react-icons/io5";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
- 
 
 //internal import
 import CategoryServices from "@services/CategoryServices";
+import ProductServices from "@services/ProductServices";
+import ProductCard from "@components/product/ProductCard";
 import CMSkeleton from "@components/preloader/CMSkeleton";
 import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import useGetSetting from "@hooks/useGetSetting";
 
-const FeatureCategory = () => {
+const FeatureCategory = ({ attributes }) => {
   const router = useRouter();
   const { isLoading, setIsLoading } = useContext(SidebarContext);
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
-  const listRef = useRef(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
   const {
     data,
     error,
@@ -29,9 +31,28 @@ const FeatureCategory = () => {
     queryFn: async () => await CategoryServices.getShowingCategory(),
   });
 
-  // console.log("category", data);
-
   const categories = useMemo(() => data?.[0]?.children || [], [data]);
+
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
+
+  useEffect(() => {
+    if (selectedCategory?._id) {
+      setLoadingProducts(true);
+      ProductServices.getShowingStoreProducts({ category: selectedCategory._id })
+        .then((res) => {
+          setProducts(res?.products || []);
+          setLoadingProducts(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoadingProducts(false);
+        });
+    }
+  }, [selectedCategory]);
 
   const handleCategoryClick = (id, categoryName) => {
     const category_name = categoryName
@@ -42,101 +63,70 @@ const FeatureCategory = () => {
     setIsLoading(!isLoading);
   };
 
-  const scrollByCards = (dir = 1) => {
-    const el = listRef.current;
-    if (!el) return;
-
-    // Scroll roughly ~2 cards on desktop, ~1.5 on small screens
-    const amount = Math.max(240, Math.floor(el.clientWidth * 0.6));
-    el.scrollBy({ left: dir * amount, behavior: "smooth" });
-  };
-
-  const bgColors = [
-    "bg-green-100",
-    "bg-blue-100",
-    "bg-purple-100",
-    "bg-red-100",
-    "bg-orange-100",
-    "bg-cyan-100",
-    "bg-yellow-100",
-    "bg-teal-100",
-    "bg-indigo-100",
-    "bg-pink-100",
-  ];
-
   return (
     <>
       {loading ? (
         <CMSkeleton count={10} height={20} error={error} loading={loading} />
       ) : (
-        <div className="relative w-full">
-          {/* Arrows (desktop/tablet). Mobile users can swipe. */}
-          {categories.length > 0 && (
-            <>
-              <button
-                type="button"
-                aria-label="Scroll categories left"
-                onClick={() => scrollByCards(-1)}
-                className={`flex absolute left-1 sm:-left-4 top-1/3 -translate-y-1/2 z-10 h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white shadow-md border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-store-600 transition-colors`}
-              >
-                <FiChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                aria-label="Scroll categories right"
-                onClick={() => scrollByCards(1)}
-                className={`flex absolute right-1 sm:-right-4 top-1/3 -translate-y-1/2 z-10 h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white shadow-md border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-store-600 transition-colors`}
-              >
-                <FiChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
-
-          <ul
-            ref={listRef}
-            className="flex overflow-x-auto py-4 px-4 w-full scrollbar-hide gap-6 sm:gap-8 snap-x snap-mandatory scroll-smooth"
-          >
-            {categories.map((category, i) => (
-              <li
-                className="group shrink-0 snap-start cursor-pointer flex flex-col items-center w-28 sm:w-32 md:w-40"
-                key={i + 1}
-                onClick={() =>
-                  handleCategoryClick(
-                    category._id,
-                    showingTranslateValue(category?.name)
-                  )
-                }
-              >
-                <div 
-                  className={`flex justify-center items-center w-full aspect-square rounded-t-full rounded-bl-none mb-3 p-4 pt-8 shadow-sm transition-transform duration-300 ease-in-out transform group-hover:scale-105 ${bgColors[i % bgColors.length]}`}
+        <div className="flex flex-col md:flex-row w-full">
+          {/* Sidebar Categories */}
+          <div className="w-full md:w-1/4 bg-white md:rounded-l-lg rounded-t-lg md:rounded-tr-none border border-gray-100 md:border-r-0 overflow-hidden h-fit">
+            <ul className="flex flex-col">
+              {categories.map((category, i) => (
+                <li
+                  key={i + 1}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`cursor-pointer px-5 py-4 flex items-center justify-between transition-all duration-200 border-b border-gray-50 last:border-none ${
+                    selectedCategory?._id === category._id
+                      ? "bg-store-50 text-store-600 font-semibold border-l-4 border-l-store-500"
+                      : "hover:bg-gray-50 text-gray-600 hover:text-store-500"
+                  }`}
                 >
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28">
-                    {category.icon ? (
+                  <div className="flex items-center gap-3">
+                    {category.icon && (
                       <Image
-                        src={category?.icon}
-                        alt="category"
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-contain drop-shadow-sm"
-                      />
-                    ) : (
-                      <Image
-                        src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
-                        alt="category"
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-contain drop-shadow-sm"
+                        src={category.icon}
+                        alt={category.name}
+                        width={52}
+                        height={34}
+                        className="object-contain"
                       />
                     )}
+                    <span className="text-sm md:text-base">
+                      {showingTranslateValue(category?.name)}
+                    </span>
                   </div>
-                </div>
+                  {selectedCategory?._id === category._id && (
+                    <IoChevronForwardSharp className="text-store-500" />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                <h3 className="text-sm sm:text-base font-medium text-gray-700 text-center group-hover:text-store-600 transition-colors">
-                  {showingTranslateValue(category?.name)}
-                </h3>
-              </li>
-            ))}
-          </ul>
+          {/* Products Content Area */}
+          <div className="w-full md:w-3/4 bg-store-50 md:rounded-r-lg rounded-b-lg md:rounded-bl-none border border-gray-100 md:border-l-0 p-4">
+            {loadingProducts ? (
+              <CMSkeleton count={10} height={20} error={error} loading={loadingProducts} />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <ProductCard
+                      key={product._id}
+                      product={product}
+                      attributes={attributes}
+                      hidePriceAndAdd={true}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-10 text-gray-400">
+                    <p>No products found</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>

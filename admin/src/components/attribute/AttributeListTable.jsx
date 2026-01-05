@@ -141,11 +141,11 @@ const AttributeListTable = ({
             <TableCell className="font-medium text-sm">
               <CombinationInput
                 id={i}
-                name="price"
-                placeholder="Sale price"
+                name="discount"
+                placeholder="Discount"
                 variant={variant}
                 isBulkUpdate={isBulkUpdate}
-                value={variant.price || ""}
+                value={variant.discount || ""}
                 handleQuantityPrice={handleQuantityPrice}
               />
             </TableCell>
