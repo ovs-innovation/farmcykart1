@@ -42,80 +42,116 @@ const PhoneSignup = () => {
     },
   };
 
-  useEffect(() => {
-    // Clear any existing verifier to avoid "element removed" errors
+  // useEffect(() => {
+  //   // Clear any existing verifier to avoid "element removed" errors
+  //   if (window.recaptchaVerifier) {
+  //     try {
+  //       window.recaptchaVerifier.clear();
+  //     } catch (error) {
+  //       console.error("Error clearing recaptcha", error);
+  //     }
+  //     window.recaptchaVerifier = null;
+  //   }
+
+  //   // Initialize Recaptcha
+  //   try {
+  //     const recaptchaContainer = document.getElementById('recaptcha-container');
+  //     if (recaptchaContainer) {
+  //       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+  //         'size': 'normal',
+  //         'callback': (response) => {
+  //           // reCAPTCHA solved, allow signInWithPhoneNumber.
+  //         },
+  //         'expired-callback': () => {
+  //           // Response expired. Ask user to solve reCAPTCHA again.
+  //         }
+  //       });
+        
+  //       window.recaptchaVerifier.render().catch((err) => {
+  //         console.error("Recaptcha Render Error:", err);
+  //         if (err.code === 'auth/network-request-failed') {
+  //           notifyError("Recaptcha Network Error: Add 'localhost' to Authorized Domains in Firebase Console.");
+  //         }
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error initializing recaptcha", error);
+  //   }
+
+  //   return () => {
+  //     if (window.recaptchaVerifier) {
+  //       try {
+  //         window.recaptchaVerifier.clear();
+  //       } catch (error) {
+  //         console.error("Error clearing recaptcha on unmount", error);
+  //       }
+  //       window.recaptchaVerifier = null;
+  //     }
+  //   };
+  // }, []);
+const resetRecaptcha = () => {
+  if (typeof window === "undefined") return;
+
+  const el = document.getElementById("recaptcha-container");
+  if (el) el.innerHTML = "";
+
+  if (window.recaptchaVerifier) {
+    window.recaptchaVerifier.clear();
+    window.recaptchaVerifier = null;
+  }
+};
+
+
+  const onSignInSubmit = async ({ phone }) => {
+  setLoading(true);
+  setPhoneNumber(phone);
+
+  try {
+     resetRecaptcha(); // ✅ VERY IMPORTANT
+    // ✅ IMPORTANT: recreate every time
     if (window.recaptchaVerifier) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (error) {
-        console.error("Error clearing recaptcha", error);
-      }
+      window.recaptchaVerifier.clear();
       window.recaptchaVerifier = null;
     }
 
-    // Initialize Recaptcha
-    try {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'normal',
-        'callback': (response) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible", // ✅ MUST
+        callback: () => {
+          console.log("reCAPTCHA solved");
         },
-        'expired-callback': () => {
-          // Response expired. Ask user to solve reCAPTCHA again.
-        }
-      });
-      
-      window.recaptchaVerifier.render();
-    } catch (error) {
-      console.error("Error initializing recaptcha", error);
-    }
-
-    return () => {
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (error) {
-          console.error("Error clearing recaptcha on unmount", error);
-        }
-        window.recaptchaVerifier = null;
       }
-    };
-  }, []);
-
-  const onSignInSubmit = async ({ phone }) => {
-    setLoading(true);
-    setPhoneNumber(phone);
+    );
+ ;
     const appVerifier = window.recaptchaVerifier;
 
-    // Development Bypass for sending OTP
-    if (process.env.NODE_ENV === "development" && phone.includes("1234567890")) {
-        setShowOtpInput(true);
-        setLoading(false);
-        notifySuccess("OTP sent successfully (Dev Bypass)!");
-        return;
-    }
+    const confirmationResult = await signInWithPhoneNumber(
+      auth,
+      phone,
+      appVerifier
+    );
+    console.log("OTP sent", confirmationResult);
+    window.confirmationResult = confirmationResult;
 
-    try {
-      const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
-      window.confirmationResult = confirmationResult;
-      setShowOtpInput(true);
-      setLoading(false);
-      notifySuccess("OTP sent successfully!");
-    } catch (error) {
-      console.error("Error sending OTP", error);
-      setLoading(false);
+    setShowOtpInput(true);
+    notifySuccess("OTP sent successfully");
+  } catch (error) {
+    console.error(error);
+
+    if (error.code === "auth/too-many-requests") {
+      notifyError("Too many attempts. Please wait 1–2 minutes.");
+    } else if (error.code === "auth/invalid-app-credential") {
+      notifyError("Recaptcha failed. Refresh page & try again.");
+    } else {
       notifyError(error.message);
-      
-      if (error.code === 'auth/network-request-failed') {
-        notifyError("Network error. Check internet or Authorized Domains.");
-      }
-
-      // Reset recaptcha if needed
-      if (window.recaptchaVerifier) {
-          // window.recaptchaVerifier.clear(); 
-      }
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const verifyOtp = async (e) => {
     e.preventDefault();
@@ -192,7 +228,7 @@ const PhoneSignup = () => {
                   )}
                 </div>
                 
-                <div id="recaptcha-container"></div>
+                <div id="recaptcha-container"  style={{ display: "none" }}></div>
 
                 {!showOtpInput ? (
                   <form

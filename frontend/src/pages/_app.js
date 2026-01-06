@@ -1,4 +1,5 @@
 import "@styles/custom.css";
+import "@lib/firebase";
 import { CartProvider } from "react-use-cart";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";

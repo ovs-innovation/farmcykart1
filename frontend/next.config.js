@@ -13,7 +13,7 @@ const withPWA = require("next-pwa")({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   turbopack: {},
   images: {
     domains: ["res.cloudinary.com", "i.postimg.cc"],
