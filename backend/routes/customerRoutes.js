@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   loginCustomer,
+  loginWithPhone,
   registerCustomer,
   verifyPhoneNumber,
   signUpWithProvider,
@@ -32,6 +33,9 @@ router.post("/verify-email", emailVerificationLimit, verifyEmailAddress);
 
 //verify phone number
 router.post("/verify-phone", phoneVerificationLimit, verifyPhoneNumber);
+
+//login with phone
+router.post("/login-phone", loginWithPhone);
 
 // shipping address send to array
 router.post("/shipping/address/:id", addShippingAddress);

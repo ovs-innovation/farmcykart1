@@ -99,6 +99,44 @@ const verifyPhoneNumber = async (req, res) => {
   }
 };
 
+const loginWithPhone = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    // In a real app, you should verify the Firebase ID token here using firebase-admin
+    // const { token } = req.body;
+    // const decodedToken = await admin.auth().verifyIdToken(token);
+    // const phone = decodedToken.phone_number;
+
+    let user = await Customer.findOne({ phone });
+
+    if (!user) {
+      // Create new user
+      user = new Customer({
+        phone,
+        name: "New User", // Placeholder
+        email: `${phone}@example.com`, // Placeholder
+        password: bcrypt.hashSync("12345678"), // Placeholder
+        verified: true,
+      });
+      await user.save();
+    }
+
+    const token = signInToken(user);
+    res.send({
+      token,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      message: "Login Successful!",
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
 const registerCustomer = async (req, res) => {
   const token = req.params.token;
 
@@ -814,6 +852,7 @@ const getCustomerStatistics = async (req, res) => {
 
 module.exports = {
   loginCustomer,
+  loginWithPhone,
   verifyPhoneNumber,
   registerCustomer,
   addAllCustomers,
