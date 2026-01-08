@@ -17,7 +17,7 @@ const Cart = () => {
   const { currency } = useUtilsFunction();
   const userInfo = getUserSession();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const handleCheckout = () => {
     if (items?.length <= 0) {

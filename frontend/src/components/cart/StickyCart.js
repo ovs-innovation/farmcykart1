@@ -11,7 +11,7 @@ const StickyCart = () => {
   const { totalItems, totalUniqueItems, cartTotal } = useCart();
   const { toggleCartDrawer } = useContext(SidebarContext);
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
 
   const { globalSetting } = useGetSetting();

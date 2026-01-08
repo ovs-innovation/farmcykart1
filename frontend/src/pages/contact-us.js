@@ -25,7 +25,7 @@ const ContactUs = () => {
 
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting, loading, error } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const submitHandler = () => {
     notifySuccess(

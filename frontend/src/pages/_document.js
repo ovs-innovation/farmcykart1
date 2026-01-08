@@ -19,42 +19,25 @@ class MyDocument extends Document {
 
   render() {
     const setting = this.props.setting;
+    const favicon = setting?.favicon || "/favicon.png";
+    const metaTitle = setting?.meta_title || "Farmacykart – Customized Promotional Items & Advertising Products Online Store";
+    const metaDescription = setting?.meta_description || "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions";
+    const metaKeywords = setting?.meta_keywords || "ecommerce online store";
+    const metaUrl = setting?.meta_url || "";
+    const metaImage = setting?.meta_img || "/logo/logo.png";
+
     return (
       <Html lang="en">
         <Head>
-          <link rel="icon" href={setting?.favicon || "/favicon.png"} />
-          <meta
-            property="og:title"
-            content={
-              setting?.meta_title ||
-              "E-Fashionapparel – Customized Promotional Items & Advertising Products Online Store"
-            }
-          />
+          <link rel="icon" href={favicon} />
+          <link rel="shortcut icon" href={favicon} />
+          <link rel="apple-touch-icon" href={favicon} />
+          <meta property="og:title" content={metaTitle} />
           <meta property="og:type" content="eCommerce Website" />
-          <meta
-            property="og:description"
-            content={
-              setting?.meta_description ||
-              "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions"
-            }
-          />
-          <meta
-            name="keywords"
-            content={setting?.meta_keywords || "ecommenrce online store"}
-          />
-          <meta
-            property="og:url"
-            content={
-              setting?.meta_url || "https://ejewellary.ovsinnovation.com/"
-            }
-          />
-          <meta
-            property="og:image"
-            content={
-              setting?.meta_img ||
-              "https://res.cloudinary.com/dhqcwkpzp/image/upload/v1761819918/undefined/logojwellary.png"
-            }
-          />
+          <meta property="og:description" content={metaDescription} />
+          <meta name="keywords" content={metaKeywords} />
+          <meta property="og:url" content={metaUrl} />
+          <meta property="og:image" content={metaImage} />
         </Head>
         <body>
           <Main />

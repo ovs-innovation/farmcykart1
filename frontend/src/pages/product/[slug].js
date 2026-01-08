@@ -1156,7 +1156,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           {/* Top summary rating row (like Flipkart) */}
                           {ratingSummary && (
                             <div className="flex items-center flex-wrap gap-2 mb-2">
-                              <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-green-600 text-white text-xs font-semibold">
+                              <div className="inline-flex items-center px-2 py-0.5 rounded-md text-white text-xs font-semibold" style={{ backgroundColor: '#006E44' }}>
                                 <span className="mr-1">
                                   {ratingSummary.averageRating?.toFixed
                                     ? ratingSummary.averageRating.toFixed(1)
@@ -1339,9 +1339,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           <div className="mt-8">
                             <p className="text-xs sm:text-sm text-gray-700 font-medium">
                               Call Us To Order By Mobile Number :{" "}
-                              <span className="text-store-500 font-semibold">
-                                +0044235234
-                              </span>{" "}
+                              <a 
+                                href={`tel:${(storeCustomizationSetting?.navbar?.phone || storeCustomizationSetting?.footer?.bottom_contact || globalSetting?.contact || "+0044235234").replace(/\s+/g, '')}`}
+                                className="text-store-500 font-semibold hover:text-store-600 hover:underline"
+                              >
+                                {storeCustomizationSetting?.navbar?.phone || storeCustomizationSetting?.footer?.bottom_contact || globalSetting?.contact || "+0044235234"}
+                              </a>
                             </p>
                           </div>
 
@@ -1912,7 +1915,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                         card
                                       />
                                       {discount > 0 && (
-                                        <span className="text-xs font-semibold text-green-600">
+                                        <span className="text-xs font-semibold" style={{ color: '#006E44' }}>
                                           {discount}% OFF
                                         </span>
                                       )}

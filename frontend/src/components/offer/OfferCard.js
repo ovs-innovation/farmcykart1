@@ -8,7 +8,7 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 const OfferCard = () => {
   const { storeCustomizationSetting } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   return (
     <div className="w-full group">

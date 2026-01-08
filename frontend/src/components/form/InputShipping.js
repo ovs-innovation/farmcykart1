@@ -12,7 +12,7 @@ const InputShipping = ({
   handleShippingCost,
 }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   return (
     <div>
       <div className="p-3 card border border-gray-200 bg-white rounded-md">

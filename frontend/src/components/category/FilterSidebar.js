@@ -21,6 +21,7 @@ const FilterSidebar = ({
   const { showingTranslateValue, currency } = useUtilsFunction();
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
   const [openSections, setOpenSections] = useState({
     brand: false,
     rating: false,
@@ -35,7 +36,9 @@ const FilterSidebar = ({
           CategoryServices.getShowingCategory(),
           BrandServices.getShowingBrands(),
         ]);
-        setCategories(catData || []);
+        // Extract children from category data structure
+        const mainCategories = catData?.[0]?.children || catData || [];
+        setCategories(mainCategories);
         setBrands(brandData || []);
       } catch (err) {
         console.error("Error fetching filter data", err);
@@ -43,6 +46,13 @@ const FilterSidebar = ({
     };
     fetchData();
   }, []);
+
+  const toggleCategory = (catId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catId]: !prev[catId],
+    }));
+  };
 
   const toggleSection = (section) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -109,7 +119,17 @@ const FilterSidebar = ({
             );
           })}
           {selectedCategories.map((catId) => {
-            const cat = categories.find((c) => c._id === catId);
+            // Search in both parent and child categories
+            let cat = categories.find((c) => c._id === catId);
+            if (!cat) {
+              // Try to find in subcategories
+              for (const parentCat of categories) {
+                if (parentCat.children) {
+                  cat = parentCat.children.find((c) => c._id === catId);
+                  if (cat) break;
+                }
+              }
+            }
             if (!cat) return null;
             return (
               <span
@@ -118,7 +138,7 @@ const FilterSidebar = ({
               >
                 {showingTranslateValue(cat.name)}
                 <IoClose
-                  className="ml-1 cursor-pointer"
+                  className="ml-1 cursor-pointer hover:text-red-600"
                   onClick={() => handleCategoryChange(catId)}
                 />
               </span>
@@ -169,30 +189,79 @@ const FilterSidebar = ({
       <div className="border-b border-gray-100">
         <button
           onClick={() => toggleSection("category")}
-          className="w-full p-4 flex justify-between items-center text-sm font-bold uppercase text-gray-700"
+          className="w-full p-4 flex justify-between items-center text-sm font-bold uppercase text-gray-700 hover:bg-gray-50 transition-colors"
         >
           Categories
           {openSections.category ? <FiChevronUp /> : <FiChevronDown />}
         </button>
         {openSections.category && (
-          <div className="px-4 pb-4 max-h-60 overflow-y-auto">
-            {categories.map((cat) => (
-              <div key={cat._id} className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id={`cat-${cat._id}`}
-                  checked={selectedCategories.includes(cat._id)}
-                  onChange={() => handleCategoryChange(cat._id)}
-                  className="rounded border-gray-300 text-store-600 focus:ring-store-500"
-                />
-                <label
-                  htmlFor={`cat-${cat._id}`}
-                  className="ml-2 text-sm text-gray-600 cursor-pointer"
-                >
-                  {showingTranslateValue(cat.name)}
-                </label>
-              </div>
-            ))}
+          <div className="px-4 pb-4 max-h-96 overflow-y-auto">
+            {categories.map((cat) => {
+              const hasChildren = cat?.children && cat.children.length > 0;
+              const isExpanded = expandedCategories[cat._id];
+              
+              return (
+                <div key={cat._id} className="mb-2">
+                  {/* Parent Category */}
+                  <div className="flex items-center justify-between group">
+                    <div className="flex items-center flex-1">
+                      <input
+                        type="checkbox"
+                        id={`cat-${cat._id}`}
+                        checked={selectedCategories.includes(cat._id)}
+                        onChange={() => handleCategoryChange(cat._id)}
+                        className="rounded border-gray-300 text-store-600 focus:ring-store-500"
+                      />
+                      <label
+                        htmlFor={`cat-${cat._id}`}
+                        className="ml-2 text-sm font-medium text-gray-700 cursor-pointer flex-1 hover:text-store-600 transition-colors"
+                      >
+                        {showingTranslateValue(cat.name)}
+                      </label>
+                    </div>
+                    {hasChildren && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCategory(cat._id);
+                        }}
+                        className="ml-2 p-1 text-gray-400 hover:text-store-600 transition-colors"
+                        aria-label={isExpanded ? "Collapse" : "Expand"}
+                      >
+                        {isExpanded ? (
+                          <FiChevronUp className="text-xs" />
+                        ) : (
+                          <FiChevronDown className="text-xs" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Subcategories */}
+                  {hasChildren && isExpanded && (
+                    <div className="ml-6 mt-2 mb-3 border-l-2 border-gray-200 pl-4 space-y-2">
+                      {cat.children.map((subCat) => (
+                        <div key={subCat._id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`subcat-${subCat._id}`}
+                            checked={selectedCategories.includes(subCat._id)}
+                            onChange={() => handleCategoryChange(subCat._id)}
+                            className="rounded border-gray-300 text-store-600 focus:ring-store-500"
+                          />
+                          <label
+                            htmlFor={`subcat-${subCat._id}`}
+                            className="ml-2 text-sm text-gray-600 cursor-pointer hover:text-store-600 transition-colors"
+                          >
+                            {showingTranslateValue(subCat.name)}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

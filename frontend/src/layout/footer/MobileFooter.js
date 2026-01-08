@@ -14,6 +14,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import CategoryDrawer from "@components/drawer/CategoryDrawer";
 import useGetSetting from "@hooks/useGetSetting";
 import useWishlist from "@hooks/useWishlist";
+import LocationButton from "@components/location/LocationButton";
 
 const MobileFooter = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -24,7 +25,7 @@ const MobileFooter = () => {
   const router = useRouter();
   const { t } = useTranslation("common");
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -53,7 +54,7 @@ const MobileFooter = () => {
         >
           <div className="relative w-16 h-16">
             <Image
-              src="/logo/logojwellary.png"
+              src="/logo/logo.png"
               alt="logo"
               layout="fill"
               objectFit="contain"
@@ -69,13 +70,13 @@ const MobileFooter = () => {
           className={`text-xl text-store-500 indicator justify-center`}
         >
           {userInfo?.image ? (
-            <Link href="/user/dashboard" className="relative top-1 w-6 h-6">
+            <Link href="/user/dashboard" className="relative top-1 w-8 h-8 block">
               <Image
-                width={29}
-                height={29}
+                width={32}
+                height={32}
                 src={userInfo.image}
                 alt="user"
-                className="rounded-full"
+                className="rounded-full object-cover w-8 h-8 border-2 border-gray-200"
               />
             </Link>
           ) : userInfo?.name ? (
@@ -109,13 +110,17 @@ const MobileFooter = () => {
         <div className="fixed z-30 top-16 left-0 w-full bg-white px-3 py-2 shadow">
           <form
             onSubmit={handleSubmit}
-            className="relative pr-12 bg-white overflow-hidden shadow-sm rounded-md w-full"
+            className="relative pr-12 bg-white overflow-hidden shadow-sm rounded-md w-full flex items-center"
           >
-            <label className="flex items-center py-0.5">
+            {/* Location Button */}
+            <LocationButton className="h-10 flex-shrink-0" />
+            
+            {/* Search Input */}
+            <label className="flex items-center py-0.5 flex-1">
               <input
                 onChange={(e) => setSearchText(e.target.value)}
                 value={searchText}
-                className="form-input w-full pl-5 appearance-none transition ease-in-out border text-input text-sm font-sans rounded-md min-h-10 h-10 duration-200 bg-[#F3F4F6] focus:ring-0 outline-none border-none focus:outline-none placeholder-gray-500 placeholder-opacity-75"
+                className="form-input w-full pl-3 appearance-none transition ease-in-out border text-input text-sm font-sans rounded-md min-h-10 h-10 duration-200 bg-[#F3F4F6] focus:ring-0 outline-none border-none focus:outline-none placeholder-gray-500 placeholder-opacity-75"
                 placeholder={t("Search Health and Herbs...")}
               />
             </label>

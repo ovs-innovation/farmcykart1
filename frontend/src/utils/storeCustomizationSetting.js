@@ -871,6 +871,6 @@ export const storeCustomization = {
     meta_url: "https://E-HealthandHerbs-store-nine.vercel.app/",
   },
   theme: {
-    color: "pink",
+    color: "green",
   }
 };

@@ -1,22 +1,23 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request) {
-  const userInfo = await getToken({
-    req: request,
-    // NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-  });
+  const nextAuthToken = await getToken({ req: request });
+  
+  const userInfoCookie = request.cookies.get("userInfo");
+  let cookieUserInfo = null;
+  
+  if (userInfoCookie?.value) {
+    try {
+      cookieUserInfo = JSON.parse(userInfoCookie.value);
+    } catch (e) {
+      cookieUserInfo = null;
+    }
+  }
 
-  // console.log(
-  //   "middleware ran>>>>]]]",
-  //   request.nextUrl.pathname,
+  const isAuthenticated = !!nextAuthToken || !!cookieUserInfo?.token;
 
-  //   "userInfo",
-  //   userInfo?.email
-  // );
-
-  if (!userInfo) {
+  if (!isAuthenticated) {
     return NextResponse.redirect(new URL(`/auth/login`, request.url));
   }
 

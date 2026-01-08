@@ -8,7 +8,7 @@ import useGetSetting from "@hooks/useGetSetting";
 
 const Card = () => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   return (
     <>
       {ctaCardData.map((item) => (

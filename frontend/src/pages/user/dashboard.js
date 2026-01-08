@@ -18,43 +18,52 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 
-//internal import
 import Layout from "@layout/Layout";
 import Card from "@components/order-card/Card";
 import OrderServices from "@services/OrderServices";
 import RecentOrder from "@pages/user/recent-order";
 import { SidebarContext } from "@context/SidebarContext";
+import { UserContext } from "@context/UserContext";
 import Loading from "@components/preloader/Loading";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import PrescriptionStatus from "@components/prescription/PrescriptionStatus";
+import { setToken } from "@services/httpServices";
 
 const Dashboard = ({ title, description, children }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { state: userState, dispatch } = useContext(UserContext);
   const { isLoading, setIsLoading, currentPage } = useContext(SidebarContext);
 
   const { storeCustomizationSetting } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
   const [isOpen, setIsOpen] = useState(false);
 
+  const userInfo = userState?.userInfo || session?.user;
+  const userId = userInfo?._id || userInfo?.id;
+  const isAuthenticated = !!userInfo?.token || status === "authenticated";
+
   const {
     data,
     error,
     isLoading: loading,
   } = useQuery({
-    queryKey: ["orders", { currentPage, user: session?.user?.id }],
+    queryKey: ["orders", { currentPage, user: userId }],
     queryFn: async () =>
       await OrderServices.getOrderCustomer({
         page: currentPage,
         limit: 10,
       }),
-    enabled: status === "authenticated",
+    enabled: isAuthenticated,
   });
 
   const handleLogOut = () => {
-    signOut();
+    signOut({ redirect: false });
+    Cookies.remove("userInfo");
     Cookies.remove("couponInfo");
+    setToken(null);
+    dispatch({ type: "USER_LOGOUT" });
     router.push("/");
   };
 
@@ -120,10 +129,10 @@ const Dashboard = ({ title, description, children }) => {
                 <div className="bg-white p-4 rounded-md mb-5 lg:hidden flex justify-between items-center">
                   <div>
                     <h2 className="text-xl font-serif font-semibold text-gray-700">
-                      {session?.user?.name}
+                      {userInfo?.name}
                     </h2>
                     <span className="text-sm text-gray-500">
-                      {session?.user?.email}
+                      {userInfo?.email || userInfo?.phone}
                     </span>
                   </div>
                   <button
@@ -208,8 +217,8 @@ const Dashboard = ({ title, description, children }) => {
                         className={`text-store-600 bg-store-200`}
                       />
                     </div>
-                    {status === "authenticated" && session?.user?.id && (
-                      <PrescriptionStatus userId={session.user.id} />
+                    {isAuthenticated && userId && (
+                      <PrescriptionStatus userId={userId} />
                     )}
                     <RecentOrder data={data} loading={loading} error={error} />
                   </div>

@@ -3,7 +3,7 @@ import useGetSetting from "@hooks/useGetSetting";
 
 const InputPayment = ({ register, Icon, name, value, setShowCard }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   return (
     <div className="px-3 py-4 card border border-gray-200 bg-white rounded-md">
       <label className="cursor-pointer label">

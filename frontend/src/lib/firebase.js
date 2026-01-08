@@ -1,22 +1,27 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
+// Firebase configuration
+// Replace these values with your Firebase project configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDUBq2cp6dQhkxGUlwQ01y1Az8MsNiL9Ic",
-  authDomain: "farmacykart-f0650.firebaseapp.com",
-  projectId: "farmacykart-f0650",
-  storageBucket: "farmacykart-f0650.firebasestorage.app",
-  messagingSenderId: "902396666658",
-  appId: "1:902396666658:web:e37de93d37a9958968fb7b",
-  measurementId: "G-J107YQ2JEX"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-auth.useDeviceLanguage();
+// Initialize Firebase only if it hasn't been initialized already
+let app;
+if (typeof window !== "undefined" && !getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else if (typeof window !== "undefined") {
+  app = getApps()[0];
+}
 
-export { auth };
+// Initialize Firebase Auth
+export const auth = typeof window !== "undefined" ? getAuth(app) : null;
+
 export default app;
+

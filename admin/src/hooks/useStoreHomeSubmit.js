@@ -67,6 +67,8 @@ const useStoreHomeSubmit = () => {
   const [offersMenuLink, setOffersMenuLink] = useState(true);
   const [privacyPolicy, setPrivacyPolicy] = useState(true);
   const [termsConditions, setTermsConditions] = useState(true);
+  const [refundReturnPolicy, setRefundReturnPolicy] = useState(true);
+  const [shippingDeliveryPolicy, setShippingDeliveryPolicy] = useState(true);
   const [faqLeftColStatus, setFaqLeftColStatus] = useState(true);
   const [faqRightColStatus, setFaqRightColStatus] = useState(true);
   const [offersPageHeader, setOffersPageHeader] = useState(true);
@@ -127,6 +129,14 @@ const useStoreHomeSubmit = () => {
   const [aboutTopContentRightImage, setAboutTopContentRightImage] =
     useState("");
   const [termsConditionsHeaderBg, setTermsConditionsHeaderBg] = useState("");
+  const [refundReturnPolicyHeaderBg, setRefundReturnPolicyHeaderBg] = useState("");
+  const [refundReturnPolicyTextEdit, setRefundReturnPolicyTextEdit] = useState(
+    createEditorState("")
+  );
+  const [shippingDeliveryPolicyHeaderBg, setShippingDeliveryPolicyHeaderBg] = useState("");
+  const [shippingDeliveryPolicyTextEdit, setShippingDeliveryPolicyTextEdit] = useState(
+    createEditorState("")
+  );
   const [themeColor, setThemeColor] = useState("store");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -555,6 +565,34 @@ const useStoreHomeSubmit = () => {
                   )
                 : "",
             },
+          },
+          refund_return_policy: {
+            status: refundReturnPolicy,
+            header_bg: refundReturnPolicyHeaderBg,
+            title: handleRemoveEmptyKey({
+              ...resData?.refund_return_policy?.title,
+              [language]: data.refund_return_page_title || "",
+            }),
+            description: handleRemoveEmptyKey({
+              ...resData?.refund_return_policy?.description,
+              [language]: refundReturnPolicyTextEdit
+                ? draftToHtml(convertToRaw(refundReturnPolicyTextEdit.getCurrentContent()))
+                : "",
+            }),
+          },
+          shipping_delivery_policy: {
+            status: shippingDeliveryPolicy,
+            header_bg: shippingDeliveryPolicyHeaderBg,
+            title: handleRemoveEmptyKey({
+              ...resData?.shipping_delivery_policy?.title,
+              [language]: data.shipping_delivery_page_title || "",
+            }),
+            description: handleRemoveEmptyKey({
+              ...resData?.shipping_delivery_policy?.description,
+              [language]: shippingDeliveryPolicyTextEdit
+                ? draftToHtml(convertToRaw(shippingDeliveryPolicyTextEdit.getCurrentContent()))
+                : "",
+            }),
           },
           faq: {
             page_status: faqStatus,
@@ -1896,6 +1934,32 @@ const useStoreHomeSubmit = () => {
             )
           );
 
+          //refund return policy
+          setRefundReturnPolicy(res?.refund_return_policy?.status);
+          setRefundReturnPolicyHeaderBg(res?.refund_return_policy?.header_bg);
+          setValue(
+            "refund_return_page_title",
+            res?.refund_return_policy?.title?.[language || "en"] || ""
+          );
+          setRefundReturnPolicyTextEdit(
+            createEditorState(
+              showingTranslateValue(res?.refund_return_policy?.description)
+            )
+          );
+
+          //shipping delivery policy
+          setShippingDeliveryPolicy(res?.shipping_delivery_policy?.status);
+          setShippingDeliveryPolicyHeaderBg(res?.shipping_delivery_policy?.header_bg);
+          setValue(
+            "shipping_delivery_page_title",
+            res?.shipping_delivery_policy?.title?.[language || "en"] || ""
+          );
+          setShippingDeliveryPolicyTextEdit(
+            createEditorState(
+              showingTranslateValue(res?.shipping_delivery_policy?.description)
+            )
+          );
+
           //faq
           setFaqStatus(res?.faq?.page_status);
           setFaqHeaderBg(res?.faq?.header_bg);
@@ -2149,6 +2213,18 @@ const useStoreHomeSubmit = () => {
     termsConditions,
     setTermsConditionsHeaderBg,
     termsConditionsHeaderBg,
+    refundReturnPolicy,
+    setRefundReturnPolicy,
+    refundReturnPolicyHeaderBg,
+    setRefundReturnPolicyHeaderBg,
+    refundReturnPolicyTextEdit,
+    setRefundReturnPolicyTextEdit,
+    shippingDeliveryPolicy,
+    setShippingDeliveryPolicy,
+    shippingDeliveryPolicyHeaderBg,
+    setShippingDeliveryPolicyHeaderBg,
+    shippingDeliveryPolicyTextEdit,
+    setShippingDeliveryPolicyTextEdit,
     setFaqStatus,
     faqStatus,
     setFaqLeftColStatus,

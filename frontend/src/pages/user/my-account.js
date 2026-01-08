@@ -44,11 +44,11 @@ const MyAccount = () => {
                     src={userInfo.image}
                     width={64}
                     height={64}
-                    className="h-16 w-16 rounded-full bg-gray-50"
+                    className="h-16 w-16 rounded-full object-cover border-2 border-gray-300"
                     alt={userInfo?.name[0]}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-200 text-xl font-bold text-center mr-4">
+                  <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-200 text-xl font-bold text-center mr-4 border-2 border-gray-300">
                     {userInfo?.name?.charAt(0)}
                   </div>
                 )}

@@ -88,10 +88,10 @@ p:not(:last-of-type) {
   border-width: 1px !important;
   width: 12px !important;
   height: 12px !important;
-  border-color: #059669 !important;
+  border-color: #006E44 !important;
 }
 .react-multi-carousel-dot--active button {
-  background: #059669 !important;
+  background: #006E44 !important;
 }
 @media (min-width: 320px) and (max-width: 767px) {
   .react-multi-carousel-dot-list.custom-dot {
@@ -575,8 +575,8 @@ p:not(:last-of-type) {
 }
 
 .control-arrow control-next {
-  color: #059669;
-  background: #059669;
+  color: #006E44;
+  background: #006E44;
 }
 .carousel .carousel-status {
   color: #000 !important;

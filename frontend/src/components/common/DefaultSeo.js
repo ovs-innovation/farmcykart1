@@ -5,21 +5,32 @@ import { DefaultSeo as NextSeo } from "next-seo";
 import useGetSetting from "@hooks/useGetSetting";
 
 const DefaultSeo = () => {
-  const { globalSetting } = useGetSetting();
+  const { globalSetting, storeCustomizationSetting } = useGetSetting();
+
+  // Get dynamic SEO values from settings
+  const metaTitle = storeCustomizationSetting?.seo?.meta_title || globalSetting?.shop_name || "E-HealthandHerbs";
+  const metaDescription = storeCustomizationSetting?.seo?.meta_description || "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions";
+  const metaUrl = storeCustomizationSetting?.seo?.meta_url || globalSetting?.website || "";
+  const metaImage = storeCustomizationSetting?.seo?.meta_img || storeCustomizationSetting?.seo?.favicon || "/logo/logo.png";
+  const favicon = storeCustomizationSetting?.seo?.favicon || globalSetting?.logo || "/favicon.png";
 
   return (
     <NextSeo
-      title={
-        globalSetting?.meta_title ||
-        "E-HealthandHerbs – Customized Promotional Items & Advertising Products Online Store"
-      }
+      title={metaTitle}
+      description={metaDescription}
       openGraph={{
         type: "website",
         locale: "en_IE",
-        url: globalSetting?.meta_url || "favicon.png",
-        site_name:
-          globalSetting?.meta_title ||
-          "E-HealthandHerbs – Customized Promotional Items & Advertising Products Online Store",
+        url: metaUrl,
+        site_name: metaTitle,
+        images: [
+          {
+            url: metaImage,
+            width: 1200,
+            height: 630,
+            alt: metaTitle,
+          },
+        ],
       }}
       twitter={{
         handle: "@handle",
@@ -40,11 +51,23 @@ const DefaultSeo = () => {
           name: "theme-color",
           content: "#ffffff",
         },
+        {
+          name: "description",
+          content: metaDescription,
+        },
       ]}
       additionalLinkTags={[
         {
+          rel: "icon",
+          href: favicon,
+        },
+        {
+          rel: "shortcut icon",
+          href: favicon,
+        },
+        {
           rel: "apple-touch-icon",
-          href: "/icon-192x192.png",
+          href: favicon,
         },
         {
           rel: "manifest",

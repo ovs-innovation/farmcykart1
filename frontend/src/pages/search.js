@@ -105,7 +105,7 @@ const Search = ({ products, attributes }) => {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 relative">
                   <Image
-                    src="/logo/logo-color.png"
+                    src="/logo/logo.png"
                     alt="logo"
                     layout="fill"
                     objectFit="contain"

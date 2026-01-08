@@ -18,7 +18,7 @@ const CategoryCard = ({ title, icon, nested, id }) => {
     useContext(SidebarContext);
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   // react hook
   const [show, setShow] = useState(false);
@@ -74,7 +74,7 @@ const CategoryCard = ({ title, icon, nested, id }) => {
         )}
 
         <div className={`inline-flex items-center justify-between ml-3 text-sm font-medium w-full hover:text-store-600`}>
-          {title}
+          <span className="uppercase">{title}</span>
           {nested?.length > 0 && (
             <span className="transition duration-700 ease-in-out inline-flex loading-none items-end text-gray-400">
               {show ? <IoChevronDownOutline /> : <IoChevronForwardOutline />}

@@ -40,7 +40,7 @@ const Navbar = () => {
 
   const { storeCustomizationSetting } = useGetSetting();
   console.log("storeCustomizationSetting", storeCustomizationSetting);
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   useEffect(() => {
     let isMounted = true;
@@ -142,7 +142,7 @@ const Navbar = () => {
                   <button className="flex items-center gap-1 hover:text-store-500 transition-colors py-2">
                     Categories <IoChevronDownOutline />
                   </button>
-                  <div className="absolute top-full left-0 w-56 bg-white shadow-lg rounded-md py-1 hidden group-hover:block z-50 border border-gray-100">
+                  <div className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-md py-1 hidden group-hover:block z-50 border border-gray-100">
                     {categoriesData?.[0]?.children?.map((category) => (
                       <Link
                         key={category._id}
@@ -152,9 +152,22 @@ const Navbar = () => {
                             .toLowerCase()
                             .replace(/[^A-Z0-9]+/gi, "-")
                         }&_id=${category._id}`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-store-500 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-store-500 transition-colors"
                       >
-                        {showingTranslateValue(category?.name)}
+                        {category?.icon ? (
+                          <Image
+                            src={category.icon}
+                            alt={showingTranslateValue(category?.name)}
+                            width={20}
+                            height={20}
+                            className="object-contain flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-5 h-5 flex-shrink-0"></div>
+                        )}
+                        <span className="font-medium uppercase">
+                          {showingTranslateValue(category?.name)}
+                        </span>
                       </Link>
                     ))}
                   </div>
@@ -209,7 +222,7 @@ const Navbar = () => {
                       height={32}
                       src={userInfo?.image}
                       alt="user"
-                      className="bg-white rounded-full"
+                      className="bg-white rounded-full object-cover w-8 h-8 border-2 border-gray-200"
                     />
                   </Link>
                 ) : userInfo?.name ? (

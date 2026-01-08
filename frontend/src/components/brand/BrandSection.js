@@ -13,7 +13,7 @@ import useGetSetting from "@hooks/useGetSetting";
 const BrandSection = ({ brands = [] }) => {
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   const prevRef = useRef(null);
   const nextRef = useRef(null);
 

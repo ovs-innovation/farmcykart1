@@ -16,7 +16,7 @@ const EmailVerification = ({ params }) => {
   const router = useRouter();
   const { storeCustomizationSetting } = useGetSetting();
   const themeColor =
-    storeCustomizationSetting?.theme?.color || "pink";
+    storeCustomizationSetting?.theme?.color || "green";
 
   // console.log("params", params);
   const { error, mutate, isPending, isError, isSuccess } = useMutation({

@@ -29,11 +29,12 @@ const Discount = ({ discount, product, slug, modal }) => {
         <span
           className={
             modal
-              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              ? "absolute text-sm text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
               : slug
-              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
-              : "absolute text-xs bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
+              ? "absolute text-sm text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              : "absolute text-xs text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
           }
+          style={{ backgroundColor: '#006E44' }}
         >
           {discount}% OFF
         </span>
@@ -42,11 +43,12 @@ const Discount = ({ discount, product, slug, modal }) => {
         <span
           className={
             modal
-              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              ? "absolute text-sm text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
               : slug
-              ? "absolute text-sm bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
-              : "absolute text-xs bg-green-500 text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
+              ? "absolute text-sm text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-4 whitespace-nowrap"
+              : "absolute text-xs text-white py-1.5 px-4 rounded-l-none rounded-r-full font-bold uppercase z-10 left-0 top-2 whitespace-nowrap"
           }
+          style={{ backgroundColor: '#006E44' }}
         >
           {discountPercentage}% OFF
         </span>

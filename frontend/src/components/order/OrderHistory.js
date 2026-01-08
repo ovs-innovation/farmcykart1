@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 const OrderHistory = ({ order, currency }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   return (
     <>

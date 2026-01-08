@@ -1,16 +1,25 @@
 import { useSession } from "next-auth/react";
+import Cookies from "js-cookie";
 
 const getUserSession = () => {
   const { data } = useSession();
 
-  // console.log(
-  //   "data",
-  //   data,
-  //   dayjs(data?.expires).format("DD, MMM, YYYY, h:mm A")
-  // );
+  if (data?.user) {
+    return data.user;
+  }
 
-  const userInfo = data?.user || null;
-  return userInfo;
+  if (typeof window !== "undefined") {
+    const cookieUserInfo = Cookies.get("userInfo");
+    if (cookieUserInfo) {
+      try {
+        return JSON.parse(cookieUserInfo);
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+
+  return null;
 };
 
 export { getUserSession };

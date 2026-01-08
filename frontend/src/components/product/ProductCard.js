@@ -29,7 +29,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false }) => {
   const { showingTranslateValue, getNumberTwo } = useUtilsFunction();
   const router = useRouter();
 
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   const currency = globalSetting?.default_currency || "₹";
 
 

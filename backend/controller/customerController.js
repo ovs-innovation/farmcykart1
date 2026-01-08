@@ -101,21 +101,29 @@ const verifyPhoneNumber = async (req, res) => {
 
 const loginWithPhone = async (req, res) => {
   try {
-    const { phone } = req.body;
-    // In a real app, you should verify the Firebase ID token here using firebase-admin
-    // const { token } = req.body;
-    // const decodedToken = await admin.auth().verifyIdToken(token);
-    // const phone = decodedToken.phone_number;
+    const { phoneNumber, idToken } = req.body;
 
-    let user = await Customer.findOne({ phone });
+    if (!phoneNumber) {
+      return res.status(400).send({
+        message: "Phone number is required.",
+      });
+    }
+
+    if (!idToken) {
+      return res.status(400).send({
+        message: "Firebase ID token is required.",
+      });
+    }
+
+    let user = await Customer.findOne({ phone: phoneNumber });
 
     if (!user) {
-      // Create new user
+      const phoneDigits = phoneNumber.replace(/\D/g, "").slice(-10);
       user = new Customer({
-        phone,
-        name: "New User", // Placeholder
-        email: `${phone}@example.com`, // Placeholder
-        password: bcrypt.hashSync("12345678"), // Placeholder
+        phone: phoneNumber,
+        name: `Customer ${phoneDigits.slice(-4)}`,
+        email: `user${phoneDigits}@farmcykart.com`,
+        password: bcrypt.hashSync(Math.random().toString(36).slice(-8)),
         verified: true,
       });
       await user.save();
@@ -128,6 +136,8 @@ const loginWithPhone = async (req, res) => {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      address: user.address || "",
+      image: user.image || "",
       message: "Login Successful!",
     });
   } catch (err) {

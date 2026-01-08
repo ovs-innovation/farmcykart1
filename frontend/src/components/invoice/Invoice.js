@@ -12,7 +12,7 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
 
   const { getNumberTwo } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   return (
     <div ref={printRef}>
@@ -48,7 +48,7 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
                 <Image
                   width={110}
                   height={40}
-                  src={storeCustomizationSetting?.navbar?.logo || "/logo/logojwellary.png"}
+                  src={storeCustomizationSetting?.navbar?.logo || "/logo/logo.png"}
                   alt="logo"
                 />
               </Link>

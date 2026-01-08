@@ -4,7 +4,7 @@ import useGetSetting from "@hooks/useGetSetting";
 
 const RatingSummary = ({ summary }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   if (!summary) return null;
 

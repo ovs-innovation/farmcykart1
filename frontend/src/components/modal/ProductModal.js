@@ -16,6 +16,7 @@ import Discount from "@components/common/Discount";
 import VariantList from "@components/variants/VariantList";
 import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import useGetSetting from "@hooks/useGetSetting";
 import { handleLogEvent } from "src/lib/analytics";
 
 const ProductModal = ({
@@ -32,6 +33,14 @@ const ProductModal = ({
   const { handleAddItem, setItem, item } = useAddToCart();
   const { lang, showingTranslateValue, getNumber, getNumberTwo } =
     useUtilsFunction();
+  const { storeCustomizationSetting, globalSetting } = useGetSetting();
+
+  // Get dynamic contact number
+  const contactNumber = 
+    
+    storeCustomizationSetting?.footer?.bottom_contact ||
+    globalSetting?.contact ||
+    "+0044235234";
 
   // react hook
   const [value, setValue] = useState("");
@@ -329,7 +338,7 @@ const ProductModal = ({
                   <button
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity < 1}
-                    className={`text-sm leading-4 inline-flex items-center cursor-pointer transition ease-in-out duration-300 font-semibold font-serif text-center justify-center border-0 border-transparent rounded-md focus-visible:outline-none focus:outline-none text-white px-4 ml-4 md:px-6 lg:px-8 py-4 md:py-3.5 lg:py-4 hover:text-white bg-${(require('@hooks/useGetSetting').default()?.storeCustomizationSetting?.theme?.color) || 'pink'}-500 hover:bg-${(require('@hooks/useGetSetting').default()?.storeCustomizationSetting?.theme?.color) || 'pink'}-600 w-full h-12`}
+                    className={`text-sm leading-4 inline-flex items-center cursor-pointer transition ease-in-out duration-300 font-semibold font-serif text-center justify-center border-0 border-transparent rounded-md focus-visible:outline-none focus:outline-none text-white px-4 ml-4 md:px-6 lg:px-8 py-4 md:py-3.5 lg:py-4 hover:text-white bg-${(require('@hooks/useGetSetting').default()?.storeCustomizationSetting?.theme?.color) || 'green'}-500 hover:bg-${(require('@hooks/useGetSetting').default()?.storeCustomizationSetting?.theme?.color) || 'green'}-600 w-full h-12`}
                   >
                     {t("common:addToCart")}
                   </button>
@@ -371,9 +380,12 @@ const ProductModal = ({
               <div className="flex justify-end mt-2">
                 <p className="text-xs sm:text-sm text-gray-600">
                   Call Us To Order By Mobile Number :{" "}
-                  <span className={`text-${(require('@hooks/useGetSetting').default()?.storeCustomizationSetting?.theme?.color) || 'pink'}-700 font-semibold`}>
-                    +0044235234
-                  </span>{" "}
+                  <a 
+                    href={`tel:${contactNumber.replace(/\s+/g, '')}`}
+                    className="text-store-500 font-semibold hover:text-store-600 hover:underline"
+                  >
+                    {contactNumber}
+                  </a>
                 </p>
               </div>
             </div>

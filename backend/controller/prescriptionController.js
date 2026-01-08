@@ -185,17 +185,35 @@ const updatePrescriptionStatus = async (req, res) => {
         if (customer) {
           let cart = customer.cart || [];
           
+          // Prevent duplicate medicines in the same request by grouping by productId
+          const medicineMap = new Map();
           medicines.forEach((medicine) => {
+            const productIdStr = medicine.productId.toString();
+            if (medicineMap.has(productIdStr)) {
+              medicineMap.set(productIdStr, {
+                productId: medicine.productId,
+                quantity: medicineMap.get(productIdStr).quantity + (medicine.quantity || 1),
+              });
+            } else {
+              medicineMap.set(productIdStr, {
+                productId: medicine.productId,
+                quantity: medicine.quantity || 1,
+              });
+            }
+          });
+
+          // Now add/update items in cart
+          medicineMap.forEach((medicine) => {
             const existingItemIndex = cart.findIndex(
               (item) => item.productId.toString() === medicine.productId.toString()
             );
 
             if (existingItemIndex > -1) {
-              cart[existingItemIndex].quantity += (medicine.quantity || 1);
+              cart[existingItemIndex].quantity += medicine.quantity;
             } else {
               cart.push({
                 productId: medicine.productId,
-                quantity: medicine.quantity || 1,
+                quantity: medicine.quantity,
               });
             }
           });

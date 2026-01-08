@@ -1,8 +1,8 @@
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import React, { useEffect, useState, useContext } from "react";
 
-//internal import
 import Label from "@components/form/Label";
 import Error from "@components/form/Error";
 import Dashboard from "@pages/user/dashboard";
@@ -12,14 +12,19 @@ import CustomerServices from "@services/CustomerServices";
 import Uploader from "@components/image-uploader/Uploader";
 import { notifySuccess, notifyError } from "@utils/toast";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { UserContext } from "@context/UserContext";
 
 const UpdateProfile = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { data: session, update } = useSession();
+  const { state: userState, dispatch } = useContext(UserContext);
 
   const { storeCustomizationSetting } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
+
+  const userInfo = userState?.userInfo || session?.user;
+  const isPhoneLogin = userInfo?.email?.includes("@farmcykart.com");
 
   const {
     register,
@@ -29,51 +34,72 @@ const UpdateProfile = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    return notifySuccess("This Feature is disabled for demo!");
+    if (!imageUrl && !userInfo?.image) {
+      notifyError("Please upload a profile photo before saving.");
+      return;
+    }
 
     setLoading(true);
 
     const userData = {
       name: data.name,
       email: data.email,
-      address: data.address,
+      address: data.address || "",
       phone: data.phone,
-      image: imageUrl,
+      image: imageUrl || userInfo?.image || "",
     };
+
     try {
-      const res = await CustomerServices.updateCustomer(
-        session?.user?.id,
-        userData
-      );
+      const userId = userInfo?._id || userInfo?.id;
+      if (!userId) {
+        throw new Error("User ID not found. Please login again.");
+      }
+
+      const response = await CustomerServices.updateCustomer(userId, userData);
+
+      const updatedUserInfo = {
+        ...userInfo,
+        name: data.name,
+        email: data.email,
+        address: data.address || "",
+        phone: data.phone,
+        image: userData.image,
+      };
+
+      Cookies.set("userInfo", JSON.stringify(updatedUserInfo), { expires: 1 });
+      dispatch({ type: "USER_LOGIN", payload: updatedUserInfo });
+
+      if (session?.user) {
+        update({
+          ...session,
+          user: {
+            ...session.user,
+            name: data.name,
+            email: data.email,
+            address: data.address || "",
+            phone: data.phone,
+            image: userData.image,
+          },
+        });
+      }
+
       setLoading(false);
-      //session update
-      update({
-        ...session,
-        user: {
-          ...session.user,
-          name: data.name,
-          address: data.address,
-          phone: data.phone,
-          image: data.image,
-        },
-      });
-      notifySuccess("Profile Update Successfully!");
-      // window.location.reload();
+      notifySuccess("Profile Updated Successfully! 🎉");
     } catch (error) {
       setLoading(false);
-      notifyError(err?.response?.data?.message || err?.message);
+      notifyError(error?.response?.data?.message || error?.message || "Failed to update profile. Please try again.");
     }
   };
 
   useEffect(() => {
-    if (session?.user) {
-      setValue("name", session?.user?.name);
-      setValue("email", session?.user?.email);
-      setValue("address", session?.user?.address);
-      setValue("phone", session?.user?.phone);
-      setImageUrl(session?.user?.image);
+    if (userInfo) {
+      setValue("name", userInfo?.name);
+      setValue("email", userInfo?.email);
+      setValue("address", userInfo?.address || "");
+      setValue("phone", userInfo?.phone);
+      setImageUrl(userInfo?.image || "");
     }
-  }, [session?.user]);
+  }, [userInfo, setValue]);
 
   return (
     <Dashboard
@@ -100,7 +126,14 @@ const UpdateProfile = () => {
               <div>
                 <Label label="Photo" />
                 <div className="mt-1 flex items-center">
-                  <Uploader imageUrl={imageUrl} setImageUrl={setImageUrl} />
+                  <div className="w-full">
+                    <Uploader imageUrl={imageUrl} setImageUrl={setImageUrl} />
+                    {imageUrl && (
+                      <p className="text-xs mt-2 text-center" style={{ color: '#006E44' }}>
+                        ✓ Image ready to save
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -160,14 +193,14 @@ const UpdateProfile = () => {
                           register={register}
                           name="email"
                           type="email"
-                          readOnly={true}
-                          defaultValue={session?.user?.email}
+                          readOnly={false}
                           label={showingTranslateValue(
                             storeCustomizationSetting?.dashboard?.user_email
                           )}
                           placeholder={showingTranslateValue(
                             storeCustomizationSetting?.dashboard?.user_email
                           )}
+                          required={true}
                         />
                         <Error errorName={errors.email} />
                       </div>

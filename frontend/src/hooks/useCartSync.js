@@ -12,6 +12,7 @@ const useCartSync = () => {
   
   const isSyncedRef = useRef(false);
   const lastUserIdRef = useRef(null);
+  const isSyncingRef = useRef(false);
 
   // Sync from Customer.cart (Backend Cart)
   useEffect(() => {
@@ -22,6 +23,7 @@ const useCartSync = () => {
       if (!userId) {
         isSyncedRef.current = false;
         lastUserIdRef.current = null;
+        isSyncingRef.current = false;
         return;
       }
 
@@ -30,16 +32,22 @@ const useCartSync = () => {
         isSyncedRef.current = false;
       }
 
-      // If already synced for this user, skip
-      if (isSyncedRef.current) {
+      // If already synced for this user or currently syncing, skip
+      if (isSyncedRef.current || isSyncingRef.current) {
         return;
       }
+
+      // Mark as syncing to prevent multiple simultaneous syncs
+      isSyncingRef.current = true;
 
       try {
         const res = await CustomerServices.getCustomerById(userId);
         const backendCart = res.cart || [];
 
         if (backendCart.length > 0) {
+          // Collect all items to add/update first
+          const itemsToProcess = [];
+          
           backendCart.forEach((cartItem) => {
             const product = cartItem.productId;
             // Ensure product is valid and populated
@@ -50,7 +58,7 @@ const useCartSync = () => {
             const id = product._id;
             const backendQty = cartItem.quantity || 1;
             
-            // Check if item exists in local cart
+            // Check if item exists in local cart with exact ID
             const localItem = getItem(id);
             
             // Check if any variant of this product exists in local cart
@@ -58,25 +66,36 @@ const useCartSync = () => {
             const hasVariantInCart = items.some(item => String(item.id).startsWith(String(id) + '-'));
 
             if (localItem) {
-              // If local quantity is less than backend quantity, update it
-              if (localItem.quantity < backendQty) {
-                updateItemQuantity(id, backendQty);
+              // If local quantity is different from backend quantity, update it
+              if (localItem.quantity !== backendQty) {
+                itemsToProcess.push({ type: 'update', id, quantity: backendQty });
               }
-            } else if (hasVariantInCart) {
-              // If a variant exists locally, we assume the backend item corresponds to it.
-              // We do NOT add the generic item to avoid duplication.
-              // This handles the case where backend doesn't store variant info but frontend does.
-            } else {
-              // Add new item from backend
-              const newItem = {
-                id: id,
-                price: product.prices?.price || product.prices?.originalPrice || 0,
-                title: product.title?.en || product.title || "Product",
-                image: Array.isArray(product.image) ? product.image[0] : (typeof product.image === 'string' ? product.image : ''),
-                quantity: backendQty,
-                slug: product.slug
-              };
-              addItem(newItem, backendQty);
+            } else if (!hasVariantInCart) {
+              // Only add if no variant exists and no exact match exists
+              itemsToProcess.push({
+                type: 'add',
+                item: {
+                  id: id,
+                  price: product.prices?.price || product.prices?.originalPrice || 0,
+                  title: product.title?.en || product.title || "Product",
+                  image: Array.isArray(product.image) ? product.image[0] : (typeof product.image === 'string' ? product.image : ''),
+                  quantity: backendQty,
+                  slug: product.slug
+                },
+                quantity: backendQty
+              });
+            }
+          });
+
+          // Process all updates/adds in batch
+          itemsToProcess.forEach((action) => {
+            if (action.type === 'update') {
+              updateItemQuantity(action.id, action.quantity);
+            } else if (action.type === 'add') {
+              // Double-check item doesn't exist before adding
+              if (!getItem(action.item.id)) {
+                addItem(action.item, action.quantity);
+              }
             }
           });
         }
@@ -87,11 +106,14 @@ const useCartSync = () => {
 
       } catch (err) {
         console.error("Error syncing cart:", err);
+      } finally {
+        isSyncingRef.current = false;
       }
     };
 
     syncBackendCart();
-  }, [userInfo, items, addItem, updateItemQuantity, getItem]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo?._id, userInfo?.id]); // Only sync when user changes, not when cart items change
 };
 
 export default useCartSync;

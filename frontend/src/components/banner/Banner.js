@@ -8,7 +8,7 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 const Banner = () => {
   const { storeCustomizationSetting } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   console.log(storeCustomizationSetting?.home?.promotion_button_link)
 
   return (

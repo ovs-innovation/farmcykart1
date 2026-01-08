@@ -206,10 +206,22 @@ const StoreHome = () => {
     textEdit,
     setTextEdit,
     termsConditionsTextEdit,
+    setTermsConditionsTextEdit,
+    refundReturnPolicy,
+    setRefundReturnPolicy,
+    refundReturnPolicyHeaderBg,
+    setRefundReturnPolicyHeaderBg,
+    refundReturnPolicyTextEdit,
+    setRefundReturnPolicyTextEdit,
+    shippingDeliveryPolicy,
+    setShippingDeliveryPolicy,
+    shippingDeliveryPolicyHeaderBg,
+    setShippingDeliveryPolicyHeaderBg,
+    shippingDeliveryPolicyTextEdit,
+    setShippingDeliveryPolicyTextEdit,
     isSubmitting,
     themeColor,
     // showChild,
-    setTermsConditionsTextEdit,
   } = useStoreHomeSubmit();
 
   useEffect(() => {
@@ -670,6 +682,18 @@ const StoreHome = () => {
                   termsConditionsHeaderBg={termsConditionsHeaderBg}
                   termsConditionsTextEdit={termsConditionsTextEdit}
                   setTermsConditionsTextEdit={setTermsConditionsTextEdit}
+                  refundReturnPolicy={refundReturnPolicy}
+                  setRefundReturnPolicy={setRefundReturnPolicy}
+                  refundReturnPolicyHeaderBg={refundReturnPolicyHeaderBg}
+                  setRefundReturnPolicyHeaderBg={setRefundReturnPolicyHeaderBg}
+                  refundReturnPolicyTextEdit={refundReturnPolicyTextEdit}
+                  setRefundReturnPolicyTextEdit={setRefundReturnPolicyTextEdit}
+                  shippingDeliveryPolicy={shippingDeliveryPolicy}
+                  setShippingDeliveryPolicy={setShippingDeliveryPolicy}
+                  shippingDeliveryPolicyHeaderBg={shippingDeliveryPolicyHeaderBg}
+                  setShippingDeliveryPolicyHeaderBg={setShippingDeliveryPolicyHeaderBg}
+                  shippingDeliveryPolicyTextEdit={shippingDeliveryPolicyTextEdit}
+                  setShippingDeliveryPolicyTextEdit={setShippingDeliveryPolicyTextEdit}
                   isSubmitting={isSubmitting}
                 />
               </form>

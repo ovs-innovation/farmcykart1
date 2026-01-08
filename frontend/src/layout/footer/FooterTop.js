@@ -9,6 +9,7 @@ import CMSkeleton from "@components/preloader/CMSkeleton";
 
 const FooterTop = () => {
   const { storeCustomizationSetting, loading, error } = useGetSetting();
+  console.log("storeCustomizationSetting app", storeCustomizationSetting?.footer);
 
   return (
     <>

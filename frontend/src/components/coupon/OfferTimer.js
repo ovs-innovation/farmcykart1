@@ -5,7 +5,7 @@ import useGetSetting from "@hooks/useGetSetting";
 const OfferTimer = ({ expiryTimestamp, darkGreen }) => {
   const { seconds, minutes, hours, days } = useTimer({ expiryTimestamp });
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   return (
     <>

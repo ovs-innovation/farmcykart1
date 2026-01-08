@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 
 //internal imports
 import SettingServices from "@services/SettingServices";
+import useGetSetting from "@hooks/useGetSetting";
+import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const BottomNavigation = ({ or, route, desc, pageName, loginTitle }) => {
   const buttonStyles = `
@@ -21,6 +23,9 @@ const BottomNavigation = ({ or, route, desc, pageName, loginTitle }) => {
     queryFn: async () => await SettingServices.getStoreSetting(),
     staleTime: 4 * 60 * 1000, // Api request after 4 minutes
   });
+
+  const { storeCustomizationSetting } = useGetSetting();
+  const { showingTranslateValue } = useUtilsFunction();
 
   return (
     <>
@@ -40,9 +45,10 @@ const BottomNavigation = ({ or, route, desc, pageName, loginTitle }) => {
                   redirect: true,
                 })
               }
-              className={
-                buttonStyles + "bg-green-600 text-white hover:bg-green-700"
-              }
+              className={buttonStyles}
+              style={{ backgroundColor: '#006E44', color: 'white' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#005a37'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#006E44'}
             >
               <ImGoogle className="text-2xl" />
               <span className="ml-2">{loginTitle} With Google</span>
@@ -93,6 +99,24 @@ const BottomNavigation = ({ or, route, desc, pageName, loginTitle }) => {
             <span className="capitalize">{pageName}</span>
           </Link>
         </div>
+      </div>
+
+      {/* Privacy Policy & Terms & Conditions Button */}
+      <div className="mt-4 mb-4">
+        <Link
+          href="/privacy-policy"
+          className="text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 flex flex-col items-center justify-center text-center w-full"
+          style={{ backgroundColor: '#006E44' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#005a37'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#006E44'}
+        >
+          <span className="text-sm leading-tight">
+            {showingTranslateValue(storeCustomizationSetting?.privacy_policy?.title) || "Privacy Policy"} and
+          </span>
+          <span className="text-sm leading-tight">
+            {showingTranslateValue(storeCustomizationSetting?.term_and_condition?.title) || "Terms & Conditions"}
+          </span>
+        </Link>
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import { FiShield, FiLock, FiEye, FiFileText, FiAlertCircle, FiCheckCircle, FiUser } from "react-icons/fi";
 
 //internal import
 import Layout from "@layout/Layout";
@@ -10,7 +11,6 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 const PrivacyPolicy = () => {
   const { storeCustomizationSetting, loading, error } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
-  // console.log("data", storeCustomizationSetting);
 
   return (
     <Layout title="Privacy Policy" description="This is privacy policy page">
@@ -20,97 +20,101 @@ const PrivacyPolicy = () => {
           storeCustomizationSetting?.privacy_policy?.title
         )}
       />
-      <div className="bg-white">
-        <div className="max-w-screen-2xl mx-auto lg:py-20 py-10 px-4 sm:px-10 text-justify">
-          <CMSkeleton
-            html
-            count={15}
-            height={15}
-            error={error}
-            loading={loading}
-            data={storeCustomizationSetting?.privacy_policy?.description}
-          />
-          <br />
-          <CMSkeleton count={15} height={15} loading={loading} />
-          <br />
-          <CMSkeleton count={15} height={15} loading={loading} />
-          {/* <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-consent")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-consent-docs")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-information")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-information-docs1")}</p>
-              <p>{t("common:privacy-policy-information-docs2")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-use-information")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-use-information-docs")}</p>
+      <div className="bg-gray-50">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-10 py-10">
+          {/* Main Content Card */}
+          <div className=" rounded-xl overflow-hidden">
+            <div className="">
+              {/* Icon Section */}
+               
 
-              <ol>
-                <li>{t("common:privacy-policy-use-information-docs1")}</li>
-                <li>{t("common:privacy-policy-use-information-docs2")}</li>
-                <li>{t("common:privacy-policy-use-information-docs3")}</li>
-                <li>{t("common:privacy-policy-use-information-docs4")}</li>
-                <li>{t("common:privacy-policy-use-information-docs5")}</li>
-                <li>{t("common:privacy-policy-use-information-docs6")}</li>
-                <li>{t("common:privacy-policy-use-information-docs7")}</li>
-              </ol>
+              {/* Last Updated Section */}
+              
+
+              {/* Content Section */}
+              <div className="privacy-policy-content">
+                <style dangerouslySetInnerHTML={{
+                  __html: `
+                    .privacy-policy-content h1, 
+                    .privacy-policy-content h2, 
+                    .privacy-policy-content h3, 
+                    .privacy-policy-content h4, 
+                    .privacy-policy-content h5, 
+                    .privacy-policy-content h6,
+                    .privacy-policy-content strong {
+                      font-weight: 400 !important;
+                    }
+                  `
+                }} />
+                <div className="prose prose-lg max-w-none">
+                  <div className="text-gray-700 leading-relaxed space-y-6 text-justify">
+                    <CMSkeleton
+                      html
+                      count={15}
+                      height={15}
+                      error={error}
+                      loading={loading}
+                      data={storeCustomizationSetting?.privacy_policy?.description}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Loading States */}
+              {loading && (
+                <div className="mt-6 space-y-4">
+                  <CMSkeleton count={15} height={15} loading={loading} />
+                  <CMSkeleton count={15} height={15} loading={loading} />
+                </div>
+              )}
+
+              {/* Quick Info Cards */}
+              {!loading && !error && (
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <FiLock className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Data Protection</h3>
+                        <p className="text-sm text-gray-600">Your personal information is encrypted and securely stored using industry-standard security measures.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50 border-l-4 border-purple-500 p-5 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <FiEye className="w-6 h-6 text-purple-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Transparency</h3>
+                        <p className="text-sm text-gray-600">We clearly explain how we collect, use, and protect your personal information.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Section */}
+              {!loading && !error && (
+                <div className="mt-10 pt-8 border-t border-gray-200">
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="flex items-start gap-3">
+                      <FiAlertCircle className="w-6 h-6 text-store-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Have Questions About Privacy?</h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          If you have any questions or concerns about our privacy policy, please contact our privacy team.
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-store-600">
+                          <FiShield className="w-4 h-4" />
+                          <span>Your privacy is our priority</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-log-file")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-log-file-docs")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-advertising")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-advertising-docs")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-third-party")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-third-party-docs1")}</p>
-              <p>{t("common:privacy-policy-third-party-docs2")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-ccpa-rights")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-ccpa-rights-docs")}</p>
-            </div>
-          </div>
-          <div className="mb-8 lg:mb-12 last:mb-0">
-            <h2 className="text-xl xl:text-2xl xl:leading-7 font-semibold font-serif mb-2 lg:mb-4">
-              {t("common:privacy-policy-children-information")}
-            </h2>
-            <div className="font-sans leading-7">
-              <p>{t("common:privacy-policy-children-information-docs1")}</p>
-              <p>{t("common:privacy-policy-children-information-docs2")}</p>
-            </div>
-          </div> */}
         </div>
       </div>
     </Layout>

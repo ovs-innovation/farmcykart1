@@ -151,7 +151,7 @@ const MainCarousel = () => {
                 </p>
                 {/* <Link
                   href={item.url}
-                  className={`hidden sm:inline-block lg:inline-block text-sm leading-6 font-serif font-medium mt-6 px-6 py-2 bg-${storeCustomizationSetting?.theme?.color || 'pink'}-500 text-center rounded-md text-white hover:bg-${storeCustomizationSetting?.theme?.color || 'pink'}-600`}
+                  className={`hidden sm:inline-block lg:inline-block text-sm leading-6 font-serif font-medium mt-6 px-6 py-2 bg-${storeCustomizationSetting?.theme?.color || 'green'}-500 text-center rounded-md text-white hover:bg-${storeCustomizationSetting?.theme?.color || 'green'}-600`}
                 >
                   {item.buttonName}
                 </Link> */}

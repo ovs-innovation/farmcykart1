@@ -30,7 +30,7 @@ const Category = () => {
     useContext(SidebarContext);
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const [activeTab, setActiveTab] = useState("category");
 
@@ -65,7 +65,7 @@ const Category = () => {
               <Image
                 width={100}
                 height={38}
-                src="/logo/logojwellary.png"
+                src="/logo/logo.png"
                 alt="logo"
               />
             </Link>

@@ -5,7 +5,7 @@ import useGetSetting from "@hooks/useGetSetting";
 
 const Loading = ({ loading }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   return (
     <div className="text-lg text-center py-6">
       <ScaleLoader

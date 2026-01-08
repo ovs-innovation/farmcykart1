@@ -13,7 +13,7 @@ const VariantList = ({
 }) => {
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink"; 
+  const storeColor = storeCustomizationSetting?.theme?.color || "green"; 
   // Helper function to get variant details including hex color
   const getVariantDetails = (attributeId, variantId) => {
     const attribute = varTitle?.find(attr => attr._id === attributeId);

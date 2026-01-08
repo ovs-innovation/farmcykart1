@@ -25,7 +25,7 @@ const CategoryCarousel = () => {
   const { showingTranslateValue } = useUtilsFunction();
   const { isLoading, setIsLoading } = useContext(SidebarContext);
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const {
     data,
@@ -49,7 +49,7 @@ const CategoryCarousel = () => {
 
   return (
     <>
-      <div className="relative category-carousel-wrapper my-10">
+      <div className="relative category-carousel-wrapper my-10 px-8 md:px-12">
         <Swiper
           onInit={(swiper) => {
             swiper.params.navigation.prevEl = prevRef.current;
@@ -58,37 +58,37 @@ const CategoryCarousel = () => {
             swiper.navigation.update();
           }}
           autoplay={{
-            delay: 3000,
+            delay: 3500,
             disableOnInteraction: false,
           }}
-          spaceBetween={10}
+          spaceBetween={24}
           navigation={true}
           allowTouchMove={true}
           loop={true}
           breakpoints={{
-            // when window width is >= 320px
             320: {
               slidesPerView: 2,
+              spaceBetween: 16,
             },
-            // when window width is >= 480px
             480: {
-              slidesPerView: 3,
+              slidesPerView: 2.5,
+              spaceBetween: 20,
             },
-            // when window width is >= 640px
             640: {
-              slidesPerView: 4,
+              slidesPerView: 3.5,
+              spaceBetween: 24,
             },
-            // when window width is >= 768px
             768: {
-              slidesPerView: 6,
+              slidesPerView: 4,
+              spaceBetween: 24,
             },
-            // when window width is >= 1024px
             1024: {
-              slidesPerView: 8,
+              slidesPerView: 4.5,
+              spaceBetween: 28,
             },
-            // when window width is >= 1280px
             1280: {
-              slidesPerView: 10,
+              slidesPerView: 5,
+              spaceBetween: 32,
             },
           }}
           modules={[Autoplay, Navigation, Pagination, Controller]}
@@ -107,44 +107,61 @@ const CategoryCarousel = () => {
                   onClick={() =>
                     handleCategoryClick(category?._id, category.name)
                   }
-                  className="text-center cursor-pointer p-3 bg-white rounded-lg hover:shadow-sm transition-all duration-300"
+                  className="text-center cursor-pointer p-4 md:p-5 bg-white rounded-2xl hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 hover:border-store-300"
                 >
-                  <div className="bg-white p-2 mx-auto w-12 h-12 rounded-full shadow-md flex items-center justify-center">
-                    <div className="relative w-8 h-8">
-                      <Image
-                        src={
-                          category?.icon ||
-                          "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
-                        }
-                        alt="category"
-                        width={32}
-                        height={32}
-                        className="object-contain"
-                      />
+                  {/* Circular Image Container */}
+                  <div className="relative mx-auto mb-4">
+                    {/* Outer Glow Effect */}
+                    <div className="absolute inset-0 bg-store-100 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform scale-125"></div>
+                    
+                    {/* Main Circle */}
+                    <div className="relative flex items-center justify-center transition-all duration-500 transform group-hover:scale-110">
+                      <div className="relative w-16 h-16 md:w-20 md:h-20">
+                        <Image
+                          src={
+                            category?.icon ||
+                            "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+                          }
+                          alt={showingTranslateValue(category?.name) || "category"}
+                          width={80}
+                          height={80}
+                          className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-110"
+                        />
+                      </div>
+                      
+                       
                     </div>
                   </div>
 
+                  {/* Category Name */}
                   <h3
-                    className={`text-xs text-gray-600 mt-2 font-serif group-hover:text-store-500 truncate`}
+                    className={`text-sm md:text-base font-semibold text-gray-700 mt-2 font-serif group-hover:text-store-600 transition-colors duration-300 uppercase tracking-wide line-clamp-2 min-h-[2.5rem] flex items-center justify-center`}
                   >
                     {showingTranslateValue(category?.name)}
                   </h3>
+                  
+                  {/* Hover Indicator */}
+                  <div className="mt-3 h-1 w-0 mx-auto bg-gradient-to-r from-store-400 to-store-600 rounded-full group-hover:w-12 transition-all duration-500"></div>
                 </div>
               </SwiperSlide>
             ))
           )}
         </Swiper>
+        
+        {/* Navigation Buttons */}
         <button
           ref={prevRef}
-          className="prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-2 text-gray-600 hover:text-store-500 transition-all"
+          className="prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-xl rounded-full p-3 text-gray-700 hover:text-white hover:bg-store-500 transition-all duration-300 transform hover:scale-110 border border-gray-200 hover:border-store-500"
+          aria-label="Previous categories"
         >
-          <IoChevronBackOutline size={20} />
+          <IoChevronBackOutline size={24} />
         </button>
         <button
           ref={nextRef}
-          className="next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-2 text-gray-600 hover:text-store-500 transition-all"
+          className="next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-xl rounded-full p-3 text-gray-700 hover:text-white hover:bg-store-500 transition-all duration-300 transform hover:scale-110 border border-gray-200 hover:border-store-500"
+          aria-label="Next categories"
         >
-          <IoChevronForward size={20} />
+          <IoChevronForward size={24} />
         </button>
       </div>
     </>

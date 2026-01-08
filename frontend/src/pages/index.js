@@ -21,10 +21,15 @@ import ProductCard from "@components/product/ProductCard";
 import HeroBanner from "@components/banner/HeroBanner";
 import OrderOptions from "@components/cta-card/OrderOptions";
 import FeatureCategory from "@components/category/FeatureCategory";
+import HealthCheckupBanner from "@components/banner/HealthCheckupBanner";
+import CategoryCards from "@components/category/CategoryCards";
 import AttributeServices from "@services/AttributeServices";
 import CMSkeleton from "@components/preloader/CMSkeleton";
 import BrandSection from "@components/brand/BrandSection";
+import TrustedBrandsSection from "@components/brand/TrustedBrandsSection";
 import BrandServices from "@services/BrandServices";
+import SectionHeader from "@components/common/SectionHeader";
+import SliderCarousel from "@components/carousel/SliderCarousel";
 
 const Home = ({ popularProducts, discountProducts, bestSellingProducts, attributes, brands }) => {
   const router = useRouter();
@@ -57,6 +62,7 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                   <div className="w-full">
                     <OrderOptions />
                   </div>
+                  
                 </div>
                 {storeCustomizationSetting?.home?.promotion_banner_status && (
                   <div
@@ -72,63 +78,32 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
             {storeCustomizationSetting?.home?.featured_status && (
               <div className="bg-white lg:py-16 py-10">
                 <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-                  <div className="mb-10 flex justify-start">
-                    <div className="text-left w-full">
-                      <h2 className="text-xl lg:text-2xl mb-2 font-serif font-semibold">
-                        <CMSkeleton
-                          count={1}
-                          height={30}
-                          loading={loading}
-                          data={storeCustomizationSetting?.home?.feature_title}
-                        />
-                      </h2>
-                      <p className="text-base font-sans text-gray-600 leading-6">
-                        <CMSkeleton
-                          count={4}
-                          height={10}
-                          error={error}
-                          loading={loading}
-                          data={
-                            storeCustomizationSetting?.home?.feature_description
-                          }
-                        />
-                      </p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    title={storeCustomizationSetting?.home?.feature_title || "Featured Categories"}
+                    subtitle={storeCustomizationSetting?.home?.feature_description || "Explore our handpicked selection of featured categories"}
+                    loading={loading}
+                    error={error}
+                    align="left"
+                  />
 
                   <FeatureCategory attributes={attributes} />
                 </div>
               </div>
             )}
 
-
+            {/* Trusted Brands Section */}
+            <TrustedBrandsSection brands={brands} />
 
             {/* popular products */}
             {storeCustomizationSetting?.home?.popular_products_status && (
               <div className="bg-gray-50 lg:py-16 py-10 mx-auto max-w-screen-2xl px-3 sm:px-10">
-                <div className="mb-10 flex justify-start">
-                  <div className="text-left w-full">
-                    <h2 className="text-xl lg:text-2xl mb-2 font-serif font-semibold">
-                      <CMSkeleton
-                        count={1}
-                        height={30}
-                        loading={loading}
-                        data={storeCustomizationSetting?.home?.popular_title}
-                      />
-                    </h2>
-                    <p className="text-base font-sans text-gray-600 leading-6">
-                      <CMSkeleton
-                        count={5}
-                        height={10}
-                        error={error}
-                        loading={loading}
-                        data={
-                          storeCustomizationSetting?.home?.popular_description
-                        }
-                      />
-                    </p>
-                  </div>
-                </div>
+                <SectionHeader
+                  title={storeCustomizationSetting?.home?.popular_title || "Popular Products"}
+                  subtitle={storeCustomizationSetting?.home?.popular_description || "Discover our most loved and trending products"}
+                  loading={loading}
+                  error={error}
+                  align="left"
+                />
                 <div className="flex w-full relative group">
                   <div className="w-full">
                     {loading ? (
@@ -195,19 +170,19 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
               </div>
             )}
 
+           
+
+                  <div className="w-full px-3 sm:px-10">
+                    <HealthCheckupBanner />
+                  </div>
             {/* best selling products */}
             {bestSellingProducts?.length > 0 && (
               <div className="bg-white lg:py-16 py-10 mx-auto max-w-screen-2xl px-3 sm:px-10">
-                <div className="mb-10 flex justify-start">
-                  <div className="text-left w-full">
-                    <h2 className="text-xl lg:text-2xl mb-2 font-serif font-semibold">
-                      Best Selling Products
-                    </h2>
-                    <p className="text-base font-sans text-gray-600 leading-6">
-                      We have compiled the best selling products for you
-                    </p>
-                  </div>
-                </div>
+                <SectionHeader
+                  title="Best Selling Products"
+                  subtitle="We have compiled the best selling products for you"
+                  align="left"
+                />
                 <div className="flex w-full relative group">
                   <div className="w-full">
                     {loading ? (
@@ -269,7 +244,8 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                 </div>
               </div>
             )}
-
+            {/* Slider Carousel */}
+            <SliderCarousel />
             {/* //  promotional banner card */}
             {storeCustomizationSetting?.home?.delivery_status && 
              (storeCustomizationSetting?.home?.promotional_banner_image1 || 
@@ -333,32 +309,13 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                   id="discount"
                   className="bg-gray-50 lg:py-16 py-10 mx-auto max-w-screen-2xl px-3 sm:px-10"
                 >
-                  <div className="mb-10 flex justify-start">
-                    <div className="text-left w-full">
-                      <h2 className="text-xl lg:text-2xl mb-2 font-serif font-semibold">
-                        <CMSkeleton
-                          count={1}
-                          height={30}
-                          loading={loading}
-                          data={
-                            storeCustomizationSetting?.home
-                              ?.latest_discount_title
-                          }
-                        />
-                      </h2>
-                      <p className="text-base font-sans text-gray-600 leading-6">
-                        <CMSkeleton
-                          count={5}
-                          height={20}
-                          loading={loading}
-                          data={
-                            storeCustomizationSetting?.home
-                              ?.latest_discount_description
-                          }
-                        />
-                      </p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    title={storeCustomizationSetting?.home?.latest_discount_title || "Discounted Products"}
+                    subtitle={storeCustomizationSetting?.home?.latest_discount_description || "Grab amazing deals on our discounted products"}
+                    loading={loading}
+                    error={error}
+                    align="left"
+                  />
                   <div className="flex w-full relative group">
                     <div className="w-full">
                       {loading ? (
@@ -424,6 +381,9 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                   </div>
                 </div>
               )}
+
+              {/* Category Cards Section */}
+            <CategoryCards />
           </div>
         </Layout>
       )}

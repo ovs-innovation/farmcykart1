@@ -2,22 +2,23 @@ import Cookies from "js-cookie";
 import { useSession } from "next-auth/react";
 import React, { createContext, useEffect, useReducer } from "react";
 
-//internal imports
 import { setToken } from "@services/httpServices";
 import LoadingForSession from "@components/preloader/LoadingForSession";
 
 export const UserContext = createContext();
 
-const initialState = {
-  userInfo: Cookies.get("userInfo")
-    ? JSON.parse(Cookies.get("userInfo"))
-    : null,
-  shippingAddress: Cookies.get("shippingAddress")
-    ? JSON.parse(Cookies.get("shippingAddress"))
-    : {},
-  couponInfo: Cookies.get("couponInfo")
-    ? JSON.parse(Cookies.get("couponInfo"))
-    : {},
+const getInitialState = () => {
+  const userInfoCookie = Cookies.get("userInfo");
+  const shippingAddressCookie = Cookies.get("shippingAddress");
+  const couponInfoCookie = Cookies.get("couponInfo");
+
+  return {
+    userInfo: userInfoCookie ? JSON.parse(userInfoCookie) : null,
+    shippingAddress: shippingAddressCookie
+      ? JSON.parse(shippingAddressCookie)
+      : {},
+    couponInfo: couponInfoCookie ? JSON.parse(couponInfoCookie) : {},
+  };
 };
 
 function reducer(state, action) {
@@ -36,15 +37,28 @@ function reducer(state, action) {
 
     case "SAVE_COUPON":
       return { ...state, couponInfo: action.payload };
+
+    default:
+      return state;
   }
 }
 
 export const UserProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, null, getInitialState);
   const { data: session, status } = useSession();
-  // const status = "loading";
 
   useEffect(() => {
+    const cookieUserInfo = Cookies.get("userInfo");
+    
+    if (cookieUserInfo) {
+      const parsedUser = JSON.parse(cookieUserInfo);
+      if (parsedUser?.token) {
+        setToken(parsedUser.token);
+        dispatch({ type: "USER_LOGIN", payload: parsedUser });
+        return;
+      }
+    }
+
     if (status === "authenticated" && session?.user) {
       setToken(session.user.token);
       const user = {
@@ -53,14 +67,30 @@ export const UserProvider = ({ children }) => {
       };
       Cookies.set("userInfo", JSON.stringify(user), { expires: 1 });
       dispatch({ type: "USER_LOGIN", payload: user });
-    } else if (status === "unauthenticated") {
+    } else if (status === "unauthenticated" && !cookieUserInfo) {
       setToken(null);
       Cookies.remove("userInfo");
       dispatch({ type: "USER_LOGOUT" });
     }
   }, [session, status]);
 
-  if (status === "loading") {
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const cookieUserInfo = Cookies.get("userInfo");
+      if (cookieUserInfo) {
+        const parsedUser = JSON.parse(cookieUserInfo);
+        if (parsedUser?.token) {
+          setToken(parsedUser.token);
+          dispatch({ type: "USER_LOGIN", payload: parsedUser });
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  if (status === "loading" && !state.userInfo) {
     return <LoadingForSession />;
   }
 

@@ -4,7 +4,7 @@ import useGetSetting from "@hooks/useGetSetting";
 
 const SelectOption = ({ name, label, options, onChange, value, register }) => {
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   return (
     <>
       <Label label={label} />

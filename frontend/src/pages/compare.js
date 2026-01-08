@@ -25,7 +25,7 @@ const Compare = ({ attributes }) => {
   const [compareItems, setCompareItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   const currency = globalSetting?.default_currency || "₹";
 
   useEffect(() => {

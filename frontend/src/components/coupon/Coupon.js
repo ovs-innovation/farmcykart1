@@ -15,7 +15,7 @@ const Coupon = ({ couponInHome }) => {
   const [copiedCode, setCopiedCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["coupon"],

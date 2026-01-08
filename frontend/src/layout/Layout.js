@@ -13,18 +13,25 @@ import FeatureCard from "@components/feature-card/FeatureCard";
 import useGetSetting from "@hooks/useGetSetting";
 import { getPalette } from "@utils/themeColors";
 import useCartSync from "@hooks/useCartSync";
+import LocationAutoRequest from "@components/location/LocationAutoRequest";
 
 const Layout = ({ title, description, children, hideMobileHeader }) => {
-  const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const { storeCustomizationSetting, globalSetting } = useGetSetting();
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
   const palette = getPalette(storeColor);
 
   // Sync prescription medicines to cart
   useCartSync();
 
+  // Get dynamic title and favicon from settings
+  const siteTitle = storeCustomizationSetting?.seo?.meta_title || globalSetting?.shop_name || "Farmacykart";
+  const favicon = storeCustomizationSetting?.seo?.favicon || globalSetting?.logo || "/favicon.png";
+  const defaultDescription = storeCustomizationSetting?.seo?.meta_description || description || "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions";
+
   return (
     <>
       <ToastContainer />
+      <LocationAutoRequest />
 
       <div className="font-sans">
         <Head>
@@ -45,12 +52,12 @@ const Layout = ({ title, description, children, hideMobileHeader }) => {
             `}
           </style>
           <title>
-            {title
-              ? `E-HealthandHerbs | ${title}`
-              : "E-HealthandHerbs – Customized Promotional Items & Advertising Products Online Store"}
+            {title ? `${siteTitle} | ${title}` : siteTitle}
           </title>
-          {description && <meta name="description" content={description || "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions"} />}
-          <link ref="icon" href="https://res.cloudinary.com/dhqcwkpzp/image/upload/v1750844959/download_wfxk5k.webp" />
+          <meta name="description" content={description || defaultDescription} />
+          <link rel="icon" href={favicon} />
+          <link rel="shortcut icon" href={favicon} />
+          <link rel="apple-touch-icon" href={favicon} />
         </Head>
         {/* Desktop header */}
         <div className="hidden lg:block">
@@ -65,7 +72,7 @@ const Layout = ({ title, description, children, hideMobileHeader }) => {
         {!hideMobileHeader && <MobileBottomNavigation />}
 
         {/* Add top padding on mobile so content doesn't sit behind fixed header */}
-        <div className={`bg-gray-50 ${hideMobileHeader ? "pt-0" : "pt-16"} lg:pt-0 pb-16 lg:pb-0`}>{children}</div>
+        <div className={`${hideMobileHeader ? "pt-0" : "pt-16"} lg:pt-0 lg:mt-0 pb-16 lg:pb-0`}>{children}</div>
         <div className="  w-full">
           <FooterTop  />
           <div className="w-full">

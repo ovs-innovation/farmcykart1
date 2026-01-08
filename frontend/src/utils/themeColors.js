@@ -267,7 +267,7 @@ const colors = {
 };
 
 export const getPalette = (tokenOrHex) => {
-  if (!tokenOrHex) return colors.pink;
+  if (!tokenOrHex) return colors.green;
 
   if (tokenOrHex.startsWith("#") || tokenOrHex.startsWith("linear-gradient")) {
     // Simple hex to palette generation
@@ -287,5 +287,5 @@ export const getPalette = (tokenOrHex) => {
     };
   }
 
-  return colors[tokenOrHex] || colors.pink;
+  return colors[tokenOrHex] || colors.green;
 };

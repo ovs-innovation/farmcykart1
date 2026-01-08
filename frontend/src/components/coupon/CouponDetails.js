@@ -10,7 +10,7 @@ const CouponDetails = ({ coupon }) => {
   const [copiedCode, setCopiedCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { storeCustomizationSetting } = useGetSetting();
-  const storeColor = storeCustomizationSetting?.theme?.color || "pink";
+  const storeColor = storeCustomizationSetting?.theme?.color || "green";
 
   const handleCopied = (code) => {
     setCopiedCode(code);
