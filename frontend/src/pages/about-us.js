@@ -180,7 +180,7 @@ const AboutUs = () => {
                 </p>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-6 xl:gap-x-8">
+            {/* <div className="grid sm:grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-6 xl:gap-x-8">
               <div className="max-w-sm">
                 <Image
                   width={420}
@@ -325,7 +325,7 @@ const AboutUs = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

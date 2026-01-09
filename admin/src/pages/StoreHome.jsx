@@ -620,7 +620,7 @@ const StoreHome = () => {
         {tabName === "about-us-setting" && (
           <AnimatedContent>
             <div className="sm:container md:p-6 p-4 mx-auto bg-white  dark:bg-gray-800 dark:text-gray-200 rounded-lg">
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit)} id="about-us-form">
                 <AboutUs
                   isSave={isSave}
                   register={register}
@@ -654,6 +654,8 @@ const StoreHome = () => {
                   setOurFounderSixImage={setOurFounderSixImage}
                   ourFounderSixImage={ourFounderSixImage}
                   isSubmitting={isSubmitting}
+                  handleSubmit={handleSubmit}
+                  onSubmit={onSubmit}
                 />
               </form>
             </div>

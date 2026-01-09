@@ -525,7 +525,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-white font-bold hover:text-store-200 transition-colors duration-300"
             >
-              E-HealthandHerbs
+              Farmacykart
             </Link>
             , All rights reserved.
           </p>

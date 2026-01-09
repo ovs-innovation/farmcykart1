@@ -51,6 +51,8 @@ const AboutUs = ({
   setOurFounderSixImage,
   ourFounderSixImage,
   isSubmitting,
+  handleSubmit,
+  onSubmit,
 }) => {
   const { t } = useTranslation();
 
@@ -58,7 +60,7 @@ const AboutUs = ({
     <>
       <div className="grid grid-cols-12 font-sans pr-4">
         <div className="col-span-12 md:col-span-12 lg:col-span-12">
-          <div className="sticky top-0 z-20 flex justify-end">
+          <div className="sticky top-0 z-20 flex justify-end bg-white dark:bg-gray-800 pb-2">
             {isSubmitting ? (
               <Button disabled={true} type="button" className="h-10 px-6">
                 <img
@@ -73,7 +75,10 @@ const AboutUs = ({
                 </span>
               </Button>
             ) : (
-              <Button type="submit" className="h-10 px-6 ">
+              <Button 
+                type="submit"
+                className="h-10 px-6"
+              >
                 {" "}
                 {isSave ? t("SaveBtn") : t("UpdateBtn")}
               </Button>
@@ -198,7 +203,6 @@ const AboutUs = ({
 
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="About Us Top Description"
                     name="about_us_top_description"
@@ -206,7 +210,7 @@ const AboutUs = ({
                     placeholder="About Us Top Description"
                   />
                   <Error
-                    errorName={(errors.name = "about_us_top_description")}
+                    errorName={errors.about_us_top_description}
                   />
                 </div>
               </div>
@@ -252,7 +256,6 @@ const AboutUs = ({
 
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="About Us Top Box One Description"
                     name="about_us_top_box_one_description"
@@ -260,9 +263,7 @@ const AboutUs = ({
                     placeholder={t("BoxOneDescription")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_us_top_box_one_description")
-                    }
+                    errorName={errors.about_us_top_box_one_description}
                   />
                 </div>
               </div>
@@ -280,9 +281,7 @@ const AboutUs = ({
                     placeholder={t("BoxTwoTitle")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_page_Top_left_box_two_title")
-                    }
+                    errorName={errors.about_page_Top_left_box_two_title}
                   />
                 </div>
               </div>
@@ -312,7 +311,6 @@ const AboutUs = ({
 
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="About Us Top Box Two Description"
                     name="about_us_top_box_two_description"
@@ -320,9 +318,7 @@ const AboutUs = ({
                     placeholder={t("BoxTwoDescription")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_us_top_box_two_description")
-                    }
+                    errorName={errors.about_us_top_box_two_description}
                   />
                 </div>
               </div>
@@ -402,7 +398,6 @@ const AboutUs = ({
 
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="About Us Middle Description"
                     name="about_us_middle_description_one"
@@ -410,9 +405,7 @@ const AboutUs = ({
                     placeholder={t("MiddleDescriptionOne")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_us_middle_description_one")
-                    }
+                    errorName={errors.about_us_middle_description_one}
                   />
                 </div>
               </div>
@@ -424,7 +417,6 @@ const AboutUs = ({
 
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="About Us Middle Description"
                     name="about_us_middle_description_two"
@@ -432,9 +424,7 @@ const AboutUs = ({
                     placeholder={t("MiddleDescriptionTwo")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_us_middle_description_two")
-                    }
+                    errorName={errors.about_us_middle_description_two}
                   />
                 </div>
               </div>
@@ -504,7 +494,6 @@ const AboutUs = ({
                 </label>
                 <div className="sm:col-span-4">
                   <TextAreaCom
-                    required={true}
                     register={register}
                     label="Our Founder Description"
                     name="about_us_ourfounder_description"
@@ -512,16 +501,14 @@ const AboutUs = ({
                     placeholder={t("OurFounderDescription")}
                   />
                   <Error
-                    errorName={
-                      (errors.name = "about_us_ourfounder_description")
-                    }
+                    errorName={errors.about_us_ourfounder_description}
                   />
                 </div>
               </div>
 
               {/*  ====================================================== Our Team Tabs ====================================================== */}
 
-              <TabsComponent>
+              {/* <TabsComponent>
                 <Tabs>
                   <TabList>
                     <Tab>{t("OurTeam")} 1</Tab>
@@ -843,7 +830,7 @@ const AboutUs = ({
                     </div>
                   </TabPanel>
                 </Tabs>
-              </TabsComponent>
+              </TabsComponent> */}
             </div>
           </div>
         </div>

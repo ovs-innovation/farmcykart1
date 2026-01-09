@@ -10,6 +10,7 @@
   FiStar,
   FiHelpCircle,
   FiFileText,
+  FiMail,
 } from "react-icons/fi";
 
 /**
@@ -81,6 +82,11 @@ const sidebar = [
     path: "/reviews",
     icon: FiStar,
     name: "Reviews",
+  },
+  {
+    path: "/newsletters",
+    icon: FiMail,
+    name: "Newsletters",
   },
 
   {

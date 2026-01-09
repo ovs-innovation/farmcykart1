@@ -20,7 +20,7 @@ import { notifySuccess, notifyError } from "@utils/toast";
 const Login = () => {
   const router = useRouter();
   const { dispatch } = useContext(UserContext);
-  const [loginMethod, setLoginMethod] = useState("email"); // "email" or "otp"
+  const [loginMethod, setLoginMethod] = useState("otp"); // "email" or "otp"
   const { handleSubmit, submitHandler, register, errors, loading } = useLoginSubmit();
 
   // OTP states
@@ -251,13 +251,14 @@ const Login = () => {
                       }`}
                     >
                       <FiSmartphone className="w-4 h-4" />
-                      OTP
+                      Phone
                     </button>
                   </div>
                 </div>
                 {/* Email Login Form */}
                 {loginMethod === "email" && (
-                  <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col justify-center">
+                  <div>
+                    <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col justify-center">
                     <div className="grid grid-cols-1 gap-5">
                       <div className="form-group">
                         <InputArea
@@ -314,8 +315,9 @@ const Login = () => {
                       )}
                     </div>
                   </form>
+                  </div>
                 )}
-
+                
                 {/* OTP Login Form */}
                 {loginMethod === "otp" && (
                   <>
@@ -444,7 +446,10 @@ const Login = () => {
                   route={"/auth/signup"}
                   pageName={"Sign Up"}
                   loginTitle="Login"
+                  hideSignUp={loginMethod === "otp"}
+                  hideSocial={loginMethod === "otp"}
                 />
+               
               </div>
             </div>
           </div>

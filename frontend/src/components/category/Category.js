@@ -14,6 +14,9 @@ import {
   FiHelpCircle,
   FiFileText,
   FiShield,
+  FiBriefcase,
+  FiRefreshCw,
+  FiTruck,
 } from "react-icons/fi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -26,7 +29,7 @@ import CategoryCard from "@components/category/CategoryCard";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const Category = () => {
-  const { categoryDrawerOpen, closeCategoryDrawer } =
+  const { categoryDrawerOpen, closeCategoryDrawer } = 
     useContext(SidebarContext);
   const { showingTranslateValue } = useUtilsFunction();
   const { storeCustomizationSetting } = useGetSetting();
@@ -45,13 +48,16 @@ const Category = () => {
     { title: "Home", href: "/", icon: FiHome },
     // { title: "Category", href: "/search", icon: FiGrid },
     // { title: "Products", href: "/search", icon: FiShoppingBag },
-    { title: "Top Offers", href: "/offer", icon: FiTag },
+    // { title: "Top Offers", href: "/offer", icon: FiTag },
     { title: "My Orders", href: "/user/my-orders", icon: FiGrid },
     { title: "Favorite", href: "/wishlist", icon: FiHeart },
     { title: "Compare", href: "/compare", icon: FiShuffle },
     { title: "About Us", href: "/about-us", icon: FiUsers },
+    { title: "Careers", href: "/careers", icon: FiBriefcase },
     { title: "Contact Us", href: "/contact-us", icon: FiPhoneCall },
-    { title: "FAQs", href: "/faq", icon: FiHelpCircle },
+    // { title: "FAQs", href: "/faq", icon: FiHelpCircle },
+    { title: "Refund and Returns Policy", href: "/refund-and-return-policy", icon: FiRefreshCw },
+    { title: "Shipping & Delivery Policy", href: "/shipping-and-delivery-policy", icon: FiTruck },
     { title: "Terms & Conditions", href: "/terms-and-conditions", icon: FiFileText },
     { title: "Privacy Policy", href: "/privacy-policy", icon: FiShield },
   ];

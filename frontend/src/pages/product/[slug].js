@@ -52,10 +52,25 @@ import ReviewServices from "@services/ReviewServices";
 import { notifyError, notifySuccess } from "@utils/toast";
 import { useSession } from "next-auth/react";
 import { addToWishlist } from "@lib/wishlist";
+import { getExpectedDeliveryTime } from "@utils/deliveryTime";
+import CustomerServices from "@services/CustomerServices";
+import { useQuery } from "@tanstack/react-query";
+import { FiTruck } from "react-icons/fi";
+import Cookies from "js-cookie";
 
 const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const router = useRouter();
   const { data: session } = useSession();
+  
+  // Get user info from session or cookies
+  const userInfo = session?.user || (typeof window !== "undefined" ? (() => {
+    try {
+      const cookieUserInfo = Cookies.get("userInfo");
+      return cookieUserInfo ? JSON.parse(cookieUserInfo) : null;
+    } catch (e) {
+      return null;
+    }
+  })() : null);
 
   const { lang, showingTranslateValue, getNumber, currency } =
     useUtilsFunction();
@@ -95,6 +110,18 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const [shareUrl, setShareUrl] = useState("");
   const [activeTab, setActiveTab] = useState("product-description");
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
+  const [expectedDeliveryTime, setExpectedDeliveryTime] = useState(null);
+
+  // Fetch shipping address if user is logged in
+  const { data: shippingAddressData } = useQuery({
+    queryKey: ["shippingAddress", { id: userInfo?.id }],
+    queryFn: async () =>
+      await CustomerServices.getShippingAddress({
+        userId: userInfo?.id,
+      }),
+    select: (data) => data?.shippingAddress,
+    enabled: !!userInfo?.id,
+  });
 
   // Simple stock derivation to avoid infinite variant loops
   useEffect(() => {
@@ -476,6 +503,36 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       setDynamicDescription(showingTranslateValue(product?.description));
     }
   }, [productImages]);
+
+  // Calculate expected delivery time
+  useEffect(() => {
+    const calculateDelivery = async () => {
+      try {
+        console.log("Calculating delivery time...", {
+          hasGlobalSetting: !!globalSetting,
+          hasShippingAddress: !!shippingAddressData,
+          globalSetting: globalSetting ? {
+            hasAddress: !!globalSetting.address,
+            hasPostCode: !!globalSetting.post_code
+          } : null
+        });
+
+        const deliveryTime = await getExpectedDeliveryTime(
+          globalSetting,
+          shippingAddressData
+        );
+        
+        console.log("Delivery time result:", deliveryTime);
+        setExpectedDeliveryTime(deliveryTime);
+      } catch (error) {
+        console.error("Error calculating delivery time:", error);
+        // Set default delivery time on error instead of null
+        setExpectedDeliveryTime("1-2 days");
+      }
+    };
+
+    calculateDelivery();
+  }, [globalSetting, shippingAddressData]);
 
   // Fetch reviews when product or filters change
   useEffect(() => {
@@ -1217,6 +1274,19 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           <div className="relative">
                             <Stock stock={stock} />
                           </div>
+
+                          {/* Expected Delivery Time */}
+                          {expectedDeliveryTime && (
+                            <div className="mt-4 flex items-center gap-2 text-sm">
+                              <FiTruck className="w-5 h-5 text-store-500" />
+                              <span className="text-gray-700 font-medium">
+                                Expected Delivery:{" "}
+                                <span className="text-store-600 font-semibold">
+                                  {expectedDeliveryTime}
+                                </span>
+                              </span>
+                            </div>
+                          )}
                         </div>
                          {/* Flipkart-style share icon and action buttons in top-right */}
                 <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -1468,7 +1538,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           )}
 
                           {/* Tab Navigation */}
-                          <div className="sticky top-16 lg:top-[80px] z-10 bg-store-50 mt-10 mb-6 py-2 shadow-sm w-full">
+                          <div className="sticky top-16 lg:top-[80px] z-10 bg-white mt-10 opacity-100 mb-6 py-2 shadow-sm w-full">
                             <style jsx global>{`
                               .tab-navigation-container {
                                 scrollbar-width: none !important; /* Firefox */
