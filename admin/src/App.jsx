@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import AccessibleNavigationAnnouncer from "@/components/AccessibleNavigationAnnouncer";
 import PrivateRoute from "@/components/login/PrivateRoute";
+import DynamicHead from "@/components/common/DynamicHead";
 const Layout = lazy(() => import("@/layout/Layout"));
 const Login = lazy(() => import("@/pages/Login"));
 const SignUp = lazy(() => import("@/pages/SignUp"));
@@ -17,6 +18,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const App = () => {
   return (
     <>
+      <DynamicHead />
       <ToastContainer />
       <Router>
         <AccessibleNavigationAnnouncer />

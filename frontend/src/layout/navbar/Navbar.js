@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -20,6 +20,8 @@ import CartDrawer from "@components/drawer/CartDrawer";
 import { SidebarContext } from "@context/SidebarContext";
 import BrandServices from "@services/BrandServices";
 import CategoryServices from "@services/CategoryServices";
+import LocationButton from "@components/location/LocationButton";
+import SearchSuggestions from "@components/search/SearchSuggestions";
 
 const Navbar = () => {
   const { t, lang } = useTranslation("common");
@@ -31,6 +33,9 @@ const Navbar = () => {
   const [searchText, setSearchText] = useState("");
   const [brands, setBrands] = useState([]);
   const [matchedBrand, setMatchedBrand] = useState(null);
+  const [showSearchInNavbar, setShowSearchInNavbar] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef(null);
   const { toggleCartDrawer } = useContext(SidebarContext);
   const { totalItems, totalUniqueItems } = useCart();
   const { count: wishlistCount } = useWishlist();
@@ -61,6 +66,35 @@ const Navbar = () => {
     };
   }, []);
 
+  // Scroll listener to show/hide search bar in navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      // Get viewport height
+      const viewportHeight = window.innerHeight;
+      // Get current scroll position
+      const scrollY = window.scrollY || window.pageYOffset;
+      
+      // Show search bar when scrolled past 50% of viewport height
+      // Hide when scrolled back to top (less than 50% of viewport height)
+      if (scrollY > viewportHeight * 0.5) {
+        setShowSearchInNavbar(true);
+      } else {
+        setShowSearchInNavbar(false);
+      }
+    };
+
+    // Add scroll event listener
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Check initial scroll position
+    handleScroll();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const getBrandLabel = (brand = {}) => {
     if (!brand.name) return "";
     if (typeof brand.name === "string") return brand.name;
@@ -74,8 +108,10 @@ const Navbar = () => {
 
   const handleSearchChange = (value) => {
     setSearchText(value);
+    setShowSuggestions(value.length > 0);
     if (!value) {
       setMatchedBrand(null);
+      setShowSuggestions(false);
       return;
     }
     const normalized = value.trim().toLowerCase();
@@ -90,9 +126,10 @@ const Navbar = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setShowSuggestions(false);
 
     if (matchedBrand) {
-      router.push(`/search?brand=${matchedBrand._id}`, null, { scroll: false });
+      router.push(`/search?brand=${matchedBrand._id}`, undefined, { shallow: false });
       setSearchText("");
       setMatchedBrand(null);
       handleLogEvent("search", `searched brand ${matchedBrand.slug || matchedBrand._id}`);
@@ -100,12 +137,12 @@ const Navbar = () => {
     }
 
     if (searchText.trim()) {
-      router.push(`/search?query=${searchText}`, null, { scroll: false });
+      router.push(`/search?query=${encodeURIComponent(searchText)}`, undefined, { shallow: false });
       setSearchText("");
       setMatchedBrand(null);
       handleLogEvent("search", `searched ${searchText}`);
     } else {
-      router.push(`/ `, null, { scroll: false });
+      router.push(`/`, undefined, { shallow: false });
       setSearchText("");
       setMatchedBrand(null);
     }
@@ -116,7 +153,7 @@ const Navbar = () => {
       <CartDrawer />
       <div className="hidden lg:block sticky top-0 z-50 bg-white w-full shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-3 sm:px-8">
-          <div className="top-bar h-8 lg:h-auto flex items-center justify-between gap-3  mx-auto">
+          <div className="top-bar h-8 lg:h-auto flex items-center justify-between gap-3 mx-auto">
             
             {/* Left Side: Logo + Nav Links */}
             <div className="flex items-center gap-8">
@@ -177,6 +214,63 @@ const Navbar = () => {
                 </button>
               </div>
             </div>
+
+            {/* Center: Search Bar - Show when scrolled */}
+            {showSearchInNavbar ? (
+              <div className="flex-1 max-w-2xl mx-4">
+                <form onSubmit={handleSubmit} className="relative flex items-center bg-white border border-gray-300 rounded-lg shadow-sm overflow-visible">
+                  {/* Location Button */}
+                  <LocationButton className="h-full" />
+                  
+                  {/* Search Input */}
+                  <div className="flex-1 relative">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search for medicine or store..."
+                      className="w-full py-2.5 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-store-500 text-gray-700 text-sm bg-transparent"
+                      value={searchText}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      onFocus={() => searchText.length > 0 && setShowSuggestions(true)}
+                      onBlur={(e) => {
+                        // Don't close if clicking on suggestions
+                        const relatedTarget = e.relatedTarget;
+                        const suggestionsContainer = document.querySelector('.search-suggestions-container');
+                        
+                        // Check if the blur is happening because of clicking on suggestions
+                        if (!relatedTarget || (suggestionsContainer && !suggestionsContainer.contains(relatedTarget))) {
+                          // Delay to allow suggestion click to register
+                          setTimeout(() => {
+                            // Double-check that suggestions container is not being interacted with
+                            const activeElement = document.activeElement;
+                            if (!suggestionsContainer || !suggestionsContainer.contains(activeElement)) {
+                              setShowSuggestions(false);
+                            }
+                          }, 200);
+                        }
+                      }}
+                    />
+                    <button 
+                      type="submit" 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-store-600 transition-colors"
+                    >
+                      <IoSearchOutline className="text-lg" />
+                    </button>
+                    <SearchSuggestions
+                      searchText={searchText}
+                      showSuggestions={showSuggestions}
+                      onSelect={() => {
+                        setSearchText("");
+                        setShowSuggestions(false);
+                      }}
+                      onClose={() => setShowSuggestions(false)}
+                    />
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div className="flex-1"></div>
+            )}
 
             {/* Right Side: Icons + Sign In */}
             <div className="flex items-center gap-4">

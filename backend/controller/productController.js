@@ -1,6 +1,7 @@
 const Product = require("../models/Product");
 const mongoose = require("mongoose");
 const Category = require("../models/Category");
+const Brand = require("../models/Brand");
 const { languageCodes } = require("../utils/data");
 
 const normalizeTaxPayload = (payload = {}) => {
@@ -701,7 +702,41 @@ const getShowingStoreProducts = async (req, res) => {
         [`title.${lang}`]: { $regex: `${title}`, $options: "i" },
       }));
 
-      queryObject.$or = titleQueries;
+      // Find brands matching the search query
+      const brandNameQueries = languageCodes.map((lang) => ({
+        [`name.${lang}`]: { $regex: `${title}`, $options: "i" },
+      }));
+      const matchingBrands = await Brand.find({
+        $or: brandNameQueries,
+        status: "show",
+      }).select("_id");
+
+      // Find categories matching the search query
+      const categoryNameQueries = languageCodes.map((lang) => ({
+        [`name.${lang}`]: { $regex: `${title}`, $options: "i" },
+      }));
+      const matchingCategories = await Category.find({
+        $or: categoryNameQueries,
+        status: "show",
+      }).select("_id");
+
+      // Build $or query for products
+      const orConditions = [...titleQueries];
+
+      // Add brand filter if matching brands found
+      if (matchingBrands.length > 0) {
+        const brandIds = matchingBrands.map((b) => b._id);
+        orConditions.push({ brand: { $in: brandIds } });
+      }
+
+      // Add category filter if matching categories found
+      if (matchingCategories.length > 0) {
+        const categoryIds = matchingCategories.map((c) => c._id);
+        orConditions.push({ category: { $in: categoryIds } });
+        orConditions.push({ categories: { $in: categoryIds } });
+      }
+
+      queryObject.$or = orConditions;
     }
     if (slug) {
       queryObject.slug = { $regex: slug, $options: "i" };

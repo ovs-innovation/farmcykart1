@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import useTranslation from "next-translate/useTranslation";
@@ -32,8 +32,9 @@ const Search = ({ products, attributes }) => {
 
   useEffect(() => {
     setIsLoading(false);
-  }, [products]);
+  }, [products, setIsLoading]);
 
+  // Call useFilter hook FIRST to get sortedField and other values
   const {
     setSortedField,
     productData,
@@ -50,18 +51,115 @@ const Search = ({ products, attributes }) => {
     sortedField,
   } = useFilter(products);
 
+  // Reset visible products when sort or filters change
+  // This useEffect must come AFTER useFilter call
   useEffect(() => {
-    if (router.query.sort) {
-      setSortedField(router.query.sort);
+    setVisibleProduct(18);
+  }, [sortedField, selectedBrands, selectedCategories, router.query]);
+
+  // Sync sort state from URL when route is ready or query changes
+  useEffect(() => {
+    if (!router.isReady) return;
+    
+    const sortFromUrl = router.query.sort;
+    const currentSort = sortedField || "All";
+    
+    // Only sync if URL value differs from current state (prevents loops)
+    if (sortFromUrl && sortFromUrl !== currentSort) {
+      setSortedField(sortFromUrl);
+    } else if (!sortFromUrl && currentSort !== "All") {
+      setSortedField("All");
+    } else if (!sortFromUrl && !currentSort) {
+      // Initial load - set default
+      setSortedField("All");
     }
-  }, [router.query.sort, setSortedField]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query.sort, router.asPath]);
+
+  // Update URL when sort changes (called from UI)
+  const handleSortChange = (value) => {
+    // Update state immediately for instant UI feedback
+    // This triggers useFilter to recalculate productData
+    setSortedField(value);
+    
+    // Build query object preserving all existing params (id, brand, query, etc.)
+    const newQuery = { ...router.query };
+    if (value === "All" || value === "") {
+      delete newQuery.sort;
+    } else {
+      newQuery.sort = value;
+    }
+    
+    // Update URL - use push with shallow: false to ensure proper navigation
+    // This ensures router.query updates and page properly navigates
+    router.push(
+      {
+        pathname: "/search",
+        query: newQuery,
+      },
+      undefined,
+      { shallow: false }
+    );
+  };
+
+  // Clear search query when filters are applied
+  const clearSearchQuery = () => {
+    if (router.query.query) {
+      const newQuery = { ...router.query };
+      delete newQuery.query;
+      router.push(
+        {
+          pathname: router.pathname,
+          query: newQuery,
+        },
+        undefined,
+        { scroll: false }
+      );
+    }
+  };
+
+  // Wrapper functions that clear search query before applying filters
+  const handleBrandChange = (brandId) => {
+    clearSearchQuery();
+    if (selectedBrands.includes(brandId)) {
+      setSelectedBrands(selectedBrands.filter((id) => id !== brandId));
+    } else {
+      setSelectedBrands([...selectedBrands, brandId]);
+    }
+  };
+
+  const handleCategoryChange = (catId) => {
+    clearSearchQuery();
+    if (selectedCategories.includes(catId)) {
+      setSelectedCategories(selectedCategories.filter((id) => id !== catId));
+    } else {
+      setSelectedCategories([...selectedCategories, catId]);
+    }
+  };
+
+  const handlePriceRangeChange = (newPriceRange) => {
+    // This function receives the full priceRange object from FilterSidebar
+    clearSearchQuery();
+    setPriceRange(newPriceRange);
+  };
+
+  const handleRatingChange = (rating) => {
+    clearSearchQuery();
+    setSelectedRating(rating);
+  };
+
+  const handleDiscountChange = (discount) => {
+    clearSearchQuery();
+    setSelectedDiscount(discount);
+  };
 
   const handleClearAll = () => {
     setSelectedBrands([]);
     setPriceRange({ min: 0, max: 100000 });
-    setSelectedCategories([]);
+    setSelectedCategories([]);-
     setSelectedRating(0);
     setSelectedDiscount(0);
+    clearSearchQuery();
   };
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -168,15 +266,15 @@ const Search = ({ products, attributes }) => {
           <div className="hidden lg:block w-1/5 shrink-0">
             <FilterSidebar
               selectedBrands={selectedBrands}
-              setSelectedBrands={setSelectedBrands}
+              setSelectedBrands={handleBrandChange}
               priceRange={priceRange}
-              setPriceRange={setPriceRange}
+              setPriceRange={handlePriceRangeChange}
               selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
+              setSelectedCategories={handleCategoryChange}
               selectedRating={selectedRating}
-              setSelectedRating={setSelectedRating}
+              setSelectedRating={handleRatingChange}
               selectedDiscount={selectedDiscount}
-              setSelectedDiscount={setSelectedDiscount}
+              setSelectedDiscount={handleDiscountChange}
               onClearAll={handleClearAll}
             />
           </div>
@@ -211,7 +309,7 @@ const Search = ({ products, attributes }) => {
                   </h6>
                   <span className="text-sm font-serif">
                     <select
-                      onChange={(e) => setSortedField(e.target.value)}
+                      onChange={(e) => handleSortChange(e.target.value)}
                       value={sortedField}
                       className="py-0 text-sm font-serif font-medium block w-full rounded border-0 bg-white pr-10 cursor-pointer focus:ring-0"
                     >
@@ -270,15 +368,15 @@ const Search = ({ products, attributes }) => {
       {/* Filter Drawer for Mobile */}
       <FilterDrawer
         selectedBrands={selectedBrands}
-        setSelectedBrands={setSelectedBrands}
+        setSelectedBrands={handleBrandChange}
         priceRange={priceRange}
-        setPriceRange={setPriceRange}
+        setPriceRange={handlePriceRangeChange}
         selectedCategories={selectedCategories}
-        setSelectedCategories={setSelectedCategories}
+        setSelectedCategories={handleCategoryChange}
         selectedRating={selectedRating}
-        setSelectedRating={setSelectedRating}
+        setSelectedRating={handleRatingChange}
         selectedDiscount={selectedDiscount}
-        setSelectedDiscount={setSelectedDiscount}
+        setSelectedDiscount={handleDiscountChange}
         onClearAll={handleClearAll}
       />
 
@@ -295,7 +393,7 @@ const Search = ({ products, attributes }) => {
             <div className="space-y-4">
               <button
                 onClick={() => {
-                  setSortedField("Low");
+                  handleSortChange("Low");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${
@@ -306,7 +404,7 @@ const Search = ({ products, attributes }) => {
               </button>
               <button
                 onClick={() => {
-                  setSortedField("High");
+                  handleSortChange("High");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${
@@ -317,7 +415,7 @@ const Search = ({ products, attributes }) => {
               </button>
               <button
                 onClick={() => {
-                  setSortedField("newest");
+                  handleSortChange("newest");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${
@@ -328,7 +426,7 @@ const Search = ({ products, attributes }) => {
               </button>
               <button
                 onClick={() => {
-                  setSortedField("best-selling");
+                  handleSortChange("best-selling");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${
@@ -339,7 +437,7 @@ const Search = ({ products, attributes }) => {
               </button>
               <button
                 onClick={() => {
-                  setSortedField("most-discounted");
+                  handleSortChange("most-discounted");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${
@@ -350,7 +448,7 @@ const Search = ({ products, attributes }) => {
               </button>
               <button
                 onClick={() => {
-                  setSortedField("All");
+                  handleSortChange("All");
                   setIsSortModalOpen(false);
                 }}
                 className={`w-full text-left py-2 px-4 rounded-lg ${

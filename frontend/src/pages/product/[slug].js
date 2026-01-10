@@ -326,16 +326,26 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       setStock(result2?.quantity);
       const price = getNumber(result2?.price);
       const originalPrice = getNumber(result2?.originalPrice);
-      let discount = getNumber(result2?.discount);
       
-      if (discount <= 0 && originalPrice > price) {
-        discount = originalPrice - price;
-      }
-
-      const discountPercentage = getNumber(
-        ((originalPrice - price) / originalPrice) * 100
-      );
+      // Use actual discount percentage from database (variant discount)
+      // Check variant discount first, then fallback to product discount
+      const variantDiscount = getNumber(result2?.discount ?? result2?.prices?.discount ?? null);
+      const productDiscount = getNumber(product?.prices?.discount ?? 0);
+      // Use variant discount if available, otherwise use product discount
+      const discount = variantDiscount !== null && variantDiscount !== undefined ? variantDiscount : productDiscount;
+      
+      console.log("Discount Debug (result2):", {
+        result2: result2,
+        result2Discount: result2?.discount,
+        result2PricesDiscount: result2?.prices?.discount,
+        variantDiscount,
+        productDiscount,
+        productPricesDiscount: product?.prices?.discount,
+        finalDiscount: discount
+      });
+      
       setDiscount(discount);
+      console.log("Discount state set to:", discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
       
@@ -398,17 +408,21 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
       const price = getNumber(rawVariantPrice);
       const originalPrice = getNumber(rawVariantOriginal);
-      let discount = getNumber(pricedVariant?.discount ?? product?.prices?.discount ?? 0);
-
-      if (discount <= 0 && originalPrice > price) {
-        discount = originalPrice - price;
-      }
-
-      const discountPercentage =
-        originalPrice > 0
-          ? getNumber(((originalPrice - price) / originalPrice) * 100)
-          : 0;
-
+      
+      // Use actual discount percentage from database (variant or product discount)
+      const variantDiscount = getNumber(pricedVariant?.discount ?? pricedVariant?.prices?.discount ?? null);
+      const productDiscount = getNumber(product?.prices?.discount ?? 0);
+      // Use variant discount if available, otherwise use product discount
+      const discount = variantDiscount !== null && variantDiscount !== undefined ? variantDiscount : productDiscount;
+      
+      console.log("Discount Debug (pricedVariant):", {
+        pricedVariantDiscount: pricedVariant?.discount,
+        pricedVariantPricesDiscount: pricedVariant?.prices?.discount,
+        variantDiscount,
+        productDiscount,
+        finalDiscount: discount
+      });
+      
       setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
@@ -448,17 +462,15 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
       const price = getNumber(baseRawPrice);
       const originalPrice = getNumber(baseRawOriginal);
-      let discount = getNumber(product?.prices?.discount ?? 0);
-
-      if (discount <= 0 && originalPrice > price) {
-        discount = originalPrice - price;
-      }
-
-      const discountPercentage =
-        originalPrice > 0
-          ? getNumber(((originalPrice - price) / originalPrice) * 100)
-          : 0;
-
+      
+      // Use actual discount percentage from database (product discount)
+      const discount = getNumber(product?.prices?.discount ?? 0);
+      
+      console.log("Discount Debug (no variant):", {
+        productPricesDiscount: product?.prices?.discount,
+        finalDiscount: discount
+      });
+      
       setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
@@ -700,10 +712,14 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       setStock(matchingVariant?.quantity || 0);
       const price = getNumber(matchingVariant?.price);
       const originalPrice = getNumber(matchingVariant?.originalPrice);
-      const discountPercentage = getNumber(
-        ((originalPrice - price) / originalPrice) * 100
-      );
-      setDiscount(getNumber(discountPercentage));
+      
+      // Use actual discount percentage from database (variant discount)
+      const variantDiscount = getNumber(matchingVariant?.discount ?? matchingVariant?.prices?.discount ?? null);
+      const productDiscount = getNumber(product?.prices?.discount ?? 0);
+      // Use variant discount if available, otherwise use product discount
+      const discount = variantDiscount !== null && variantDiscount !== undefined ? variantDiscount : productDiscount;
+      
+      setDiscount(discount);
       setPrice(price);
       setOriginalPrice(originalPrice);
       
@@ -1168,13 +1184,46 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                     <div className="mt-1 xl:mt-2 xl:sticky xl:top-28 xl:space-y-4">
                       <Discount slug product={product} discount={discount} />
 
-                      {/* Flipkart-style Product Image Gallery */}
-                      <ProductImageGallery
-                        images={currentImages.length > 0 ? currentImages : productImages}
-                        productTitle={
-                          dynamicTitle || showingTranslateValue(product?.title)
-                        }
-                      />
+                      {/* Flipkart-style Product Image Gallery with buttons inside */}
+                      <div className="relative">
+                        {/* Wishlist, Compare, Share buttons - absolute positioned inside image section */}
+                        <div className="absolute left-4 top-4 z-10 flex flex-col items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleAddToWishlist(product)}
+                            className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                            aria-label="Add to wishlist"
+                          >
+                            <FiHeart className="w-4 h-4" />
+                            <span className="hidden sm:inline">Wishlist</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCompare(product)}
+                            className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-purple-600 border border-gray-200 hover:border-purple-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                            aria-label="Add to compare"
+                          >
+                            <FiShuffle className="w-4 h-4" />
+                            <span className="hidden sm:inline">Compare</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleShareCurrentVariant}
+                            className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-store-600 border border-gray-200 hover:border-store-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
+                            aria-label="Share this product"
+                          >
+                            <FiShare2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">Share</span>
+                          </button>
+                        </div>
+
+                        <ProductImageGallery
+                          images={currentImages.length > 0 ? currentImages : productImages}
+                          productTitle={
+                            dynamicTitle || showingTranslateValue(product?.title)
+                          }
+                        />
+                      </div>
 
                       {/* Add to Cart & Buy Now under gallery (Flipkart style) */}
                       <div className="mt-4">
@@ -1288,36 +1337,6 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                             </div>
                           )}
                         </div>
-                         {/* Flipkart-style share icon and action buttons in top-right */}
-                <div className="absolute top-4 right-4 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleAddToWishlist(product)}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
-                    aria-label="Add to wishlist"
-                  >
-                    <FiHeart className="w-4 h-4" />
-                    <span className="hidden sm:inline">Wishlist</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddToCompare(product)}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-purple-600 border border-gray-200 hover:border-purple-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
-                    aria-label="Add to compare"
-                  >
-                    <FiShuffle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Compare</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleShareCurrentVariant}
-                    className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-600 hover:text-store-600 border border-gray-200 hover:border-store-500 rounded-full px-3 py-1 bg-white shadow-sm transition-colors"
-                    aria-label="Share this product"
-                  >
-                    <FiShare2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Share</span>
-                  </button>
-                </div>
                         <Price
                           // Ensure we never show ₹0 by mistake when variants exist:
                           // fall back to first variant or base product price if local state is 0.
@@ -1331,7 +1350,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           }
                           product={product}
                           currency={currency}
-                          discount={discount}
+                          discount={discount || product?.prices?.discount || 0}
                           originalPrice={
                             originalPrice > 0
                               ? originalPrice

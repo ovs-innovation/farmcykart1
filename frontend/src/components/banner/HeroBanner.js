@@ -1,18 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { IoSearchOutline } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 import LocationButton from "@components/location/LocationButton";
+import SearchSuggestions from "@components/search/SearchSuggestions";
 
 const HeroBanner = () => {
   const [searchText, setSearchText] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
   const { t } = useTranslation("common");
+  const searchInputRef = useRef(null);
+
+  const handleSearchChange = (value) => {
+    setSearchText(value);
+    setShowSuggestions(value.length > 0);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (searchText) {
-      router.push(`/search?query=${searchText}`, null, { scroll: false });
+    e.stopPropagation();
+    
+    const trimmedSearchText = searchText.trim();
+    
+    // Close suggestions
+    setShowSuggestions(false);
+    searchInputRef.current?.blur();
+    
+    if (trimmedSearchText) {
+      // Navigate to search page with query parameter
+      // Use router.push with pathname and query object for proper navigation
+      router.push(
+        {
+          pathname: "/search",
+          query: { query: trimmedSearchText },
+        },
+        `/search?query=${encodeURIComponent(trimmedSearchText)}`,
+        { shallow: false }
+      ).then(() => {
+        // Clear search text after successful navigation
+        setSearchText("");
+      }).catch((err) => {
+        console.error("Navigation error:", err);
+        // Fallback: use window.location if router.push fails
+        window.location.href = `/search?query=${encodeURIComponent(trimmedSearchText)}`;
+      });
     }
   };
 
@@ -43,18 +75,37 @@ const HeroBanner = () => {
 
         {/* Search Box Section */}
         <div className="relative z-10 w-full flex flex-col items-center px-4 pt-4">
-            <form onSubmit={handleSubmit} className="w-full max-w-4xl relative flex items-center bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden">
+            <form onSubmit={handleSubmit} className="w-full max-w-4xl relative flex items-center bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg overflow-visible">
                 {/* Location Button */}
                 <LocationButton className="h-full" />
                 
                 {/* Search Input */}
                 <div className="flex-1 relative">
                     <input
+                        ref={searchInputRef}
                         type="text"
                         placeholder="Search for medicine or store..."
                         className="w-full py-4 pl-4 pr-12 focus:outline-none focus:ring-0 text-gray-700 text-lg bg-transparent"
                         value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onFocus={() => searchText.length > 0 && setShowSuggestions(true)}
+                        onBlur={(e) => {
+                          // Don't close if clicking on suggestions
+                          const relatedTarget = e.relatedTarget;
+                          const suggestionsContainer = document.querySelector('.search-suggestions-container');
+                          
+                          // Check if the blur is happening because of clicking on suggestions
+                          if (!relatedTarget || (suggestionsContainer && !suggestionsContainer.contains(relatedTarget))) {
+                            // Delay to allow suggestion click to register
+                            setTimeout(() => {
+                              // Double-check that suggestions container is not being interacted with
+                              const activeElement = document.activeElement;
+                              if (!suggestionsContainer || !suggestionsContainer.contains(activeElement)) {
+                                setShowSuggestions(false);
+                              }
+                            }, 200);
+                          }
+                        }}
                     />
                     <button 
                         type="submit" 
@@ -62,6 +113,15 @@ const HeroBanner = () => {
                     >
                         <IoSearchOutline className="text-2xl" />
                     </button>
+                    <SearchSuggestions
+                      searchText={searchText}
+                      showSuggestions={showSuggestions}
+                      onSelect={() => {
+                        setSearchText("");
+                        setShowSuggestions(false);
+                      }}
+                      onClose={() => setShowSuggestions(false)}
+                    />
                 </div>
             </form>
         </div>

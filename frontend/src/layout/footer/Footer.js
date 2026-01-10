@@ -393,7 +393,7 @@ const Footer = () => {
                     storeCustomizationSetting?.footer?.social_linkedin ||
                     storeCustomizationSetting?.footer?.social_whatsapp) && (
                     <span className="text-base leading-7 font-semibold text-gray-700 block mb-4 pb-2 border-b-2 border-gray-100 inline-block">
-                      {t("footer-follow-us")}
+                      {t("follow-us")}
                     </span>
                   )}
                   <ul className="text-sm flex flex-wrap gap-3">
@@ -475,7 +475,7 @@ const Footer = () => {
                     <FiPhone className="w-7 h-7 text-white" />
                   </div>
                   <p className="text-base leading-7 font-semibold text-gray-700 block mb-2">
-                    {t("footer-call-us")}
+                    {t("call-us")}
                   </p>
                   <a
                     href={`tel:${storeCustomizationSetting?.footer?.bottom_contact}`}

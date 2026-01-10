@@ -120,12 +120,12 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false }) => {
         />
       )}
 
-  <div className="group box-border max-w-[270px] overflow-hidden flex rounded-lg border border-gray-200 flex-col items-center bg-white relative transition-shadow duration-300">
+  <div className="group box-border w-full h-full max-w-[270px] overflow-hidden flex rounded-lg border border-gray-200 flex-col items-center bg-white relative transition-shadow duration-300">
         
         {/* Product Name - Moved to top */}
-        <div className="w-full px-4 pt-4 pb-1">
+        <div className="w-full px-4 pt-4 pb-1 flex-shrink-0">
           <h2 
-            className="text-heading mb-0 block text-sm font-normal text-gray-600 leading-tight line-clamp-2" 
+            className="text-heading mb-0 block text-sm font-normal text-gray-600 leading-tight line-clamp-2 h-10" 
             title={showingTranslateValue(product?.title)}
           >
             {showingTranslateValue(product?.title)}
@@ -141,7 +141,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false }) => {
               `navigated to ${showingTranslateValue(product?.title)} product page`
             );
           }}
-          className="relative flex justify-center items-center cursor-pointer w-full p-2 min-h-[200px]"
+          className="relative flex justify-center items-center cursor-pointer w-full p-2 h-[200px] flex-shrink-0"
         >
           {/* Discount Badge - Bottom Left */}
           <div className="absolute bottom-10 left-0 z-10">
@@ -201,7 +201,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false }) => {
         </div>
 
         {/* Product Details */}
-        <div className="w-full px-4 pb-4 overflow-hidden">
+        <div className="w-full px-4 pb-4 overflow-hidden flex-shrink-0 mt-auto">
           <hr />
           {/* Price and Add Button */}
           {!hidePriceAndAdd && (

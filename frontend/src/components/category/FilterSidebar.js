@@ -59,24 +59,23 @@ const FilterSidebar = ({
   };
 
   const handleBrandChange = (brandId) => {
-    if (selectedBrands.includes(brandId)) {
-      setSelectedBrands(selectedBrands.filter((id) => id !== brandId));
-    } else {
-      setSelectedBrands([...selectedBrands, brandId]);
-    }
+    // setSelectedBrands is now a wrapper function from parent that handles clearing search query
+    // It expects the brandId and handles the toggle logic internally
+    setSelectedBrands(brandId);
   };
 
   const handleCategoryChange = (catId) => {
-    if (selectedCategories.includes(catId)) {
-      setSelectedCategories(selectedCategories.filter((id) => id !== catId));
-    } else {
-      setSelectedCategories([...selectedCategories, catId]);
-    }
+    // setSelectedCategories is now a wrapper function from parent that handles clearing search query
+    // It expects the catId and handles the toggle logic internally
+    setSelectedCategories(catId);
   };
 
   const handlePriceChange = (e, type) => {
     const value = parseInt(e.target.value) || 0;
-    setPriceRange((prev) => ({ ...prev, [type]: value }));
+    // setPriceRange is now a wrapper function from parent that handles clearing search query
+    // It expects the full priceRange object
+    const newPriceRange = { ...priceRange, [type]: value };
+    setPriceRange(newPriceRange);
   };
 
   const ratings = [4, 3, 2, 1];

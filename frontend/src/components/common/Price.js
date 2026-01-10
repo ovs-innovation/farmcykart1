@@ -20,6 +20,30 @@ const Price = ({
     ? `${product?.isPriceInclusive ? "Incl. GST" : "Excl. GST"} (${taxRateValue}%)`
     : "";
 
+  // Get discount percentage from prop or product
+  // Show discount as percentage, not as amount (without decimals)
+  let discountPercentage = 0;
+  
+  if (discount && discount > 0) {
+    // If discount is percentage (<= 100), use it directly
+    // If discount > 100, it might be amount, convert to percentage
+    if (discount <= 100) {
+      discountPercentage = Math.round(discount);
+    } else if (originalPrice > 0) {
+      // It's an amount, convert to percentage and round
+      discountPercentage = Math.round((discount / originalPrice) * 100);
+    }
+  } else if (product?.prices?.discount) {
+    // Fallback to product discount if discount prop is not available
+    const productDiscount = Number(product.prices.discount);
+    if (productDiscount > 0 && productDiscount <= 100) {
+      discountPercentage = Math.round(productDiscount);
+    } else if (productDiscount > 100 && originalPrice > 0) {
+      // It's an amount, convert to percentage and round
+      discountPercentage = Math.round((productDiscount / originalPrice) * 100);
+    }
+  }
+
   return (
     <div className="font-serif product-price font-bold">
       {product?.isCombination ? (
@@ -53,7 +77,7 @@ const Price = ({
                     : "inline-block text-green-600 text-sm font-bold ml-2"
                 }
               >
-                {currency}{getNumberTwo(discount)} Off
+                {Math.round(discountPercentage)}% Off
               </span>
             </>
           ) : null}
@@ -89,7 +113,7 @@ const Price = ({
                     : "inline-block text-green-600 text-sm font-bold ml-2"
                 }
               >
-                {currency}{getNumberTwo(discount)} Off
+                {Math.round(discountPercentage)}% Off
               </span>
             </>
           ) : null}

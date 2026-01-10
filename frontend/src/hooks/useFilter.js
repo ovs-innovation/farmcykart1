@@ -1,7 +1,9 @@
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const useFilter = (data) => {
+  const router = useRouter();
   const [pending, setPending] = useState([]);
   const [processing, setProcessing] = useState([]);
   const [delivered, setDelivered] = useState([]);
@@ -11,12 +13,54 @@ const useFilter = (data) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
-  const router = useRouter();
+  const { showingTranslateValue } = useUtilsFunction();
+
+  // Get search query from router
+  const searchQuery = router.query?.query || "";
+  
+  // Initialize sortedField from URL when router is ready
+  useEffect(() => {
+    if (router.isReady && router.query?.sort && !sortedField) {
+      setSortedField(router.query.sort);
+    } else if (router.isReady && !router.query?.sort && !sortedField) {
+      setSortedField("All");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady]);
 
   // console.log("sortedfield", sortedField, data);
 
   const productData = useMemo(() => {
     let services = data || [];
+
+    // Filter by Search Query (Brand Name, Category Name, or Product Title)
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      services = services.filter((product) => {
+        // Search in product title
+        const productTitle = showingTranslateValue(product?.title)?.toLowerCase() || "";
+        if (productTitle.includes(query)) return true;
+
+        // Search in brand name
+        const brandName = showingTranslateValue(product?.brand?.name)?.toLowerCase() || "";
+        if (brandName.includes(query)) return true;
+
+        // Search in category name
+        const categoryName = showingTranslateValue(product?.category?.name)?.toLowerCase() || "";
+        if (categoryName.includes(query)) return true;
+
+        // Search in categories array (multiple categories)
+        if (product?.categories && Array.isArray(product.categories)) {
+          const categoryMatch = product.categories.some((cat) => {
+            const catName = showingTranslateValue(cat?.name)?.toLowerCase() || "";
+            return catName.includes(query);
+          });
+          if (categoryMatch) return true;
+        }
+
+        return false;
+      });
+    }
 
     // Filter by Brand
     if (selectedBrands.length > 0) {
@@ -28,7 +72,9 @@ const useFilter = (data) => {
     // Filter by Category
     if (selectedCategories.length > 0) {
       services = services.filter((product) =>
-        selectedCategories.includes(product.category?._id || product.category)
+        selectedCategories.includes(product.category?._id || product.category) ||
+        (product?.categories && Array.isArray(product.categories) && 
+         product.categories.some(cat => selectedCategories.includes(cat?._id || cat)))
       );
     }
 
@@ -103,6 +149,7 @@ const useFilter = (data) => {
     selectedCategories,
     selectedRating,
     selectedDiscount,
+    searchQuery,
   ]);
 
   return {
