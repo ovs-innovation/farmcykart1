@@ -31,6 +31,7 @@ import BrandServices from "@services/BrandServices";
 import SectionHeader from "@components/common/SectionHeader";
 import SliderCarousel from "@components/carousel/SliderCarousel";
 import TestimonialsSection from "@components/testimonial/TestimonialsSection";
+import DealsYouLove from "@components/carousel/DealsYouLove";
 
 const Home = ({ popularProducts, discountProducts, bestSellingProducts, attributes, brands }) => {
   const router = useRouter();
@@ -90,6 +91,11 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                   <FeatureCategory attributes={attributes} />
                 </div>
               </div>
+            )}
+
+            {/* Deals You'll Love Section */}
+            {discountProducts?.length > 0 && (
+                <DealsYouLove products={discountProducts} />
             )}
 
             {/* Trusted Brands Section */}

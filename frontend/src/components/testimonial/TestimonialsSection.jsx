@@ -2,6 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FiPlay, FiX } from "react-icons/fi";
 import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/autoplay";
 
 import TestimonialServices from "@services/TestimonialServices";
 import CMSkeleton from "@components/preloader/CMSkeleton";
@@ -93,15 +99,30 @@ const TestimonialsSection = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="relative">
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              spaceBetween={24}
+              slidesPerView={1}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+              autoplay={{ delay: 3000, disableOnInteraction: false }}
+              navigation={{
+                prevEl: '.prev-testimonial',
+                nextEl: '.next-testimonial',
+              }}
+              className="testimonial-swiper py-2"
+            >
             {testimonials.map((testimonial) => {
               const thumbnail = getVideoThumbnail(testimonial.video);
               const isYoutube = isYoutubeUrl(testimonial.video);
               const isDirectVideo = isVideoUrl(testimonial.video);
 
               return (
+                <SwiperSlide key={testimonial._id}>
                 <div
-                  key={testimonial._id}
                   className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-gray-900 ${
                     !isYoutube ? "group cursor-pointer" : ""
                   }`}
@@ -157,8 +178,18 @@ const TestimonialsSection = () => {
                     )}
                   </div>
                 </div>
+                </SwiperSlide>
               );
             })}
+            </Swiper>
+            
+            {/* Custom Navigation Buttons */}
+            <button className="prev-testimonial absolute top-1/2 -left-4 z-10 bg-white shadow-lg border border-gray-100 rounded-full p-3 hover:bg-store-50 transition-colors transform -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed text-store-600 hover:text-store-700">
+              <IoChevronBack className="text-xl" />
+            </button>
+            <button className="next-testimonial absolute top-1/2 -right-4 z-10 bg-white shadow-lg border border-gray-100 rounded-full p-3 hover:bg-store-50 transition-colors transform -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed text-store-600 hover:text-store-700">
+              <IoChevronForward className="text-xl" />
+            </button>
           </div>
         </div>
       </div>

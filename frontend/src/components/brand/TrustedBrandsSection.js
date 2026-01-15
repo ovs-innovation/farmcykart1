@@ -55,15 +55,15 @@ const TrustedBrandsSection = ({ brands = [] }) => {
             </div>
           </div>
 
-          {/* Right Side - Scrolling Brand Logos */}
+          {/* Right Side - Scrolling Brand Logos (Vertical) */}
           <div className="order-1 lg:order-2">
-            <div className="relative p-6 md:p-8  overflow-hidden h-[300px] md:h-[350px] flex flex-col justify-center gap-4 md:gap-6">
-              {/* First Row - Scroll Left to Right */}
-              <div className="relative overflow-hidden w-full h-1/2">
+            <div className="relative p-6 md:p-8 overflow-hidden h-[450px] flex flex-row justify-center gap-4">
+              {/* First Column - Scroll Top to Bottom */}
+              <div className="relative overflow-hidden h-full">
                 <div 
-                  className="flex gap-6 md:gap-8 h-full items-center trusted-brands-scroll-left"
+                  className="flex flex-col gap-6 w-full items-center trusted-brands-scroll-down"
                   style={{
-                    width: 'max-content',
+                     height: 'max-content',
                   }}
                 >
                   {/* First set of brands */}
@@ -71,9 +71,9 @@ const TrustedBrandsSection = ({ brands = [] }) => {
                     const logoUrl = showingImage(brand.logo) || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
                     return (
                       <Link
-                        key={`brand-row1-1-${brand._id}`}
+                        key={`brand-col1-1-${brand._id}`}
                         href={`/search?brand=${brand._id}`}
-                        className="flex-shrink-0 group"
+                        className="flex-shrink-0 group w-full flex justify-center"
                       >
                         <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 w-20 h-20 md:w-28 md:h-28 flex items-center justify-center border border-gray-100 relative overflow-hidden">
                           <Image
@@ -88,14 +88,14 @@ const TrustedBrandsSection = ({ brands = [] }) => {
                       </Link>
                     );
                   })}
-                  {/* Duplicate set for seamless loop */}
+                  {/* Duplicate set */}
                   {brandsWithLogos.map((brand, index) => {
                     const logoUrl = showingImage(brand.logo) || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
                     return (
                       <Link
-                        key={`brand-row1-2-${brand._id}`}
+                        key={`brand-col1-2-${brand._id}`}
                         href={`/search?brand=${brand._id}`}
-                        className="flex-shrink-0 group"
+                        className="flex-shrink-0 group w-full flex justify-center"
                       >
                         <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 w-20 h-20 md:w-28 md:h-28 flex items-center justify-center border border-gray-100 relative overflow-hidden">
                           <Image
@@ -113,12 +113,12 @@ const TrustedBrandsSection = ({ brands = [] }) => {
                 </div>
               </div>
 
-              {/* Second Row - Scroll Right to Left */}
-              <div className="relative overflow-hidden w-full h-1/2">
+              {/* Second Column - Scroll Bottom to Top */}
+              <div className="relative overflow-hidden w-1/2 h-full">
                 <div 
-                  className="flex gap-6 md:gap-8 h-full items-center trusted-brands-scroll-right"
+                  className="flex flex-col gap-6 w-full items-center trusted-brands-scroll-up"
                   style={{
-                    width: 'max-content',
+                    height: 'max-content',
                   }}
                 >
                   {/* First set of brands */}
@@ -126,9 +126,9 @@ const TrustedBrandsSection = ({ brands = [] }) => {
                     const logoUrl = showingImage(brand.logo) || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
                     return (
                       <Link
-                        key={`brand-row2-1-${brand._id}`}
+                        key={`brand-col2-1-${brand._id}`}
                         href={`/search?brand=${brand._id}`}
-                        className="flex-shrink-0 group"
+                        className="flex-shrink-0 group w-full flex justify-center"
                       >
                         <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 w-20 h-20 md:w-28 md:h-28 flex items-center justify-center border border-gray-100 relative overflow-hidden">
                           <Image
@@ -148,9 +148,9 @@ const TrustedBrandsSection = ({ brands = [] }) => {
                     const logoUrl = showingImage(brand.logo) || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
                     return (
                       <Link
-                        key={`brand-row2-2-${brand._id}`}
+                        key={`brand-col2-2-${brand._id}`}
                         href={`/search?brand=${brand._id}`}
-                        className="flex-shrink-0 group"
+                        className="flex-shrink-0 group w-full flex justify-center"
                       >
                         <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 w-20 h-20 md:w-28 md:h-28 flex items-center justify-center border border-gray-100 relative overflow-hidden">
                           <Image
@@ -172,35 +172,34 @@ const TrustedBrandsSection = ({ brands = [] }) => {
         </div>
       </div>
 
-      {/* CSS Animation for Scrolling */}
+      {/* CSS Animation for Vertical Scrolling */}
       <style dangerouslySetInnerHTML={{
         __html: `
-          @keyframes trustedBrandsScrollLeft {
+          @keyframes trustedBrandsScrollUp {
             0% {
-              transform: translateX(0);
+              transform: translateY(0);
             }
             100% {
-              transform: translateX(calc(-50% - 12px));
+              transform: translateY(calc(-50% - 12px));
             }
           }
-          @keyframes trustedBrandsScrollRight {
+          @keyframes trustedBrandsScrollDown {
             0% {
-              transform: translateX(calc(-50% - 12px));
+              transform: translateY(calc(-50% - 12px));
             }
             100% {
-              transform: translateX(0);
+              transform: translateY(0);
             }
           }
-          .trusted-brands-scroll-left {
-            animation: trustedBrandsScrollLeft 35s linear infinite;
+          .trusted-brands-scroll-up {
+            animation: trustedBrandsScrollUp 35s linear infinite;
           }
-          .trusted-brands-scroll-left:hover {
-            animation-play-state: paused;
+          .trusted-brands-scroll-down {
+            animation: trustedBrandsScrollDown 35s linear infinite;
           }
-          .trusted-brands-scroll-right {
-            animation: trustedBrandsScrollRight 35s linear infinite;
-          }
-          .trusted-brands-scroll-right:hover {
+          /* Hover effect to pause the animation */
+          .trusted-brands-scroll-up:hover, 
+          .trusted-brands-scroll-down:hover {
             animation-play-state: paused;
           }
         `
