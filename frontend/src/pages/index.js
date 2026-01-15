@@ -77,7 +77,7 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
 
             {/* feature category's */}
             {storeCustomizationSetting?.home?.featured_status && (
-              <div className="bg-white lg:py-16 py-10">
+              <div id="feature-category" className="bg-white lg:py-16 py-10">
                 <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
                   <SectionHeader
                     title={storeCustomizationSetting?.home?.feature_title || "Featured Categories"}

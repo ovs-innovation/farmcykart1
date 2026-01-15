@@ -13,7 +13,7 @@ import BottomNavigation from "@components/login/BottomNavigation";
 import CustomerServices from "@services/CustomerServices";
 import { setToken } from "@services/httpServices";
 import { UserContext } from "@context/UserContext";
-import { notifySuccess } from "@utils/toast";
+import { notifySuccess, notifyError } from "@utils/toast";
 
 const OTPLogin = () => {
   const router = useRouter();
@@ -155,10 +155,11 @@ const OTPLogin = () => {
       setLoading(false);
     } catch (err) {
       console.error("Error sending OTP:", err);
-      setError(
+      const errorMessage =
         err.message ||
-          "Failed to send OTP. Please check your phone number and try again."
-      );
+        "Failed to send OTP. Please check your phone number and try again.";
+      setError(errorMessage);
+      notifyError(errorMessage);
       setLoading(false);
       clearRecaptcha();
       setStep("phone");
@@ -215,9 +216,10 @@ const OTPLogin = () => {
       }
     } catch (err) {
       console.error("Error verifying OTP:", err);
-      setError(
-        err.message || "Invalid OTP. Please check the code and try again."
-      );
+      const errorMessage =
+        err.message || "Invalid OTP. Please check the code and try again.";
+      setError(errorMessage);
+      notifyError(errorMessage);
       setLoading(false);
     }
   };
@@ -275,7 +277,7 @@ const OTPLogin = () => {
                   )}
                 </div>
 
-                {error && (
+                {step === "phone" && error && (
                   <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                     {error}
                   </div>

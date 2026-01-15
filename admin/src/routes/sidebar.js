@@ -11,6 +11,7 @@
   FiHelpCircle,
   FiFileText,
   FiMail,
+  FiMessageCircle,
 } from "react-icons/fi";
 
 /**
@@ -87,6 +88,11 @@ const sidebar = [
     path: "/newsletters",
     icon: FiMail,
     name: "Newsletters",
+  },
+  {
+    path: "/testimonials",
+    icon: FiMessageCircle,
+    name: "Testimonials",
   },
 
   {

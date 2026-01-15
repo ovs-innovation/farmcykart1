@@ -708,10 +708,10 @@ const Footer = () => {
                 <div className="mt-2">
                   <Image
                     width={274}
-                    height={25}
+                    height={20}
                     className="w-full max-w-xs rounded-lg"
                     src={
-                      "/payment-method/payment-logo.png" || storeCustomizationSetting?.footer?.payment_method_img 
+                      "/payment-method/payment_logo.png" || storeCustomizationSetting?.footer?.payment_method_img 
                      
                     }
                     alt="payment method"

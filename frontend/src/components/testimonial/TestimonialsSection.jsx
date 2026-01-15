@@ -84,7 +84,7 @@ const TestimonialsSection = () => {
     <>
       <div className="bg-store-50 lg:py-16 py-10">
         <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-          <div className="text-center mb-10">
+          <div className="text-left mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
               What our customers have to say
             </h2>
@@ -102,13 +102,13 @@ const TestimonialsSection = () => {
               return (
                 <div
                   key={testimonial._id}
-                  className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-white ${
+                  className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-gray-900 ${
                     !isYoutube ? "group cursor-pointer" : ""
                   }`}
                   onClick={!isYoutube ? () => handleVideoClick(testimonial) : undefined}
                 >
                   {/* Video Container */}
-                  <div className="relative w-full aspect-video bg-gray-900 rounded-t-xl overflow-hidden">
+                  <div className="relative w-full aspect-[50/29] bg-gray-900 overflow-hidden">
                     {isYoutube ? (
                       <iframe
                         src={getYoutubeEmbedUrl(testimonial.video)?.replace('?autoplay=1', '')}
@@ -151,20 +151,11 @@ const TestimonialsSection = () => {
                         </div>
                       </>
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-store-400 to-store-600 flex items-center justify-center">
+                      <div className="w-full h-[300px] bg-gradient-to-br from-store-400 to-store-600 flex items-center justify-center">
                         <FiPlay className="text-white text-6xl opacity-50" />
                       </div>
                     )}
                   </div>
-                  
-                  {/* Title below video for YouTube videos */}
-                  {/* {isYoutube && (
-                    <div className="p-4 bg-white">
-                      <h3 className="text-gray-900 font-bold text-lg md:text-xl leading-tight">
-                        {testimonial.title}
-                      </h3>
-                    </div>
-                  )} */}
                 </div>
               );
             })}

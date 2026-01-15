@@ -54,7 +54,12 @@ const HeroBanner = () => {
 
   const handleCTAClick = (type) => {
     if (type === "shop") {
-      router.push("/category");
+      const element = document.getElementById("feature-category");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push("/category");
+      }
     } else if (type === "prescription") {
       setPrescriptionModalOpen(true);
     }
@@ -129,13 +134,13 @@ const HeroBanner = () => {
       {/* Animated Visual Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Left Side Medicine Images - Top to Bottom */}
-        <div className="absolute left-0 top-0 w-full md:w-1/3 h-full flex flex-col items-center justify-start pt-8 md:pt-16 px-4">
+        <div className="absolute hidden left-0 top-0 w-full md:w-1/5 h-full md:flex flex-col items-center justify-start pt-8 md:pt-16 px-4">
           {/* Medicine Strip */}
           <motion.div
             variants={leftAnimationVariants}
             initial="initial"
             animate={["animate", "float"]}
-            className="relative mb-6 opacity-40"
+            className="relative mb-6 opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-3 md:p-4 transform rotate-[-5deg]">
               <div className="w-24 md:w-32 h-16 md:h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded flex items-center justify-center">
@@ -154,7 +159,7 @@ const HeroBanner = () => {
             initial="initial"
             animate={["animate", "float"]}
             transition={{ delay: 0.2 }}
-            className="relative mb-6 opacity-40"
+            className="relative mb-6 opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-2 md:p-3 transform rotate-[3deg]">
               <div className="w-16 md:w-20 h-24 md:h-28 bg-gradient-to-b from-green-100 to-green-200 rounded-t-lg rounded-b-sm relative">
@@ -170,7 +175,7 @@ const HeroBanner = () => {
             initial="initial"
             animate={["animate", "float"]}
             transition={{ delay: 0.4 }}
-            className="relative opacity-40"
+            className="relative opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-3 md:p-4 transform rotate-[-3deg]">
               <div className="flex gap-2">
@@ -183,13 +188,13 @@ const HeroBanner = () => {
         </div>
 
         {/* Right Side Medicine Images - Bottom to Top */}
-        <div className="absolute right-0 bottom-0 w-full md:w-1/3 h-full flex flex-col items-center justify-end pb-8 md:pb-16 px-4">
+        <div className="absolute right-0 bottom-0 w-full md:w-1/5 h-full hidden  md:flex flex-col items-center justify-end pb-8 md:pb-16 px-4">
           {/* Syrup Bottle */}
           <motion.div
             variants={rightAnimationVariants}
             initial="initial"
             animate={["animate", "float"]}
-            className="relative mb-6 opacity-40"
+            className="relative mb-6 opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-2 md:p-3 transform rotate-[-3deg]">
               <div className="w-14 md:w-18 h-28 md:h-32 bg-gradient-to-b from-purple-100 to-purple-200 rounded-lg relative">
@@ -205,7 +210,7 @@ const HeroBanner = () => {
             initial="initial"
             animate={["animate", "float"]}
             transition={{ delay: 0.2 }}
-            className="relative mb-6 opacity-40"
+            className="relative mb-6 opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-3 md:p-4 transform rotate-[5deg]">
               <div className="flex flex-col gap-2">
@@ -227,7 +232,7 @@ const HeroBanner = () => {
             initial="initial"
             animate={["animate", "float"]}
             transition={{ delay: 0.4 }}
-            className="relative opacity-40"
+            className="relative opacity-20"
           >
             <div className="bg-white rounded-lg shadow-xl p-2 md:p-3 transform rotate-[-2deg]">
               <div className="w-20 md:w-24 h-16 md:h-20 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded flex items-center justify-center">
@@ -353,7 +358,7 @@ const HeroBanner = () => {
               whileHover={{ scale: 1.03, y: -8 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleCTAClick("shop")}
-              className="group relative flex-1 max-w-sm cursor-pointer bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
+              className="group relative flex-1 max-w-sm cursor-pointer   backdrop-blur-md rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
             >
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-5">
@@ -373,12 +378,12 @@ const HeroBanner = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 text-center group-hover:text-green-600 transition-colors">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-200 mb-2 text-center group-hover:text-green-600 transition-colors">
                   Shop Medicines
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm md:text-base text-gray-600 mb-4 text-center leading-relaxed">
+                <p className="text-sm md:text-base text-gray-300 mb-4 text-center leading-relaxed">
                   Browse through our wide range of genuine medicines and healthcare products
                 </p>
 
@@ -408,7 +413,7 @@ const HeroBanner = () => {
               whileHover={{ scale: 1.03, y: -8 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleCTAClick("prescription")}
-              className="group relative flex-1 max-w-sm cursor-pointer bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-blue-500"
+              className="group relative flex-1 max-w-sm cursor-pointer bg-gradient-to-br  backdrop-blur-md rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-50"
             >
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-10">
@@ -446,7 +451,7 @@ const HeroBanner = () => {
 
                 {/* Hover Arrow */}
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-white text-blue-600 p-2 rounded-full">
+                  <div className="bg-white text-gray-800 p-2 rounded-full">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -455,7 +460,7 @@ const HeroBanner = () => {
               </div>
 
               {/* Bottom Accent */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-500"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-100 to-gray-50"></div>
             </motion.div>
           </div>
         </motion.div>
