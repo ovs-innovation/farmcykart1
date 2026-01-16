@@ -268,7 +268,7 @@ const Footer = () => {
                     href={storeCustomizationSetting?.footer?.block1_sub_link4}
                     className="text-gray-600 inline-flex items-center w-full hover:text-store-600 transition-all duration-300"
                   >
-                    <FiChevronRight className="w-4 h-4 mr-2 text-gray-500 group-hover:text-store-600 transition-colors" />
+                    {/* <FiChevronRight className="w-4 h-4 mr-2 text-gray-500 group-hover:text-store-600 transition-colors" /> */}
                     <CMSkeleton
                       count={1}
                       height={16}
