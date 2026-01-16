@@ -56,12 +56,9 @@ export const geocodeAddress = async (address) => {
  * @returns {string} Expected delivery time (e.g., "1-2 days")
  */
 export const calculateDeliveryTime = (distance) => {
-  // For now, always return 1-2 days as per requirement
-  // You can customize this based on distance if needed
-  // if (distance < 50) return "1 day";
-  // if (distance < 200) return "1-2 days";
-  // return "2-3 days";
-  return "1-2 days";
+  if (distance <= 5) return "1 day";
+  if (distance <= 10) return "2 days";
+  return "within a week";
 };
 
 /**
@@ -103,7 +100,29 @@ export const getStoreLocation = async (globalSetting) => {
  * @returns {Promise<{lat: number, lng: number} | null>} User coordinates
  */
 export const getUserLocation = async (shippingAddress = null) => {
-  // If shipping address is provided and has coordinates, use it
+  // 1. Try to get from cookies first (Manual override)
+  if (typeof window !== 'undefined') {
+    try {
+      const Cookies = require('js-cookie');
+      const savedLocation = Cookies.get('userLocation');
+      if (savedLocation) {
+        const location = JSON.parse(savedLocation);
+        // Accept location if it has coords OR pincode
+        if ((location.lat && location.lng) || location.pinCode) {
+          console.log('getUserLocation: Using location from cookies:', location);
+          return {
+            lat: location.lat ? parseFloat(location.lat) : null,
+            lng: location.lng ? parseFloat(location.lng) : null,
+            pinCode: location.pinCode
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error getting user location from cookies:', error);
+    }
+  }
+
+  // 2. If no cookie, use shipping address if provided
   if (shippingAddress?.lat && shippingAddress?.lng) {
     console.log('getUserLocation: Using coordinates from shipping address');
     return {
@@ -137,33 +156,6 @@ export const getUserLocation = async (shippingAddress = null) => {
     }
   }
   
-  // Otherwise, try to get from cookies
-  if (typeof window === 'undefined') {
-    console.log('getUserLocation: window is undefined (SSR)');
-    return null;
-  }
-  
-  try {
-    const Cookies = require('js-cookie');
-    const savedLocation = Cookies.get('userLocation');
-    if (savedLocation) {
-      const location = JSON.parse(savedLocation);
-      if (location.lat && location.lng) {
-        console.log('getUserLocation: Using location from cookies:', location);
-        return {
-          lat: parseFloat(location.lat),
-          lng: parseFloat(location.lng)
-        };
-      } else {
-        console.log('getUserLocation: Cookie location found but no lat/lng');
-      }
-    } else {
-      console.log('getUserLocation: No location cookie found');
-    }
-  } catch (error) {
-    console.error('Error getting user location from cookies:', error);
-  }
-  
   console.log('getUserLocation: No user location available');
   return null;
 };
@@ -175,47 +167,53 @@ export const getUserLocation = async (shippingAddress = null) => {
  * @returns {Promise<string | null>} Expected delivery time or null
  */
 export const getExpectedDeliveryTime = async (globalSetting, shippingAddress = null) => {
+  // 1. Get user location first (outside try/catch for robust flow control)
+  let userLocation = null;
+  try {
+    userLocation = await getUserLocation(shippingAddress);
+  } catch (error) {
+    console.error("Error getting user location:", error);
+    return null;
+  }
+  
+  if (!userLocation) {
+    console.log('Delivery Time: User location not found (no shipping address or cookies)');
+    return null; // Show "Check Delivery" UI
+  }
+
+  // 2. Attempts calculation, falls back to "3-5 days" if anything else fails
   try {
     // Check if globalSetting exists
     if (!globalSetting) {
-      console.log('Delivery Time: globalSetting is missing');
-      // Return default delivery time even if store location is not available
-      return "1-2 days";
+      console.log('Delivery Time: globalSetting is missing, returning default');
+      return "3-5 days";
     }
 
     // Get store location
     const storeLocation = await getStoreLocation(globalSetting);
     if (!storeLocation) {
-      console.log('Delivery Time: Store location not found or geocoding failed', {
-        address: globalSetting.address,
-        post_code: globalSetting.post_code
-      });
-      // Return default delivery time even if store location is not available
+      console.log('Delivery Time: Store location not found, returning default');
       return "1-2 days";
     }
 
-    // Get user location
-    const userLocation = await getUserLocation(shippingAddress);
-    if (!userLocation) {
-      console.log('Delivery Time: User location not found (no shipping address or cookies)');
-      // Return default delivery time even if user location is not available
-      return "1-2 days";
+    // Calculate distance if coordinates exist
+    if (userLocation.lat && userLocation.lng && storeLocation.lat && storeLocation.lng) {
+      const distance = calculateDistance(
+        storeLocation.lat,
+        storeLocation.lng,
+        userLocation.lat,
+        userLocation.lng
+      );
+      
+      console.log('Delivery Time: Distance calculated', distance, 'km');
+      return calculateDeliveryTime(distance);
     }
     
-    // Calculate distance
-    const distance = calculateDistance(
-      storeLocation.lat,
-      storeLocation.lng,
-      userLocation.lat,
-      userLocation.lng
-    );
-    
-    console.log('Delivery Time: Distance calculated', distance, 'km');
-    
-    return calculateDeliveryTime(distance);
+    console.log('Delivery Time: Using default (missing coordinates)');
+    return "1-2 days";
   } catch (error) {
-    console.error('Error calculating delivery time:', error);
-    // Return default delivery time on error
+    console.error('Error calculating delivery time (using fallback):', error);
+    // User has location, but calculation crashed -> return default time
     return "1-2 days";
   }
 };

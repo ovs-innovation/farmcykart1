@@ -15,6 +15,7 @@ import { getUserSession } from "@lib/auth";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import CustomerServices from "@services/CustomerServices";
+import LocationPickerDropdown from "@components/location/LocationPickerDropdown";
 
 const NavBarTop = () => {
   const userInfo = getUserSession();
@@ -121,19 +122,22 @@ const NavBarTop = () => {
 
   return (
     <>
-      <div className="hidden lg:block bg-gray-100">
+      <div className="hidden lg:block bg-gray-100 relative z-[51]">
         <div className="max-w-screen-2xl mx-auto px-3 sm:px-10">
           <div className="text-gray-700 py-2 font-sans text-xs font-medium border-b flex justify-between items-center">
             <span className="flex items-center gap-2">
               
-            <FiMapPin className="mr-1.5 text-store-500" size={14} />
-              {displayAddress && (
+              {displayAddress ? (
                 <span className="flex items-center text-gray-600">
-                  
-                  <span className="text-xs truncate max-w-xs" title={displayAddress}>
+                  <span
+                    className="text-xs truncate max-w-xs"
+                    title={displayAddress}
+                  >
                     {displayAddress}
                   </span>
                 </span>
+              ) : (
+                <LocationPickerDropdown className="!p-0 !bg-transparent !border-none text-xs font-sans text-gray-700 hover:text-store-500 z-40 h-auto" />
               )}
             </span>
 

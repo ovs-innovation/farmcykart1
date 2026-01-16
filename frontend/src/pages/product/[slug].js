@@ -11,6 +11,7 @@ import {
   FiShare2,
   FiHeart,
   FiShuffle,
+  FiTruck,
 } from "react-icons/fi";
 import { AiFillStar } from "react-icons/ai";
 import {
@@ -44,6 +45,7 @@ import Discount from "@components/common/Discount";
 import useGetSetting from "@hooks/useGetSetting";
 import ProductImageGallery from "@components/product/ProductImageGallery";
 import ProductDetailsSection from "@components/product/ProductDetailsSection";
+import LocationPickerDropdown from "@components/location/LocationPickerDropdown";
 import RatingSummary from "@components/reviews/RatingSummary";
 import ReviewFilters from "@components/reviews/ReviewFilters";
 import ReviewList from "@components/reviews/ReviewList";
@@ -55,7 +57,6 @@ import { addToWishlist } from "@lib/wishlist";
 import { getExpectedDeliveryTime } from "@utils/deliveryTime";
 import CustomerServices from "@services/CustomerServices";
 import { useQuery } from "@tanstack/react-query";
-import { FiTruck } from "react-icons/fi";
 import Cookies from "js-cookie";
 
 const ProductScreen = ({ product, attributes, relatedProducts }) => {
@@ -538,12 +539,27 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
         setExpectedDeliveryTime(deliveryTime);
       } catch (error) {
         console.error("Error calculating delivery time:", error);
-        // Set default delivery time on error instead of null
-        setExpectedDeliveryTime("1-2 days");
+        // Set to null on error so we show the location picker
+        setExpectedDeliveryTime(null);
       }
     };
 
     calculateDelivery();
+
+    const handleLocationUpdate = () => {
+      console.log("Location updated event received, recalculating delivery time...");
+      calculateDelivery();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener('locationUpdated', handleLocationUpdate);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener('locationUpdated', handleLocationUpdate);
+      }
+    };
   }, [globalSetting, shippingAddressData]);
 
   // Fetch reviews when product or filters change
@@ -1322,18 +1338,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                             <Stock stock={stock} />
                           </div>
 
-                          {/* Expected Delivery Time */}
-                          {expectedDeliveryTime && (
-                            <div className="mt-4 flex items-center gap-2 text-sm">
-                              <FiTruck className="w-5 h-5 text-store-500" />
-                              <span className="text-gray-700 font-medium">
-                                Expected Delivery:{" "}
-                                <span className="text-store-600 font-semibold">
-                                  {expectedDeliveryTime}
-                                </span>
-                              </span>
-                            </div>
-                          )}
+                         
                         </div>
                         <Price
                           // Ensure we never show ₹0 by mistake when variants exist:
@@ -1434,7 +1439,23 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                               </a>
                             </p>
                           </div>
-
+                           {/* Expected Delivery Time */}
+                          {expectedDeliveryTime ? (
+                            <div className="mt-4    rounded-md    flex items-center gap-3 text-sm">
+                              <FiTruck className="w-5 h-5 text-store-600 flex-shrink-0" />
+                              <div className="flex flex-col">
+                                <span className="text-gray-600 text-xs">Expected Delivery</span>
+                                <span className="text-store-700 font-bold text-base">
+                                  {expectedDeliveryTime}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-4 flex gap-4 items-center">
+                              <div className="text-sm text-gray-500 mb-1.5 font-medium">Check delivery time &amp; availability:</div>
+                              <LocationPickerDropdown className="w-30 !border !border-gray-300 rounded-md py-2 px-3 bg-gray-50 hover:bg-white hover:!border-store-500 transition-all justify-between !h-auto !border-r" />
+                            </div>
+                          )}
                           {/* social share
                           <div className="mt-2">
                               <h3 className="text-base font-semibold mb-1 font-serif">

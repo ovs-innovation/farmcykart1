@@ -17,7 +17,8 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 import CartDrawer from "@components/drawer/CartDrawer";
 import { SidebarContext } from "@context/SidebarContext";
 import CategoryServices from "@services/CategoryServices";
-import LocationButton from "@components/location/LocationButton";
+// import LocationButton from "@components/location/LocationButton";
+import LocationPickerDropdown from "@components/location/LocationPickerDropdown";
 import SearchSuggestions from "@components/search/SearchSuggestions";
 
 const Navbar = () => {
@@ -172,9 +173,9 @@ const Navbar = () => {
             {/* Center: Search Bar - Show when scrolled or on search page */}
             {(showSearchInNavbar || router.pathname === "/search") ? (
               <div className="flex-1 max-w-2xl mx-4">
-                <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border border-gray-300 rounded-lg shadow-sm overflow-visible">
+                <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border border-gray-300 rounded-lg shadow-sm overflow-visible z-20">
                   {/* Location Button */}
-                  <LocationButton className="h-full" />
+                  <LocationPickerDropdown className="h-full z-30" />
                   
                   {/* Search Input */}
                   <div className="flex-1 relative">

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { IoSearchOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
 import useTranslation from "next-translate/useTranslation";
-import LocationButton from "@components/location/LocationButton";
+import LocationPickerDropdown from "@components/location/LocationPickerDropdown";
 import SearchSuggestions from "@components/search/SearchSuggestions";
 import PrescriptionUploadModal from "@components/prescription/PrescriptionUploadModal";
 import {
@@ -303,7 +303,7 @@ const HeroBanner = () => {
         >
           <form onSubmit={handleSubmit} className="w-full max-w-4xl relative flex items-center bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-2xl z-10 overflow-visible">
             {/* Location Button */}
-            <LocationButton className="h-full" />
+            <LocationPickerDropdown className="h-full z-20" />
             
             {/* Search Input */}
             <div className="flex-1 relative" style={{ zIndex: 10 }}>

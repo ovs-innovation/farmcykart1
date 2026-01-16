@@ -13,7 +13,6 @@ import FeatureCard from "@components/feature-card/FeatureCard";
 import useGetSetting from "@hooks/useGetSetting";
 import { getPalette } from "@utils/themeColors";
 import useCartSync from "@hooks/useCartSync";
-import LocationAutoRequest from "@components/location/LocationAutoRequest";
 
 const Layout = ({ title, description, children, hideMobileHeader }) => {
   const { storeCustomizationSetting, globalSetting } = useGetSetting();
@@ -31,7 +30,6 @@ const Layout = ({ title, description, children, hideMobileHeader }) => {
   return (
     <>
       <ToastContainer />
-      <LocationAutoRequest />
 
       <div className="font-sans">
         <Head>
