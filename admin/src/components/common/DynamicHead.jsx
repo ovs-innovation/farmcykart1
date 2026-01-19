@@ -21,7 +21,7 @@ const DynamicHead = () => {
     if (!globalSetting && !storeCustomizationSetting) return;
 
     // Get values from settings
-    const shopName = globalSetting?.shop_name || "E-HealthandHerbs";
+    const shopName = globalSetting?.shop_name || "Farmacykart";
     const companyName = globalSetting?.company_name || shopName;
     const website = globalSetting?.website || window.location.origin;
     const email = globalSetting?.email || "";

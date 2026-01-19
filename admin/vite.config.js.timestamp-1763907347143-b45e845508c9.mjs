@@ -1,13 +1,13 @@
 // vite.config.js
-import react from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/@vitejs/plugin-react/dist/index.mjs";
-import { defineConfig } from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/vite/dist/node/index.js";
-import cssInjectedByJsPlugin from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/vite-plugin-css-injected-by-js/dist/esm/index.js";
-import { VitePWA } from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/vite-plugin-pwa/dist/index.js";
-import compression from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/vite-plugin-compression2/dist/index.mjs";
-import { visualizer } from "file:///C:/Users/asapc/Desktop/E-healthandherbs/admin/node_modules/rollup-plugin-visualizer/dist/plugin/index.js";
+import react from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/@vitejs/plugin-react/dist/index.mjs";
+import { defineConfig } from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/vite/dist/node/index.js";
+import cssInjectedByJsPlugin from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/vite-plugin-css-injected-by-js/dist/esm/index.js";
+import { VitePWA } from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/vite-plugin-pwa/dist/index.js";
+import compression from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/vite-plugin-compression2/dist/index.mjs";
+import { visualizer } from "file:///C:/Users/asapc/Desktop/Farmacykart/admin/node_modules/rollup-plugin-visualizer/dist/plugin/index.js";
 import dns from "dns";
 import path from "path";
-var __vite_injected_original_dirname = "C:\\Users\\asapc\\Desktop\\E-healthandherbs\\admin";
+var __vite_injected_original_dirname = "C:\\Users\\asapc\\Desktop\\Farmacykart\\admin";
 dns.setDefaultResultOrder("verbatim");
 var vite_config_default = defineConfig({
   // root: "./", // Set the root directory of your project
@@ -56,9 +56,9 @@ var vite_config_default = defineConfig({
         scope: ".",
         start_url: ".",
         id: ".",
-        short_name: "E-HealthandHerbs - E-Commerce Website",
-        name: "E-HealthandHerbs | React eCommerce Admin Dashboard",
-        description: "E-HealthandHerbs : React Grocery & Organic Food Store e-commerce Admin Dashboard",
+        short_name: "Farmacykart - E-Commerce Website",
+        name: "Farmacykart | React eCommerce Admin Dashboard",
+        description: "Farmacykart : React Grocery & Organic Food Store e-commerce Admin Dashboard",
         icons: [
           {
             src: "favicon.ico",

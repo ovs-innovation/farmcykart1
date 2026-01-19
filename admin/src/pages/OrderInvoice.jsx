@@ -117,9 +117,9 @@ const OrderInvoice = () => {
                   {globalSetting?.logo ? (
                     <img src={globalSetting?.logo} alt="Logo" width="110" />
                   ) : mode === "dark" ? (
-                    <img src={logoDark} alt="E-HealthandHerbs" width="110" />
+                    <img src={logoDark} alt="Farmacykart" width="110" />
                   ) : (
-                    <img src={logoLight} alt="E-HealthandHerbs" width="110" />
+                    <img src={logoLight} alt="Farmacykart" width="110" />
                   )}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">

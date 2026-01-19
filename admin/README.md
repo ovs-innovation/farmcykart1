@@ -1,2 +1,2 @@
 
-This is updated version of E-HealthandHerbs-admin
+This is updated version of Farmacykart-admin

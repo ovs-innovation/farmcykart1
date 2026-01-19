@@ -51,7 +51,7 @@ function MyApp({ Component, pageProps }) {
           handlePageView();
 
           const handleRouteChange = (url) => {
-            handlePageView(`/${router.pathname}`, "E-HealthandHerbs");
+            handlePageView(`/${router.pathname}`, "Farmacykart");
           };
 
           router.events.on("routeChangeComplete", handleRouteChange);

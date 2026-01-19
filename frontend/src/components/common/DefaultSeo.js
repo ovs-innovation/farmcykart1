@@ -8,7 +8,7 @@ const DefaultSeo = () => {
   const { globalSetting, storeCustomizationSetting } = useGetSetting();
 
   // Get dynamic SEO values from settings
-  const metaTitle = storeCustomizationSetting?.seo?.meta_title || globalSetting?.shop_name || "E-HealthandHerbs";
+  const metaTitle = storeCustomizationSetting?.seo?.meta_title || globalSetting?.shop_name || "Farmacykart";
   const metaDescription = storeCustomizationSetting?.seo?.meta_description || "Discover personalized merchandise, branded giveaways, and advertising essentials. Ideal for businesses, events, and promotions";
   const metaUrl = storeCustomizationSetting?.seo?.meta_url || globalSetting?.website || "";
   const metaImage = storeCustomizationSetting?.seo?.meta_img || storeCustomizationSetting?.seo?.favicon || "/logo/logo.png";

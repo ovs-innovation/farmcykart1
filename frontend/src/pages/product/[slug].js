@@ -1035,7 +1035,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     const urlToShare =
       (typeof window !== "undefined" && window.location.href) ||
       shareUrl ||
-      `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`;
+      `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`;
 
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
@@ -1471,7 +1471,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     shareUrl ||
                                     (typeof window !== "undefined"
                                       ? window.location.href
-                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                      : `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`)
                                   }
                                   quote=""
                                 >
@@ -1484,7 +1484,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     shareUrl ||
                                     (typeof window !== "undefined"
                                       ? window.location.href
-                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                      : `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`)
                                   }
                                   quote=""
                                 >
@@ -1497,7 +1497,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     shareUrl ||
                                     (typeof window !== "undefined"
                                       ? window.location.href
-                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                      : `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`)
                                   }`}
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -1513,7 +1513,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     shareUrl ||
                                     (typeof window !== "undefined"
                                       ? window.location.href
-                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                      : `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`)
                                   }
                                   quote=""
                                 >
@@ -1526,7 +1526,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                     shareUrl ||
                                     (typeof window !== "undefined"
                                       ? window.location.href
-                                      : `https://E-HealthandHerbs-store-nine.vercel.app/product/${router.query.slug}`)
+                                      : `https://Farmacykart-store-nine.vercel.app/product/${router.query.slug}`)
                                   }
                                   quote=""
                                 >

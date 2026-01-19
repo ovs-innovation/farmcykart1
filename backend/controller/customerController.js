@@ -27,9 +27,9 @@ const verifyEmailAddress = async (req, res) => {
     const option = {
       name: req.body.name,
       email: req.body.email,
-      contact_email: globalSetting?.setting?.email || "support@E-HealthandHerbs.com",
+      contact_email: globalSetting?.setting?.email || "support@farmacykart.com",
       token: token,
-      shop_name: globalSetting?.setting?.shop_name || "E-HealthandHerbs",
+      shop_name: globalSetting?.setting?.shop_name || "Farmacykart",
     };
     const body = {
       from: globalSetting?.setting?.email || process.env.EMAIL_USER,
@@ -284,9 +284,9 @@ const forgetPassword = async (req, res) => {
     const option = {
       name: isAdded.name,
       email: req.body.email,
-      contact_email: globalSetting?.setting?.email || "support@E-HealthandHerbs.com",
+      contact_email: globalSetting?.setting?.email || "support@Farmacykart.com",
       token: token,
-      shop_name: globalSetting?.setting?.shop_name || "E-HealthandHerbs",
+      shop_name: globalSetting?.setting?.shop_name || "Farmacykart",
     };
 
     const body = {

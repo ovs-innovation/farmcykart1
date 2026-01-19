@@ -59,10 +59,10 @@ export default defineConfig({
         scope: ".",
         start_url: ".",
         id: ".",
-        short_name: "E-HealthandHerbs - E-Commerce Website",
-        name: "E-HealthandHerbs | React eCommerce Admin Dashboard",
+        short_name: "Farmacykart - E-Commerce Website",
+        name: "Farmacykart | React eCommerce Admin Dashboard",
         description:
-          "E-HealthandHerbs : React Grocery & Organic Food Store e-commerce Admin Dashboard",
+          "Farmacykart : React Grocery & Organic Food Store e-commerce Admin Dashboard",
         icons: [
           {
             src: "favicon.ico",

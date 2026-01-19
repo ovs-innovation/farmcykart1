@@ -77,14 +77,14 @@ const SidebarContent = () => {
         ) : mode === "dark" ? (
           <img
             src={logoLight}
-            alt="E-HealthandHerbs"
+            alt="Farmacykart"
             width="135"
             className="pl-6"
           />
         ) : (
           <img
             src={logoDark}
-            alt="E-HealthandHerbs"
+            alt="Farmacykart"
             width="135"
             className="pl-6"
           />
