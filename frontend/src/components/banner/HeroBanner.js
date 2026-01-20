@@ -303,10 +303,10 @@ const HeroBanner = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.5 }}
-          className="relative z-10 w-full flex flex-col items-center px-3 sm:px-4"
+          className="relative z-30 w-full flex flex-col items-center px-3 sm:px-4"
         >
           <div className="w-full max-w-3xl">
-            <form onSubmit={handleSubmit} className="w-full relative flex items-center bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 z-10 p-2">
+            <form onSubmit={handleSubmit} className="w-full relative flex items-center bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 z-30 p-2">
               {/* Location Button */}
               <div className="  border-r border-gray-200 ">
                 <LocationPickerDropdown />

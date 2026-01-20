@@ -131,7 +131,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false, hideDiscoun
               `navigated to ${showingTranslateValue(product?.title)} product page`
             );
           }}
-          className="relative flex justify-center items-center cursor-pointer w-full p-1 sm:p-1.5 h-[120px] sm:h-[140px] md:h-[160px] lg:h-[220px] flex-shrink-0"
+          className="relative flex justify-center items-center cursor-pointer w-full p-1 sm:p-1.5 h-[120px] sm:h-[140px] md:h-[160px] lg:h-[190px] flex-shrink-0"
         >
           {/* Discount Badge - Top Left (hide if hideDiscount prop is true) */}
           {!hideDiscount && (
@@ -174,7 +174,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false, hideDiscoun
                 alt="product"
                 width={300}
                 height={300}
-                className="w-full h-full max-h-[120px] sm:max-h-[140px] md:max-h-[160px] lg:max-h-[220px] object-contain"
+                className="w-full h-full max-h-[120px] sm:max-h-[140px] md:max-h-[160px] lg:max-h-[190px] object-contain"
                 style={{ objectFit: 'contain' }}
               />
             ) : (
@@ -253,18 +253,18 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false, hideDiscoun
                     item && (
                       <div
                         key={item.id}
-                        className={`h-9 w-auto flex items-center justify-evenly py-1 px-3 bg-store-500 text-white rounded-md`}
+                        className={`h-8 w-auto flex items-center justify-evenly py-1 px-2 bg-store-500 text-white rounded-md`}
                       >
                         <button
                           onClick={() =>
                             updateItemQuantity(item.id, item.quantity - 1)
                           }
                         >
-                          <span className="text-white text-base">
+                          <span className="text-white text-sm">
                             <IoRemove />
                           </span>
                         </button>
-                        <p className="text-sm text-white px-2 font-serif font-semibold">
+                        <p className="text-sm text-white px-1 font-serif font-semibold">
                           {item.quantity}
                         </p>
                         <button
@@ -274,7 +274,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false, hideDiscoun
                               : handleIncreaseQuantity({ ...item, stock: product.stock })
                           }
                         >
-                          <span className="text-white text-base">
+                          <span className="text-white text-sm">
                             <IoAdd />
                           </span>
                         </button>
@@ -287,7 +287,7 @@ const ProductCard = ({ product, attributes, hidePriceAndAdd = false, hideDiscoun
               <button
                 onClick={() => handleAddItem(product)}
                 aria-label="Add to cart"
-                className={`h-8 sm:h-9 px-4 sm:px-6 md:px-10 min-w-[60px] sm:min-w-[80px] flex items-center justify-center bg-blue-100 text-blue-700 border border-blue-300 rounded-md font-medium text-xs sm:text-sm hover:bg-blue-200 transition-colors`}
+                className={`h-7 sm:h-8 px-3 sm:px-6 min-w-[60px] sm:min-w-[80px] flex items-center justify-center bg-blue-100 text-blue-700 border border-blue-300 rounded-md font-medium text-xs sm:text-sm hover:bg-blue-200 transition-colors`}
                 style={{
                   backgroundColor: `var(--store-color-50)`,
                   color: `var(--store-color-700)`,

@@ -122,7 +122,7 @@ const NavBarTop = () => {
 
   return (
     <>
-      <div className="hidden lg:block bg-gray-100 relative z-[51]">
+      <div className="bg-gray-100 relative z-[51]">
         <div className="max-w-screen-2xl mx-auto px-3 sm:px-10">
           <div className="text-gray-700 py-2 font-sans text-xs font-medium border-b flex justify-between items-center">
             <span className="flex items-center gap-2">

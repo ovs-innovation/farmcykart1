@@ -9,7 +9,7 @@ const useFilter = (data) => {
   const [delivered, setDelivered] = useState([]);
   const [sortedField, setSortedField] = useState("");
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedDiscount, setSelectedDiscount] = useState(0);

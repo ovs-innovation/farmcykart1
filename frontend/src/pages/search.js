@@ -214,7 +214,7 @@ const Search = ({ products, attributes }) => {
   return (
     <Layout title="Search" description="This is search page" hideMobileHeader={true}>
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
+      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
         {isSearchOpen ? (
           <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border border-gray-300 rounded-lg shadow-sm overflow-visible">
             <button 
@@ -322,7 +322,7 @@ const Search = ({ products, attributes }) => {
       </div>
 
       {/* Mobile Sort/Filter Bar */}
-      <div className="lg:hidden sticky top-[57px] z-20 bg-white border-b border-gray-100 flex divide-x divide-gray-100">
+      <div className="lg:hidden sticky top-[57px] z-40 bg-white border-b border-gray-100 flex divide-x divide-gray-100">
         <button
           onClick={() => setIsSortModalOpen(true)}
           className="flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-700"

@@ -147,7 +147,7 @@ const CategoryCards = () => {
                       backgroundImage: `linear-gradient(135deg, ${palette[600]}f0 0%, ${palette[700]}f0 100%)`,
                       minHeight: "320px",
                     }}
-                    onClick={() => router.push(`/search?query=${category.searchQuery}`)}
+                    onClick={() => router.push(`/search`)}
                   >
                     {/* Background Pattern */}
                     <div
