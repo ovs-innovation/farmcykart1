@@ -31,7 +31,7 @@ const DealsYouLove = ({ products }) => {
   if (!dealProducts || dealProducts.length === 0) return null;
 
   return (
-    <div className="bg-white lg:py-16 py-10 mx-auto max-w-screen-2xl px-3 sm:px-10">
+    <div className="bg-white lg:py-16 py-6 mx-auto max-w-screen-2xl px-3 sm:px-10">
       <div className="mb-10 flex justify-between items-center">
             <div className="w-full">
                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Deals you'll love</h2>
@@ -80,10 +80,10 @@ const DealsYouLove = ({ products }) => {
                   {/* Amazon style logic: Show discount prominence */}
                   {item.discountPercent >= 20 ? (
                       <div className="flex flex-col items-center">
-                          <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-sm mb-1">
+                          <span className="bg-store-600 text-white text-xs font-bold px-2 py-1 rounded-sm mb-1">
                               {item.discountPercent}% off
                           </span>
-                          <span className="text-red-600 font-bold text-sm">Deal of the Day</span>
+                          
                           <div className="text-xs text-gray-500 line-through">
                               {currency}{item.originalPrice}
                           </div>

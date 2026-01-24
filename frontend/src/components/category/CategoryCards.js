@@ -1,13 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { 
-  FiHeart, 
-  FiActivity, 
-  FiShield, 
-  FiSmile
-} from "react-icons/fi";
-import { MdChildCare } from "react-icons/md";
-import { BsDroplet } from "react-icons/bs";
+import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -28,48 +21,48 @@ const CategoryCards = () => {
       id: 1,
       title: "DIABETES CARE",
       description: "Medicines, glucose monitors, test strips, and daily care essentials for diabetes management.",
-      icon: BsDroplet,
+      image: "/flags/diabetic-health.webp",
       searchQuery: "diabetes",
     },
     {
       id: 2,
       title: "HEART CARE",
       description: "Prescription and OTC medicines for blood pressure, cholesterol, and heart health support.",
-      icon: FiHeart,
+      image: "/flags/heart-care.webp",
       searchQuery: "heart",
     },
     {
       id: 3,
       title: "PAIN RELIEF",
       description: "Painkillers, muscle relaxants, and inflammation relief medicines.",
-      icon: FiActivity,
+      image: "/flags/pain-relief.png",
       searchQuery: "pain",
     },
     {
       id: 4,
       title: "COLD & COUGH",
       description: "Syrups, tablets, lozenges, and immunity boosters.",
-      icon: FiShield,
+      image: "/flags/cold-caugh.png",
       searchQuery: "cold",
     },
     {
       id: 5,
       title: "BABY CARE",
       description: "Baby medicines, nutrition, skincare, and hygiene products.",
-      icon: MdChildCare,
+      image: "/flags/babycare.png",
       searchQuery: "baby",
     },
     {
       id: 6,
       title: "WOMEN'S HEALTH",
       description: "Personal care, supplements, and wellness products for women.",
-      icon: FiSmile,
+      image: "/flags/women-health.jpg",
       searchQuery: "women",
     },
   ];
 
   return (
-    <div className="bg-white py-12 md:py-16 lg:py-20">
+    <div className="bg-white py-12  ">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-10">
         {/* Header Section */}
         <SectionHeader
@@ -138,56 +131,48 @@ const CategoryCards = () => {
             className="category-cards-swiper"
           >
             {categories.map((category) => {
-              const IconComponent = category.icon;
               return (
                 <SwiperSlide key={category.id}>
                   <div
-                    className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
+                    className="group relative overflow-hidden rounded-3xl bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] h-full border border-gray-100 flex flex-col"
                     style={{
-                      backgroundImage: `linear-gradient(135deg, ${palette[600]}f0 0%, ${palette[700]}f0 100%)`,
-                      minHeight: "320px",
+                      minHeight: "300px",
                     }}
                     onClick={() => router.push(`/search`)}
                   >
-                    {/* Background Pattern */}
-                    <div
-                      className="absolute inset-0 opacity-10"
-                      style={{
-                        backgroundImage: `url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="60" height="60" fill="url(%23grid)" /%3E%3C/svg%3E')`,
-                        backgroundSize: "60px 60px",
-                      }}
-                    ></div>
+                    {/* Top Accent Line */}
+                    <div 
+                      className="absolute top-0 left-0 w-full h-1.5 transition-all duration-500 group-hover:h-2 z-20" 
+                      style={{ backgroundColor: palette[500] }}
+                    />
 
-                    {/* Content */}
-                    <div className="relative z-10 h-full flex flex-col p-6 md:p-8">
-                      {/* Icon */}
-                      <div className="mb-6 relative z-30">
-                        <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center border-2 border-white border-opacity-30 group-hover:bg-opacity-30 transition-all duration-300">
-                          <IconComponent className="text-3xl text-white" />
-                        </div>
-                      </div>
+                    {/* Image Area - Expanded */}
+                    <div className="relative w-full h-48 overflow-hidden bg-gray-50">
+                       <Image
+                        src={category.image}
+                        alt={category.title}
+                        layout="fill"
+                        objectFit="contain" 
+                        className="transition-transform duration-700 group-hover:scale-110 p-4"
+                      />
+                      
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-80" />
+                    </div>
 
-                      {/* Title */}
-                      <h3 
-                        className="text-2xl md:text-3xl font-bold mb-4 uppercase tracking-wide text-left relative z-30"
-                        style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
-                      >
+                    <div className="relative z-10 p-8 flex flex-col flex-1 -mt-6">
+                      
+                      {/* Content */}
+                      <h3 className="text-xl md:text-2xl font-black text-gray-800 mb-3 uppercase tracking-tight group-hover:text-gray-900 line-clamp-2">
                         {category.title}
                       </h3>
-
-                      {/* Description */}
-                      <p className="text-white text-opacity-90 text-sm md:text-base flex-1 leading-relaxed relative z-30 mb-4" style={{ textShadow: '0 1px 1px rgba(0,0,0,0.1)' }}>
+                      
+                      <p className="text-gray-500 leading-relaxed mb-6 flex-1 text-sm md:text-base line-clamp-3">
                         {category.description}
                       </p>
 
-                      {/* Decorative Icon at Bottom Left */}
-                      <div className="absolute bottom-4 left-4 opacity-20 group-hover:opacity-30 transition-opacity z-0 pointer-events-none">
-                        <IconComponent className="text-6xl md:text-7xl text-white" />
-                      </div>
+                      
                     </div>
-
-                    {/* Hover Overlay Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white opacity-0 group-hover:opacity-5 transition-opacity duration-500"></div>
                   </div>
                 </SwiperSlide>
               );

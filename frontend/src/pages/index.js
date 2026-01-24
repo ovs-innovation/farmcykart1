@@ -98,8 +98,6 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
                 <DealsYouLove products={discountProducts} />
             )}
 
-            {/* Trusted Brands Section */}
-            <TrustedBrandsSection brands={brands} />
 
             {/* popular products */}
             {storeCustomizationSetting?.home?.popular_products_status && (
@@ -391,7 +389,8 @@ const Home = ({ popularProducts, discountProducts, bestSellingProducts, attribut
 
               {/* Category Cards Section */}
             <CategoryCards />
-
+             {/* Trusted Brands Section */}
+            <TrustedBrandsSection brands={brands} />
             {/* Testimonials Section */}
             <TestimonialsSection />
           </div>

@@ -70,6 +70,15 @@ const MobileFooter = () => {
       <CategoryDrawer />
       <footer className="lg:hidden fixed z-30 top-0 bg-white flex items-center justify-between w-full h-16 px-3 sm:px-10 shadow-sm">
        <div className="flex items-center gap-4">
+         <button
+          aria-label="Bar"
+          onClick={toggleCategoryDrawer}
+          className="flex items-center justify-center flex-shrink-0 h-auto relative focus:outline-none"
+        >
+          <span className={`text-xl text-store-500`}>
+            <FiAlignLeft className="w-6 h-6 drop-shadow-xl" />
+          </span>
+        </button>
         <Link
           href="/"
           className="flex items-center justify-center"
@@ -119,15 +128,7 @@ const MobileFooter = () => {
             </Link>
           )}
         </button>
-         <button
-          aria-label="Bar"
-          onClick={toggleCategoryDrawer}
-          className="flex items-center justify-center flex-shrink-0 h-auto relative focus:outline-none"
-        >
-          <span className={`text-xl text-store-500`}>
-            <FiAlignLeft className="w-6 h-6 drop-shadow-xl" />
-          </span>
-        </button>
+        
         </div>
       </footer>
       {showSearch && (

@@ -55,18 +55,7 @@ const HeroBanner = () => {
     }
   };
 
-  const handleCTAClick = (type) => {
-    if (type === "shop") {
-      const element = document.getElementById("feature-category");
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      } else {
-        router.push("/category");
-      }
-    } else if (type === "prescription") {
-      setPrescriptionModalOpen(true);
-    }
-  };
+   
 
   // Animation variants for left side (top to bottom)
   const leftAnimationVariants = {
@@ -125,7 +114,7 @@ const HeroBanner = () => {
   };
 
   return (
-    <div className="w-full relative overflow-hidden bg-white" style={{ minHeight: '600px', height: 'auto' }}>
+    <div className="w-full relative bg-white" style={{ minHeight: '300px', height: 'auto' }}>
       {/* Bubble/Water Animation Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div 
@@ -283,7 +272,7 @@ const HeroBanner = () => {
       </div>
           
       {/* Content Section */}
-      <div className="relative z-10 w-full flex flex-col items-center justify-center px-4 py-8 md:py-12 min-h-[600px]">
+      <div className="relative z-10 w-full flex flex-col items-center justify-center px-4 py-6 md:py-10 min-h-[300px]">
         {/* Hero Text Section */}
         <motion.div
           variants={contentVariants}
@@ -291,7 +280,7 @@ const HeroBanner = () => {
           animate="animate"
           className="relative z-10 text-center w-full max-w-4xl mx-auto mb-6 md:mb-8 px-2"
         >
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight text-emerald-950 drop-shadow-sm">
+          <h1 className="text-3xl md:text-5xl   font-bold mb-4 md:mb-6 leading-tight text-emerald-950 drop-shadow-sm">
             Affordable Medicines, Delivered to Your Doorstep
           </h1>
           <p className="text-base md:text-lg lg:text-xl text-emerald-800 drop-shadow-sm mb-6 md:mb-8">
@@ -303,25 +292,25 @@ const HeroBanner = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.5 }}
-          className="relative z-30 w-full flex flex-col items-center px-3 sm:px-4"
+          className="relative z-50 w-full flex flex-col items-center px-3 sm:px-4"
         >
           <div className="w-full max-w-3xl">
-            <form onSubmit={handleSubmit} className="w-full relative flex items-center bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 z-30 p-2">
+            <form onSubmit={handleSubmit} className="w-full relative flex items-center bg-white rounded-md shadow-lg border-2 border-emerald-500/20 transition-all duration-300 z-30 p-1.5">
               {/* Location Button */}
-              <div className="  border-r border-gray-200 ">
-                <LocationPickerDropdown />
+              <div className="border-r border-gray-200 mr-1 md:mr-2 relative z-50">
+                <LocationPickerDropdown className="!px-2 md:!px-4 !border-none" />
               </div>
               
               {/* Search Input */}
               <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-500">
                    <IoSearchOutline className="text-xl" />
                 </div>
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search for medicines, wellness..."
-                  className="w-full py-3.5 pl-12 pr-4 focus:outline-none text-gray-700 font-medium placeholder-gray-400 bg-transparent rounded-full"
+                  placeholder="Search for medicine"
+                  className="w-full py-3 pl-10 pr-4 focus:outline-none focus:ring-0 text-gray-700 font-medium border-0 focus:border-0 placeholder-gray-400 bg-transparent"
                   value={searchText}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   onFocus={() => {
@@ -354,153 +343,17 @@ const HeroBanner = () => {
                 />
               </div>
 
-               {/* Search Button */}
-              <button 
-                type="submit" 
-                className="hidden md:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-emerald-200 transform hover:-translate-y-0.5"
-              >
-                Search
-              </button>
-               {/* Mobile Search Button */}
-              <button 
-                type="submit" 
-                className="md:hidden flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-full transition-colors duration-300 ml-2"
-              >
-                <IoSearchOutline className="text-xl" />
-              </button>
+               {/* Search Button removed as per request */}
             </form>
           </div>
         </motion.div>
-          {/* Feature Cards */}
-          <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center items-stretch mb-6 md:mb-8 mt-6 md:mt-8 w-full max-w-5xl mx-auto px-4">
-            {/* Shop Medicines Feature Card */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleCTAClick("shop")}
-              className="group relative flex-1 max-w-sm cursor-pointer bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
-            >
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `radial-gradient(circle at 2px 2px, green 1px, transparent 0)`,
-                  backgroundSize: '20px 20px'
-                }}></div>
-              </div>
-
-              {/* Content */}
-              <div className="relative p-6 md:p-8">
-                {/* Icon Container */}
-                <div className="mb-6 flex items-center justify-center relative">
-                   <div className="absolute inset-0 bg-green-100 rounded-full animate-pulse opacity-50 scale-150"></div>
-                   <div className="relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-tr from-green-500 to-emerald-400 rounded-full shadow-lg flex items-center justify-center transform group-hover:-translate-y-2 transition-transform duration-500 border-4 border-white z-10">
-                      <FaPrescriptionBottleAlt className="text-white text-2xl md:text-3xl drop-shadow-md transform -rotate-12" />
-                      <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm z-20">
-                        <FaShoppingCart className="text-yellow-900 text-xs" />
-                      </div>
-                   </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 text-center group-hover:text-green-600 transition-colors">
-                  Shop Medicines
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm md:text-base text-gray-600 mb-4 text-center leading-relaxed">
-                  Browse through our wide range of genuine medicines and healthcare products
-                </p>
-
-                {/* Badge */}
-                <div className="flex justify-center">
-                  <span className="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-full text-xs md:text-sm font-semibold">
-                    Get Max. Discount
-                  </span>
-                </div>
-
-                {/* Hover Arrow */}
-                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-green-600 text-white p-2 rounded-full">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Accent */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-green-600"></div>
-            </motion.div>
-
-            {/* Upload Prescription Feature Card */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleCTAClick("prescription")}
-              className="group relative flex-1 max-w-sm cursor-pointer bg-gradient-to-br from-green-500 to-emerald-600 backdrop-blur-md rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-green-400"
-            >
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-                  backgroundSize: '20px 20px'
-                }}></div>
-              </div>
-
-              {/* Content */}
-              <div className="relative p-6 md:p-8">
-                {/* Icon Container */}
-                <div className="mb-6 flex items-center justify-center relative">
-                   <div className="absolute inset-0 bg-blue-100/20 rounded-full animate-pulse opacity-50 scale-150"></div>
-                   <div className="relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-full shadow-lg flex items-center justify-center transform group-hover:-translate-y-2 transition-transform duration-500 border-4 border-white/20 backdrop-blur-md z-10">
-                      <FaFileMedical className="text-white text-2xl md:text-3xl drop-shadow-md" />
-                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white text-blue-600 rounded-full border-2 border-blue-100 flex items-center justify-center shadow-sm text-xs font-bold font-serif z-20">
-                        Rx
-                      </div>
-                   </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-2 text-center group-hover:text-blue-50 transition-colors">
-                  Upload Prescription
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm md:text-base text-blue-100 mb-4 text-center leading-relaxed">
-                  Upload your prescription and get medicines delivered to your doorstep quickly
-                </p>
-
-                {/* Badge */}
-                <div className="flex justify-center">
-                  <span className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-xs md:text-sm font-semibold border border-white/30">
-                    FAST & SAFE
-                  </span>
-                </div>
-
-                {/* Hover Arrow */}
-                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-white text-gray-800 p-2 rounded-full">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Accent */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-100 to-gray-50"></div>
-            </motion.div>
-          </div>
+          
         </motion.div>
 
         
       </div>
       
-      {/* Prescription Upload Modal */}
-      <PrescriptionUploadModal
-        modalOpen={prescriptionModalOpen}
-        setModalOpen={setPrescriptionModalOpen}
-      />
+      
     </div>
   );
 };
